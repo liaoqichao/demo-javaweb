@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+ <hibernate-mapping package="hibernate.demo13.domain">
+ 	<!-- 映射类到表 -->
+	<class name="IdCard" table="demo13_idcard">
+	<!-- 映射属性名，类型到列名（主键） -->
+		<id name="id" type="int" column="id">
+			<generator class="native"/><!-- 主键自增长 -->
+		</id>
+		<!-- 映射属性名，类型到列名（非主键） -->
+    	<property name="number"/>
+    	
+    	<!-- person属性，Person类型，
+    		表达本类与Person的一对一关系
+    		采用基于外键的一对一映射方式。本方是有外键方
+    		有外键方就是多的那一方，所以用多对一标签，属性unique=true。多对一 + 外键唯一 = 一对一
+    	 -->
+    	 <many-to-one name="person" class="Person" column="personId" unique="true">
+    	 	
+    	 </many-to-one>
+     </class>
+ </hibernate-mapping>

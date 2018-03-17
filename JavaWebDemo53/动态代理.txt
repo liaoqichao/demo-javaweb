@@ -1,0 +1,25 @@
+1.动态代理
+
+1.只学一个方法
+	方法的作用：在运行时，动态创建一组指定接口的实现类对象。简单地说就是在运行时创建对象。这这对象实现了一组接口
+interface A{}
+interface B{}
+Object obj = func(new Class[]{A.class, B.class})
+obj实现了A，B两个接口。
+obj是一个对象，这个对象的类型实现了这2个接口。
+实现接口这个动作是在运行时完成的，不是在写代码的时候完成的！
+
+----------------------------------------------------
+java.lang.reflect.Proxy 
+Proxy#newProxyInstrance：
+public static Object newProxyInstance(ClassLoader classLoader, Class[] interfaces , InvocationHandler h) throw IllegalArgumentException
+1.方法作用：动态创建实现了interfaces所指定接口的实现类对象！
+2.参数：
+	2.1 ClassLoader：类加载器
+		* 它是用来加载类的，把.class文件加载到内存，想成Class对象！	
+			
+
+----------------------------------------------------
+
+2.动态代理作用
+	* 最终学习AOP(面向切面编程)，它与装饰者模式有点相似，但是比装饰者模式灵活！

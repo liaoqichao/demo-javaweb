@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+ <hibernate-mapping package="hibernate.demo6.domain">
+	<class name="User" table="demo6_user">
+<!-- 		<id name="id" type="int" column="id"> -->
+		<!-- 使用uuid主键生成策略 -->
+		<id name="id" type="int" column="id">
+			<generator class="native"/>
+		</id>
+    	<property name="name" type="string" column="name" length="20"/>
+    	<!-- addressList属性，List集合的映射。数组就是把list标签改成array标签，其他不变 -->
+    	<list name="addressList" table="demo6_user_address" lazy="false">
+    		<key column="userId"></key><!-- 集合外键的列名。 -->
+    		<list-index ></list-index>
+    		<element column="address" type="string"></element><!-- 存放集合元素的列 -->
+    	</list>
+     </class>
+ </hibernate-mapping>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+ <hibernate-mapping package="hibernate.demo7.domain">
+	<class name="User" table="demo7_user">
+<!-- 		<id name="id" type="int" column="id"> -->
+		<!-- 使用uuid主键生成策略 -->
+		<id name="id" type="int" column="id">
+			<generator class="native"/>
+		</id>
+    	<property name="name" type="string" column="name" length="20"/>
+    	<!-- addressMap属性，Map集合的映射 -->
+		<map name="addressMap" table="demo7_user_addressMap">
+			<key column="userId"></key>
+			<map-key type="string" column="_key"></map-key>
+			<element type="string" column="address"></element>
+		
+		</map>
+     </class>
+ </hibernate-mapping>

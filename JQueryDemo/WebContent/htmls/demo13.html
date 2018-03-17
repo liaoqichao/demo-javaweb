@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script type="text/javascript" src="../js/jquery.js"></script>
+<link rel="stylesheet" type="text/css" href="../css/demo13.css"/>
+</head>
+<body>
+	<h1 align="center">子元素选择器</h1>
+	
+	<div id="div-4" class="layer-0">
+		我是div-4
+		<div id="div-4-1" class="layer-1">我是div-4-1</div>
+		<div id="div-4-2" class="layer-1">
+			<span id="div-4-2-span-1" class="layer-2">我是div-4-2-span-1</span>
+			<span id="div-4-2-span-2" class="layer-2">我是div-4-2-span-2</span>
+			<span id="div-4-2-span-3" class="layer-2">我是div-4-2-span-3</span>
+			<div id="div-4-2-1" class="layer-2">我是div-4-2-1</div>
+		</div>
+		<div class="layer-1" id="div-4-3">我是div-4-3
+			<span id="div-4-3-span-1" class="layer-2">我是"div-4-3-span-1"</span>
+		</div>
+		<span class="layer-1" id="div-4-span-1">我是div-4-span-1</span>
+		<span class="layer-1" id="div-4-span-2">我是div-4-span-2</span>
+	</div>
+	<br/>
+	<br/>
+	<button id="btn-1">选择每个class为layer-1的元素的div父元素下的第2个子元素</button>
+	<button id="btn-2">选择每个class为layer-1的元素的div父元素下的第一个子元素</button>
+	<button id="btn-3">选择每个class为layer-1的元素的div父元素下的最后一个子元素</button>
+	<button id="btn-4">如果class为layer-2的元素的div父元素下的只有一个子元素，那么选中这个子元素</button>
+<script type="text/javascript">
+$('#btn-1').click(function(){
+// 	$('div .layer-1:nth-child(1/even/odd/3n+1)') 选择每个div元素的第1/偶数/奇数/3n+1个class为layer-1元素
+	$('div .layer-1:nth-child(2)').css("background","#00ffff");
+});
+
+$("#btn-2").click(function(){
+	$('div .layer-1:first-child').css("background","#00ffff");
+});
+
+$("#btn-3").click(function(){
+	// 选择div元素，它的子元素的class=layer-1的元素的最后一个
+	$('div .layer-1:last-child').css("background","#00ffff");
+// 	$('div .layer-1').css("background","#00ffff");
+});
+
+$('#btn-4').click(function(){
+	$('div .layer-1:only-child').css("background","#00ffff");
+});
+
+</script>
+</body>
+</html>

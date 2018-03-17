@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+ <hibernate-mapping package="hibernate.demo14.domain">
+ 	<!-- 映射类到表 -->
+	<class name="Person" table="demo14_person">
+	<!-- 映射属性名，类型到列名（主键） -->
+		<id name="id" type="int" column="id">
+			<generator class="native"/><!-- 主键自增长 -->
+		</id>
+		<!-- 映射属性名，类型到列名（非主键） -->
+    	<property name="name" type="string" column="name"/>
+    	
+	    <!-- idCard属性，IdCard类型，
+    		表达本类与IdCard的一对一关系
+    		采用基于外键的一对一映射方式。本方无外键方
+    		无外键方用ont-to-one标签
+    		property-ref填的是对方外键的属性名，用property-ref来表示外键
+    		
+    		基于主键的方式
+    	 -->
+    	 <one-to-one name="idCard" class="IdCard" property-ref="person"></one-to-one>
+     </class>
+ </hibernate-mapping>

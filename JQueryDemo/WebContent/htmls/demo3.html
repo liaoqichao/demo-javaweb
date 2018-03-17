@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script type="text/javascript" src="../js/jquery.js"></script>
+<script type="text/javascript">
+function test1(){
+	// DOM -> jQuery
+// 	var text = document.getElementById("text");
+// 	var $text = $(text);
+// 	alert("jQuery:"+$text.val());
+
+	var $text = $('#text');
+	// jQuery -> DOM
+	// 在jQuery中把一个对象当做一个集合处理(因为如果是根据id取是一个，但是根据class或者tagName取就会是多个，所以用集合)
+	// 有两种方法
+	// 1.通过数组形式
+	var text1 = $text[0];
+	alert("DOM1:"+text1.value);
+	
+	// 2.通过调用get方法，参数为jQuery对象集合的下标，从0开始。
+	var text2 = $text.get(0);
+	alert("DOM2:"+text2.value);
+	
+}
+</script>
+</head>
+<body>
+	<h1>DOM对象与jQuery对象的互相转换</h1>
+	<input type="text" id="text"/><br/>
+	<input type="button" value="点击" onclick="javaScript:test1()"/>
+</body>
+</html>

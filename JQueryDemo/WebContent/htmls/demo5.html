@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script type="text/javascript" src="../js/jquery.js"></script>
+</head>
+<body>
+	<h1 class="title">练习一</h1>
+	<h2 class="title">1.给网页中所有&lt;p&gt;元素添加onclick事件</h2>
+	<p>这里是段落1</p>
+	<p>这里是段落2</p>
+	<p>这里是段落3</p>
+	<br/>
+</body>
+<script type="text/javascript">
+$('body').css({
+"padding-left": "100px",
+"padding-right": "100px",
+"padding-top": "25px",
+"padding-bottom": "25px"});
+
+$('.title').css("text-align","center");
+
+$('p').click(function(){
+// 	alert($(this).text());
+// 这里的$(this)是当前元素的jQuery对象。this表示当前元素的DOM对象
+	alert($(this).html());//取出当前标签的html内容（相当于innerHTML）
+});
+</script>
+</html>

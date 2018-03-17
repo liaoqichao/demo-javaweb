@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+ <hibernate-mapping package="hibernate.demo17.domain">
+ 	<!-- abstract=true表示抽象类本类不对应表。这里采取抽象类不对应表，具体类有对应的表，而且还有父类的属性的方式。
+ 		abstract=true表示本类不对应表，不代表类一定是抽象的，具体类也可以设置为true。
+ 		抽象类写table属性会忽略。
+ 		有union-class，主键生成策略不能为identity
+ 	 -->
+	<class name="Article" abstract="false">
+<!-- 	　	<id name="id" type="int" column="id"> -->
+<!-- 　　			<generator class="hilo"> -->
+<!-- 　　				<param name="table">hibernate_hilo</param> -->
+<!-- 　　				<param name="column">next_hi</param> -->
+<!-- 　　				<param name="max_lo">100</param> -->
+<!-- 　　			</generator> -->
+<!-- 　		</id> -->
+		<id name="id" type="int" column="id">
+			<generator class="hilo">
+				<param name="table">hibernate_hilo</param>
+				<param name="column">next_hi</param>
+				<param name="max_lo">100</param>
+			</generator>
+		</id>
+
+
+
+			
+    	<property name="title"/>
+    	<property name="content" type="text" length="10000"/><!-- 内容最多1W字 -->
+    	<property name="postTime" type="timestamp"></property>
+    	
+    	<!-- 以上是父类的属性，以下是子类的属性 -->
+    	
+    	<!-- 每个具体类对应一张表，所以需要table属性，指定对应的表，抽象类不对应表，所以父类不用指定table -->
+    	<union-subclass name="Topic" table="demo17_topic">
+    		<!-- 引用父类的主键作为外键，要声明这个外键在自己表中的列名.同时父类的主键也是
+				子类的主键，所以主键和外键是同一个键。基于主键的一对一关联。    		
+    		 -->
+    		<property name="type"></property><!-- 子类自己的属性 -->
+    	</union-subclass>
+    	<union-subclass name="Reply" table="demo17_reply" >
+    		<property name="floor"></property><!-- 子类自己的属性 -->
+    	</union-subclass>
+     </class>
+ </hibernate-mapping>

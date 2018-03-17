@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script type="text/javascript" src="../js/jquery.js"></script>
+</head>
+<body>
+	<h1 class="title" align="center">内容过滤选择器练习和jQuery遍历数组/对象练习</h1>
+	<input type="checkbox" id="option1" name="checkbox" value="羽毛球1"/>羽毛球1&nbsp;
+	<input type="checkbox" id="option2" name="checkbox" value="排球"/>排球&nbsp;
+	<input type="checkbox" id="option3" name="checkbox" value="羽毛球2"/>羽毛球2&nbsp;
+	<input type="checkbox" id="option4" name="checkbox" value="毽球"/>毽球&nbsp;
+	<button id="btn-1">点击查看选中的个数</button>
+	<button id="btn-2">显示选中的爱好的名称</button>
+	
+<script type="text/javascript">
+$('#btn-1').click(function(){
+	var checkedLength = $('input[type="checkbox"]:checked').length;
+	alert(checkedLength);
+});
+
+$('#btn-2').click(function(){
+	var $checkedObj = $('input[type=checkbox]:checked');
+	$.each($checkedObj,function(){
+		alert($(this).val());
+	});	
+});
+
+</script>
+</body>
+</html>

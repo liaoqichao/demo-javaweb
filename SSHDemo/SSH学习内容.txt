@@ -1,0 +1,60 @@
+# Struts2
+demo1 = Hello action。使用action处理浏览器的GET请求。
+demo2 = action名称的搜索顺序、action的各项配置默认值、result配置各种视图的转发类型、全视图(global-results标签)
+demo3 = 为action属性注入值
+demo4 = struts2的常用常量。（没有演示）
+demo5 = 为用户指定多个Struts配置文件。（实际是先demo6，后demo5，但是配置文件和类包名用的是demo5，所以就把它放在前面）
+demo6 = struts的处理流程。（面试问题）（没有演示）
+demo7 = 动态方法调用和使用通配符定义。
+demo8 = 接收请求参数(普通类型和实体类)、自定义类型转换器
+demo9 = 获取和添加request/session/application的属性
+demo10 = 文件上传
+demo11 = 拦截器
+demo12 = 输入校验
+demo13 = 国际化
+demo14 = ognl表达式
+demo15 = struts2的常用标签
+
+
+# Hibernate
+demo1 = HelloWorld
+demo2 = 增删改查
+demo3 = 大字符，大字节字段保存到数据库
+demo4 = 主键生成策略（起码记住nvtive，uuid这2个）
+demo5 = 映射集合属性Set
+demo6 = 映射属性集合List、数组
+demo7 = 映射集合属性Map
+demo8 = 映射集合属性，排序用的属性sort
+demo9 = 关联关系：一对多/多对一映射。建立联系，获取对象，维护联系(修改外键的值)，删除有关联关系的对象。inverse属性影响维护关系和删除有关联关系的对象。
+demo10 = 关联关系：多对多，cascade属性
+demo11 = 对象的状态分类
+demo12 = 改事务的隔离级别
+demo13 = 关联关系：一对一，基于外键方式
+demo14 = 关联关系：一对一，基于主键方式
+demo15 = 继承结构:采用一张表的形式
+demo16 = 继承结构：每个类一张表
+demo17 = 继承结构：每个具体类一张表，抽象类没有表
+demo18 = HQL语句
+demo19 = QBC(Query By Criteria)
+demo20 = 懒加载、主配置文件配置c3p0连接池
+demo21 = 二级缓存，ehcache缓存
+demo22 = 在应用程序中使用session的管理方案
+demo23 = 练习。部门，员工，账号，权限的关系。
+
+# Spring
+demo1 = spring环境搭建
+demo2 = spring第一例：把业务bean交给spring管理
+demo3 = 3种实例化bean的方法。
+demo4 = 配置spring管理的bean的作用域
+demo5 = spring管理bean的生命周期
+demo6 = 依赖注入。使用setter方式注入属性，注入集合类型的属性。
+demo7 = 依赖注入。使用构造器方式注入。
+demo8 = 依赖注入。使用注解@Resource，在成员变量和setter上注解。@Autowried注解在成员变量上。自动装配（严重不推荐使用）
+demo9 = 让spring自动扫描和管理bean，使用注解。现在基本都是用这种方式开发。
+demo10 = AOP.使用jdk，cglib创建代理对象。
+demo11 = spring使用基于注解，基于xml配置实现AOP，AOP的相关术语。
+demo12 = springjdbc的增删改查,@Transactional的使用和属性
+demo13 = spring和hibernate整合开发，二级缓存的配置
+demo14 = spring和JPA整合开发
+demo15 = spring和struts2的整合开发
+demo16 = spirng、struts2、hibernate整合开发

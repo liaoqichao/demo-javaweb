@@ -1,0 +1,40 @@
+页面静态化：
+一、什么是页面静态化？
+	首次访问去数据库获取数据，然后把数据保存到HTML中。二次访问不去数据库获取，而是直接访问HTML。
+	写页面静态化的前提：页面几乎永久不修改。如果经常都需要修改的话就不需要些页面静态化。	
+二、为什么要页面静态化
+	1.让项目的更多网页被搜索引擎收录,从而提高收录比(没有被收录则搜索引擎搜不到?)
+	2.HTML的访问速度比jsp访问速度快。(静态资源访问速度比动态资源快)
+	3.不用一直访问数据库，减少数据库压力。
+三、演示页面静态化
+	1.写一个小项目：图书管理。分析
+		a.jsp页面：
+			> link.jsp	链接页面，4个超链接
+				* 查看所有
+				* 查看SE分类
+				* 查看EE分类
+				* 查看框架分类
+			> show.jsp	显示查询结果
+		b.Servlet:(使用baseServlet,要有method)
+			BookServlet;
+			> findAll()	查看所有图书
+			> findByCategory()	按分类查询
+		c.BookService:略，没有业务逻辑
+		d.BookDao
+			> List<Book> findAll
+			> List<Book> findByCategory(int category)
+		e.domain
+			> Book
+	2.准备包
+		需要连接数据库：mysql-connector-5.1.13-bin.jar
+		需要连接池管理数据库连接：c3p0-0.9.2-pre1.jar、mchange-commons-0.2.jar、c3p0-config.xml(记得修改jdbcUrl)
+		//需要把网页表单数据封装到javabean：beanutils、LQCUtils？、beanutils依赖logging
+		用TxQueryRunner简化SQL查询：LQCUtils_v1.4.jar，commons-dbutils-1.6.jar
+		JSP页面需要JSTL核心库：jstl-1.2.jar
+	3.分层,创建类和jsp页面
+	4.给每个类建立依赖(成员变量)和完成JavaBean
+	5.写具体代码
+		
+	6.实现页面静态化
+		目标：给出过滤器，把servlet请求的资源所做的输出保存到html中，再重定向到html页面。
+			二次访问时，html已经存在，直接重定向。不用再去访问servlet。

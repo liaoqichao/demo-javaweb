@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+ <hibernate-mapping package="hibernate.demo19.domain">
+	<class name="Employee" table="demo19_employee">
+<!-- 		<id name="id" type="int" column="id"> -->
+		<id name="id" type="int" column="id">
+			<generator class="native"/>
+		</id>
+    	<property name="name" type="string" column="name" length="20"/>
+    	<!-- department属性，表达本类与Department的多对一关系 -->
+    	<many-to-one name="department" class="hibernate.demo19.domain.Department" column="departmentId">
+    		<!-- name指定的是属性名。class写全限定名,colume（指定外键的列）不写的话，默认为many-to-one的name -->
+    	</many-to-one>
+     </class>
+     <!-- 定义命名的查询,可以用?也可以用变量名，但建议用变量名
+     		在xml文件中有些字符不能写，需要转义，例如大于号，小于号
+     		大于号：&gt; 小于号:&lt;
+     		也可以通过<![CDATA[内容]]>，让内容为纯字符串。
+     -->
+     <query name="queryByIdRange">
+	     <![CDATA[
+	     	FROM Employee e WHERE e.id BETWEEN :idMin AND :idMax
+	     ]]>
+     </query>
+ </hibernate-mapping>

@@ -1,0 +1,644 @@
+A {
+	COLOR: #1e5494
+}
+
+A:link {
+	COLOR: #1e5494
+}
+
+A:visited {
+	COLOR: #1e5494
+}
+
+LI.fs A.fdleft:hover {
+	
+}
+
+LI.fd_mg A.fdleft:hover {
+	COLOR: #1e5494
+}
+
+.newskinbody LI.fs A:hover {
+	TEXT-DECORATION: none;
+	BACKGROUND: #e0ecf9
+}
+
+.newskinbody LI.fs_sep A:hover {
+	TEXT-DECORATION: none;
+	BACKGROUND: #e0ecf9
+}
+
+.newskinbody LI.fs A:focus {
+	TEXT-DECORATION: none;
+	BACKGROUND: #e0ecf9
+}
+
+.newskinbody LI.fs_sep A:focus {
+	TEXT-DECORATION: none;
+	BACKGROUND: #e0ecf9
+}
+
+.mysidebar UL.navlist_min LI.fs A:hover {
+	BACKGROUND: #c1d9f3
+}
+
+.mysidebar UL.navlist_max LI.fs A:hover {
+	BACKGROUND: #c1d9f3
+}
+
+.skinlogo IMG {
+	BACKGROUND-IMAGE:
+		url(http://rescdn.qqmail.com/zh_CN/htmledition/images/logo/logo_0_01f1927.png)
+}
+
+.attbg {
+	BACKGROUND-COLOR: #e0ecf9
+}
+
+.topbg {
+	BACKGROUND:
+		url(http://localhost:8080/PMP/images/personalManagement/top_bg1e9c5d.jpg)
+		no-repeat right top;
+	FLOAT: right
+}
+
+.topline {
+	HEIGHT: 11px;
+	BORDER-RIGHT-WIDTH: 0px;
+	WIDTH: auto;
+	BACKGROUND:
+		url(http://localhost:8080/PMP/images/personalManagement/nav_bg1e9c5d.gif)
+		repeat-x 0px -115px;
+	BORDER-LEFT: #fff 8px solid
+}
+
+.addrtitle {
+	COLOR: #798699
+}
+
+.fdbody {
+	BORDER: #d8dee5 5px solid;
+	BORDER-LEFT: #d8dee5 5px solid;
+	BORDER-TOP: #d8dee5 5px solid;
+	BORDER-BOTTOM: #d8dee5 5px solid;
+}
+
+
+
+.listbg {
+	BACKGROUND:
+		url(http://rescdn.qqmail.com/zh_CN/htmledition/images/skin_0/topline1e9c5d.gif)
+		repeat-y
+}
+
+.navbottom {
+	BACKGROUND:
+		url(http://rescdn.qqmail.com/zh_CN/htmledition/images/skin_0/topline1e9c5d.gif)
+		no-repeat
+}
+
+.sepline {
+	BORDER-TOP: #d8dee5 1px solid
+}
+
+.txt_title {
+	COLOR: #093665
+}
+
+.composetab_sel {
+	COLOR: #093665
+}
+
+.txt_title_tab {
+	BACKGROUND:
+		url(http://rescdn.qqmail.com/zh_CN/htmledition/images/skin_0/ico_titleview1e9c5d.gif)
+		no-repeat center bottom;
+	COLOR: #093665
+}
+
+.txt_title_none A:hover {
+	COLOR: #2c70c0
+}
+
+.nomail {
+	BACKGROUND: #eff5fb
+}
+
+.msg {
+	BACKGROUND: #68af02;
+	COLOR: #ffffff
+}
+
+.errmsg {
+	BACKGROUND: #eaa000;
+	COLOR: #ffffff
+}
+
+.tabtitle {
+	BORDER-TOP: #c1d9f3 5px solid;
+	BACKGROUND: #c1d9f3
+}
+
+.settingTitle {
+	BACKGROUND: #c1d9f3
+}
+
+.tabtitle TD {
+	BORDER-BOTTOM: #aac1de 1px solid
+}
+
+.tabtitle TD.selected {
+	BORDER-TOP: #aac1de 1px solid;
+	BORDER-RIGHT: #aac1de 1px solid;
+	BACKGROUND: #eff5fb;
+	BORDER-BOTTOM: #aac1de 1px;
+	BORDER-LEFT: #aac1de 1px solid
+}
+
+.settingTitle .selected {
+	BACKGROUND: #eff5fb
+}
+
+.tabtitle TD A {
+	HEIGHT: 100%;
+	WIDTH: 100%
+}
+
+.tabtitle TD A:hover {
+	COLOR: #2c70c0
+}
+
+.settingSub A:hover {
+	COLOR: #2c70c0
+}
+
+.settingtable {
+	BACKGROUND-COLOR: #eff5fb
+}
+
+.settingtd {
+	BORDER-TOP: #f9fcff 1px solid;
+	BORDER-BOTTOM: #c9d7e5 1px solid
+}
+
+.filtertd {
+	BORDER-TOP: #c9d7e5 1px solid
+}
+
+.filtertd1 {
+	BORDER-BOTTOM: #c9d7e5 1px solid
+}
+
+.settingline {
+	BORDER-BOTTOM: #fff 1px solid
+}
+
+.huizhi {
+	BORDER-TOP: #fadc80 1px solid;
+	BORDER-RIGHT: #fadc80 1px solid;
+	BACKGROUND: #fff9e3;
+	BORDER-BOTTOM: #fadc80 1px solid;
+	BORDER-LEFT: #fadc80 1px solid
+}
+
+.toolbg {
+	BACKGROUND-COLOR: #c1d9f3
+}
+
+.toolbg1 {
+	BACKGROUND-COLOR: #c1d9f3
+}
+
+.toolbgline {
+	BORDER-BOTTOM: #aac1de 1px solid
+}
+
+.O {
+	BORDER-TOP: #fff 1px solid;
+	BACKGROUND: #f2f4f6;
+	BORDER-BOTTOM: #c1c8d2 1px solid
+}
+
+.B {
+	BACKGROUND: #528bcb;
+	COLOR: #fff
+}
+
+.B .black {
+	COLOR: #fff
+}
+
+.B .gt B {
+	COLOR: #ccc
+}
+
+.B TABLE.i TD.ts {
+	COLOR: #84c923
+}
+
+.selbar_bt {
+	BORDER-TOP: #fff 1px solid;
+	BACKGROUND: #f2f4f6;
+	BORDER-BOTTOM: #fff 1px solid
+}
+
+.graytip {
+	BACKGROUND: #ffffe9;
+	BORDER-BOTTOM: #e3e6eb 1px solid
+}
+
+.searchtip {
+	MARGIN-BOTTOM: 4px;
+	BORDER-TOP: #c1c8d2 1px solid;
+	BORDER-RIGHT: #c1c8d2 1px solid;
+	BACKGROUND: #f2f4f6;
+	BORDER-BOTTOM: #c1c8d2 1px solid;
+	PADDING-BOTTOM: 7px;
+	PADDING-TOP: 7px;
+	PADDING-LEFT: 13px;
+	CLEAR: both;
+	BORDER-LEFT: #c1c8d2 1px solid;
+	PADDING-RIGHT: 0px
+}
+
+.readmailinfo {
+	BORDER-TOP: #fff 1px solid;
+	BACKGROUND: #eff5fb;
+	BORDER-BOTTOM: #aac1de 1px solid
+}
+
+#attachContainer .attsep {
+	BORDER-BOTTOM: #eff5fb 1px solid
+}
+
+.colorname {
+	COLOR: #798699
+}
+
+.txt {
+	BORDER-TOP: #718da6 1px solid;
+	HEIGHT: 20px;
+	BORDER-RIGHT: #718da6 1px solid;
+	BORDER-BOTTOM: #718da6 1px solid;
+	PADDING-TOP: 2px;
+	BORDER-LEFT: #718da6 1px solid
+}
+
+.cpright {
+	BORDER-TOP: #7f9db9 1px solid;
+	BORDER-RIGHT: #7f9db9 1px solid;
+	BACKGROUND: #fff;
+	BORDER-BOTTOM: #7f9db9 1px solid;
+	BORDER-LEFT: #7f9db9 1px solid
+}
+
+.cptitle {
+	HEIGHT: 26px !important;
+	BORDER-BOTTOM: #7f9db9 1px solid
+}
+
+.cptab {
+	BORDER-TOP: #7f9db9 1px solid;
+	HEIGHT: 25px;
+	BORDER-RIGHT: #7f9db9 1px solid;
+	WIDTH: 88px !important;
+	BORDER-BOTTOM: #7f9db9 1px;
+	POSITION: absolute;
+	TEXT-ALIGN: center;
+	BORDER-LEFT: #7f9db9 1px solid;
+	LINE-HEIGHT: 24px
+}
+
+.cpslt {
+	HEIGHT: 25px;
+	BACKGROUND: #fff;
+	FONT-WEIGHT: bold
+}
+
+.cpslt A {
+	TEXT-DECORATION: none;
+	COLOR: #000
+}
+
+.addrtips {
+	BORDER-BOTTOM: #d8dee5 1px solid;
+	COLOR: #979ea5;
+	PADDING-BOTTOM: 3px;
+	PADDING-TOP: 7px;
+	PADDING-LEFT: 6px;
+	MARGIN: 3px;
+	PADDING-RIGHT: 0px
+}
+
+.addrsort {
+	CURSOR: pointer;
+	BORDER-TOP: #7f9db9 1px solid;
+	HEIGHT: 23px;
+	BACKGROUND: #e0ecf8;
+	PADDING-LEFT: 8px;
+	LINE-HEIGHT: 23px
+}
+
+.bartools {
+	BACKGROUND: #fff;
+	BORDER-BOTTOM: #c5d8ee 1px solid
+}
+
+.colorpanel {
+	BORDER-TOP: #b8d3ed 1px solid;
+	BORDER-RIGHT: #b8d3ed 1px solid;
+	BORDER-BOTTOM: #b8d3ed 1px solid;
+	BORDER-LEFT: #b8d3ed 1px solid
+}
+
+.colortitle {
+	BORDER-TOP: #fff 1px solid;
+	BORDER-RIGHT: #fff 1px solid;
+	BACKGROUND: #deeeff;
+	BORDER-BOTTOM: #fff 1px solid;
+	FILTER: progid:DXImageTransform.Microsoft.gradient(startColorstr=#deeeff,
+		endColorstr=#ffffff, gradientType=0);
+	BORDER-LEFT: #fff 1px solid
+}
+
+.bd {
+	BORDER-TOP: #a7c5e2 1px solid;
+	BORDER-RIGHT: #a7c5e2 1px solid;
+	BORDER-BOTTOM: #a7c5e2 1px solid;
+	BORDER-LEFT: #a7c5e2 1px solid
+}
+
+.bd_upload {
+	BORDER-TOP: #4e86c4 1px solid;
+	BORDER-RIGHT: #4e86c4 1px solid;
+	BORDER-BOTTOM: #4e86c4 1px solid;
+	BORDER-LEFT: #4e86c4 1px solid
+}
+
+.biginfo {
+	BACKGROUND: #ebf3fb;
+	COLOR: #4a8f00
+}
+
+.tpinfo {
+	BORDER-TOP: #d2e2f4 1px solid;
+	BACKGROUND: #fff;
+	COLOR: #6a727a
+}
+
+.leftpanel {
+	BORDER-BOTTOM: #d3e4f7 1px solid
+}
+
+.todaytip {
+	BORDER-TOP: #d3e1f0 1px solid;
+	BORDER-RIGHT: #d3e1f0 1px solid;
+	BORDER-BOTTOM: #d3e1f0 1px solid;
+	BORDER-LEFT: #d3e1f0 1px solid
+}
+
+.rightpanel {
+	BORDER-TOP: #d3e1f0 1px solid;
+	BORDER-RIGHT: #d3e1f0 1px solid;
+	BORDER-BOTTOM: #d3e1f0 1px solid;
+	BORDER-LEFT: #d3e1f0 1px solid
+}
+
+.qqshowbd {
+	BORDER-TOP: #d3e1f0 1px solid;
+	BORDER-RIGHT: #d3e1f0 1px solid;
+	BORDER-BOTTOM: #d3e1f0 1px solid;
+	BORDER-LEFT: #d3e1f0 1px solid
+}
+
+.newu {
+	BORDER-TOP: #d3e1f0 1px solid;
+	BORDER-RIGHT: #d3e1f0 1px solid;
+	BORDER-BOTTOM: #d3e1f0 1px solid;
+	BORDER-LEFT: #d3e1f0 1px solid
+}
+
+.colorsure {
+	BACKGROUND: #e7f0fa
+}
+
+.rightpanel LEGEND {
+	COLOR: #07396d
+}
+
+.newu LEGEND {
+	COLOR: #07396d
+}
+
+.tipstitle {
+	COLOR: #07396d
+}
+
+.teachbg {
+	COLOR: #07396d
+}
+
+.mailinfo {
+	BORDER-BOTTOM: #fff 2px solid
+}
+
+.grptitle {
+	BORDER-TOP: #d1e5f8 1px solid;
+	BORDER-RIGHT: #d1e5f8 1px solid;
+	BACKGROUND: #9bc2ed;
+	BORDER-BOTTOM: #d1e5f8 1px;
+	COLOR: #fff;
+	BORDER-LEFT: #d1e5f8 1px solid
+}
+
+.bd_webqq {
+	BORDER-TOP: #fff 1px;
+	BORDER-RIGHT: #fff 1px solid;
+	BORDER-BOTTOM: #fff 1px solid;
+	BORDER-LEFT: #fff 1px solid
+}
+
+.bd_ccc {
+	BORDER-TOP: #d1e5f8 1px;
+	BORDER-RIGHT: #d1e5f8 1px solid;
+	BORDER-BOTTOM: #d1e5f8 1px solid;
+	BORDER-LEFT: #d1e5f8 1px
+}
+
+.bd_fff {
+	BORDER-LEFT: #d1e5f8 1px solid
+}
+
+.composetab_sel {
+	BACKGROUND: #c1d9f3;
+	FILTER: progid:DXImageTransform.Microsoft.gradient(startColorstr=#e0ecf9,
+		endColorstr=#c1d9f3, gradientType=0)
+}
+
+.composetab_unsel {
+	BACKGROUND: #e0ecf9;
+	FILTER: progid:DXImageTransform.Microsoft.gradient(startColorstr=#e0ecf9,
+		endColorstr=#eff5fb, gradientType=0)
+}
+
+.grptitle_tab {
+	BACKGROUND: #e7f0f8;
+	FILTER: progid:DXImageTransform.Microsoft.gradient(startColorstr=#e7f0f8,
+		endColorstr=#ffffff, gradientType=0)
+}
+
+.grptitle_tab_ {
+	BACKGROUND: #e7f0f8;
+	FILTER: progid:DXImageTransform.Microsoft.gradient(startColorstr=#ffffff,
+		endColorstr=#e7f0f8, gradientType=0)
+}
+
+.tipstitle {
+	BORDER-TOP: #fff 1px solid;
+	BORDER-RIGHT: #fff 1px solid;
+	BACKGROUND: #f3f7fd;
+	BORDER-BOTTOM: #fff 1px solid;
+	FILTER: progid:DXImageTransform.Microsoft.gradient(startColorstr=#f2f6fb,
+		endColorstr=#ffffff, gradientType=0);
+	BORDER-LEFT: #fff 1px solid
+}
+
+LI.fs {
+	COLOR: #0055ac
+}
+
+LI.fn {
+	BACKGROUND: #528bcb;
+	COLOR: #ffffff
+}
+
+.fn_list {
+	BACKGROUND: #528bcb
+}
+
+.fn_list A:link {
+	COLOR: #ffffff
+}
+
+.fn_list A:visited {
+	COLOR: #ffffff
+}
+
+.fn_list A:hover {
+	COLOR: #ffffff
+}
+
+.fn_list A:active {
+	COLOR: #ffffff
+}
+
+LI.fn A:link {
+	COLOR: #ffffff
+}
+
+LI.fn A:visited {
+	COLOR: #ffffff
+}
+
+LI.fn .icon_folderlist_star {
+	BACKGROUND-POSITION: -80px -176px
+}
+
+.icon_starred_min_black {
+	BACKGROUND-POSITION: -80px -176px
+}
+
+.backhomeimg_today {
+	BACKGROUND:
+		url(http://rescdn.qqmail.com/zh_CN/htmledition/images/skin_0/ico_home1e9c5d.gif)
+		no-repeat
+}
+
+.tabtitle {
+	BORDER-TOP-WIDTH: 4px
+}
+
+.tabtitle TD {
+	LINE-HEIGHT: 28px
+}
+
+.bgGradient {
+	
+}
+
+TABLE.B TD.fg DIV {
+	BACKGROUND-POSITION: -96px -176px
+}
+
+TABLE.B TD.fs1 DIV {
+	BACKGROUND-POSITION: -112px -176px
+}
+
+.B .tagleftDiv TD.falg_rounded {
+	BACKGROUND-COLOR: #528bcb
+}
+
+TABLE.B .TagDiv {
+	BACKGROUND-COLOR: #528bcb
+}
+
+@media Unknown {
+	.skinlogo IMG {
+		
+	}
+	.backhomeimg_today {
+		
+	}
+	.txt_title_tab {
+		
+	}
+	.topline {
+		
+	}
+	.navbar {
+		
+	}
+	.topbg {
+		
+	}
+	.toplineimg {
+		
+	}
+	.listbg {
+		
+	}
+	.navbottom {
+		
+	}
+	.scale1_10 #sepLineTd {
+		LEFT: 8px
+	}
+	.scale1_10 .toplineimg {
+		MARGIN-LEFT: -1px
+	}
+	.scale1_10 .bodybgbt {
+		WIDTH: 171px;
+		MARGIN-LEFT: 8px
+	}
+	.scale1_25 .bodybgbt {
+		WIDTH: 171px;
+		MARGIN-LEFT: 8px
+	}
+	.scale1_10 #leftPanel {
+		TOP: 76px
+	}
+	.scale1_25 #leftPanel {
+		TOP: 76px
+	}
+	.scale1_10 .listflow {
+		TOP: 106px;
+		BOTTOM: 12px
+	}
+	.scale1_25 .listflow {
+		TOP: 106px;
+		BOTTOM: 12px
+	}
+	.scale1_10 .navbottom {
+		WIDTH: 178px
+	}
+}

@@ -1,0 +1,174 @@
+<!--
+  ~ Hibernate, Relational Persistence for Idiomatic Java
+  ~
+  ~ License: GNU Lesser General Public License (LGPL), version 2.1 or later.
+  ~ See the lgpl.txt file in the root directory or <http://www.gnu.org/licenses/lgpl-2.1.html>.
+  -->
+<!DOCTYPE hibernate-configuration PUBLIC
+	"-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+	"http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+	<session-factory>
+		<!-- 配置数据库信息，jdbc4大参数和方言（使用哪个数据库） -->
+		<!-- localhost:3306可以省略 变成3个杠 
+			dbc:mysql:///hibernate
+		-->
+		<property name="connection.driver_class">com.mysql.jdbc.Driver</property>
+		<property name="connection.url">jdbc:mysql://localhost:3306/hibernate</property>
+		<property name="connection.username">root</property>
+		<property name="connection.password">123</property>
+		<!-- 方言 -->
+		<property name="dialect">org.hibernate.dialect.MySQLDialect</property>
+		
+		
+		
+		<!-- 配置c3p0连接池 
+			name的参数和c3p0官方的参数名字不一样。
+			例如：官方：acquireIncrement
+				hibernate：acquire_increment
+		-->
+		<!-- 使用c3p0连接池，配置连接池提供的供应商 -->
+		<property name="connection.provider_class">org.hibernate.connection.C3P0ConnectionProvider</property>
+		<!-- 配置数据库连接池最少数目 -->
+		<property name="c3p0.min_size">5</property>
+		<!-- 配置数据库连接池最大数目 -->
+		<property name="c3p0.max_size">20</property>
+		<!-- 设定数据库连接的过期时间，单位为秒，
+			如果连接池中的某个数据库处于空闲时间超过timeout时间，就会从连接池中清除
+		 -->
+		 <property name="c3p0.timeout">120</property>
+		 <!-- 每3000秒检查所有连接池中空间的连接，单位为秒 -->
+		<property name="c3p0.idle_test_period">3000</property>	
+		<!-- 每次创建的连接数 -->	
+		<property name="acquire_increment">2</property>
+		
+		<!-- 使用二级缓存,默认是未打开 下面注释掉的是3.0的，再下面配置的是4.0以后的 -->
+		<!-- 选择缓存供应商，只能找官方帮助文档，有4,5个可以选择。选择其他不知道还要不要导包，像c3p0一样。
+			不是找hibernate.properties 。
+		-->
+<!-- 		<property name="cache.provider_class"> -->
+<!-- 			org.hibernate.cache.HashTableCacheProvider -->
+<!-- 		</property> -->
+		<!-- 指定要使用二级缓存的实体类。不是所有类都需要缓存的！例如财务数据(不能出错)，经常变的数据(性能没提高)
+			类要写类全名
+		 -->
+<!-- 		<class-cache usage="read-only" class="hibernate.demo21.domain.Employee"/> -->
+		<!-- 具体哪个类需要用到二级缓存，在实体类.hbm.xml中配置
+			<class> 
+				<cache usage="read-write"/>
+			</class>
+		  -->
+		
+
+
+		<!-- 打开二级缓存，默认是打开的！！和视频不一样-_,- -->
+		<property name="hibernate.cache.use_second_level_cache">true</property>
+		<!-- 这里选择提供商，记得要导包 -->
+		<property name="hibernate.cache.region.factory_class">org.hibernate.cache.ehcache.EhCacheRegionFactory</property>  
+		<!-- 开启查询缓存 -->
+		<property name="hibernate.cache.use_query_cache">true</property>
+		
+		
+		
+		<!-- session的管理，sessionFactory.getCurrentSession
+			当配置为thread时表示，sessionFactory.getCurrentSession方法就能使用
+		 -->
+		<property name="current_session_context_class">thread</property>
+		
+		<property name="show_sql">true</property><!-- 显示生成的sql语句，控制台会打印出生成的sql语句 -->
+<!-- 		<property name="format_sql">true</property>格式化sql语句，看的更方便 -->
+
+
+
+
+    	<!-- 如果表不存在，自动建表。
+    		create自动创建，(先删除存在的指定的表，再创建)
+    		create-drop启动的时候创建（先删除后创建），退出的时候（sessionFactory.close()）删除
+    		update：如果表不存在就创建，不一样就更新。一样就什么都不做。一般只是在增加信息的时候有效，在更改信息的时候无效。
+    			例如：把name字段的长度改为1.原来就有"张三"（长度大于1）。一改就会出错。例如加和去掉非空约束。
+    		validate:验证表结构与XX.hbm.xml中的一致，如果不一致就抛异常。
+    	 -->
+    	<property name="hibernate.hbm2ddl.auto">update</property>
+    	
+    	
+    	
+    	
+    	<!-- 
+    		修改事务的隔离级别，MySQL默认为可重复读.看官方文档
+			    				隔离级别				对应整数表示		二进制
+			读未提交  		 	READ UNCOMMITED				1			0001
+			读已提交   		 	READ COMMITED				2			0010
+			可重复读    		 	REPEATABLE READ				4			0100
+			 串行化   		 	SERIALIZABLE				8			1000
+			 
+			通常1,2,4,8这种方式是可以同时有多个值（相加），但是这里不可以设置多个值。 
+			设置权限的时候可以使用1,2,4,8这样设置。有权限1，表示为0001
+			有权限1和2，可以表示为0011
+			所有权限都有，可以表示为1111
+			这种方式运算比字符串比较速度快得多。
+			 这里设置为读已提交(2)。
+    	-->
+    	<property name="connection.isolation">2</property>
+    	
+    	
+    	
+    	
+		<!-- 导入映射文件：告诉hibernate对象与表，属性与列的对应关系，这个对应关系存在SimpleClassName.hbm.xml下 
+			路径从/src/下开始，不要斜杠开头
+		-->
+<!-- 		<mapping resource="hibernate/demo1/domain/User.hbm.xml"/> -->
+<!-- 		<mapping resource="hibernate/demo2/domain/User.hbm.xml"/> -->
+<!-- 		<mapping resource="hibernate/demo3/domain/User.hbm.xml"/> -->
+<!-- 		<mapping resource="hibernate/demo4/domain/User.hbm.xml"/> -->
+<!-- 		<mapping resource="hibernate/demo5/domain/User.hbm.xml"/> -->
+<!-- 		<mapping resource="hibernate/demo6/domain/User.hbm.xml"/> -->
+<!-- 		<mapping resource="hibernate/demo7/domain/User.hbm.xml"/> -->
+<!-- 		<mapping resource="hibernate/demo8/domain/User.hbm.xml"/> -->
+		
+		<mapping resource="hibernate/demo9/domain/Department.hbm.xml"/>
+		<mapping resource="hibernate/demo9/domain/Employee.hbm.xml"/>
+		
+<!-- 		<mapping resource="hibernate/demo10/domain/Student.hbm.xml"/> -->
+<!-- 		<mapping resource="hibernate/demo10/domain/Teacher.hbm.xml"/> -->
+
+<!-- 		<mapping resource="hibernate/demo11/domain/User.hbm.xml"/> -->
+<!-- 		<mapping resource="hibernate/demo12/domain/User.hbm.xml"/> -->
+
+<!-- 		<mapping resource="hibernate/demo13/domain/Person.hbm.xml"/> -->
+<!-- 		<mapping resource="hibernate/demo13/domain/IdCard.hbm.xml"/> -->
+
+<!-- 		<mapping resource="hibernate/demo14/domain/Person.hbm.xml"/> -->
+<!-- 		<mapping resource="hibernate/demo14/domain/IdCard.hbm.xml"/> -->
+
+<!-- 		<mapping resource="hibernate/demo15/domain/Article.hbm.xml"/> -->
+<!-- 		<mapping resource="hibernate/demo16/domain/Article.hbm.xml"/> -->
+<!-- 		<mapping resource="hibernate/demo17/domain/Article.hbm.xml"/> -->
+
+<!-- 		<mapping resource="hibernate/demo18/domain/Department.hbm.xml"/> -->
+<!-- 		<mapping resource="hibernate/demo18/domain/Employee.hbm.xml"/> -->
+
+<!-- 		<mapping resource="hibernate/demo19/domain/Department.hbm.xml"/> -->
+<!-- 		<mapping resource="hibernate/demo19/domain/Employee.hbm.xml"/> -->
+
+<!-- 		<mapping resource="hibernate/demo20/domain/Department.hbm.xml"/> -->
+<!-- 		<mapping resource="hibernate/demo20/domain/Employee.hbm.xml"/> -->
+		
+<!-- 		<mapping resource="hibernate/demo21/domain/Department.hbm.xml"/> -->
+<!-- 		<mapping resource="hibernate/demo21/domain/Employee.hbm.xml"/> -->
+		
+		
+		<mapping resource="hibernate/demo23/domain/Department.hbm.xml"/>
+		<mapping resource="hibernate/demo23/domain/Employee.hbm.xml"/>
+		<mapping resource="hibernate/demo23/domain/UserAccount.hbm.xml"/>
+		<mapping resource="hibernate/demo23/domain/Privilege.hbm.xml"/>
+		
+		
+		<!-- 指定缓存给实体类，如果没有配置映射文件就配置这个就报错  -->
+<!-- 		<class-cache usage="read-write" class="hibernate.demo21.domain.Employee"/> -->
+<!-- 		<class-cache usage="read-write" class="hibernate.demo21.domain.Department"/> -->
+		<!-- 指定缓存给集合属性，如果没有配置映射文件就配置这个就报错 -->
+<!-- 		<collection-cache usage="read-write" collection="hibernate.demo21.domain.Department.employeeSet"/> -->
+		
+	</session-factory>
+</hibernate-configuration>

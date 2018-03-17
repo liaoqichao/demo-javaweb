@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context>
+	<Resource name="jdbc/mysql" auth="Container" type="javax.sql.DataSource"
+		driverClassName="com.mysql.jdbc.Driver"
+		url="jdbc:mysql://localhost:3306/oasys?useUnicode=true&amp;characterEncoding=UTF-8" 
+		username="root"
+		password="123456"
+		 maxActive="50" maxIdle="30" maxWait="10000" />
+	<!--name:DataSource的名称 -->
+	<!--type:数据源对应的java类型，一般设计为javax.sql.DataSource -->
+	<!--username:数据库登陆名 -->
+	<!--password:数据库登陆密码 -->
+	<!--driverClassName:指定数据库JDBC驱动程序 -->
+	<!--url:指定数据库的URL -->
+	<!--maxIdle:连接池处于空闲状态的数据库连接的最大数目，取0表示不受限制 -->
+	<!--maxWait:连接池中数据库连接处于空闲状态的最长时间（以毫秒为单位），取0表示无限制等待时间 -->
+	<!--maxActive:连接池处于活动状态的数据库连接的最大数目，去0表示不受限制 -->
+
+</Context>

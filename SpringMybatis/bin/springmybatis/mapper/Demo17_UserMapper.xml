@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+ <!-- 
+ namespace命名空间的作用是对sql的分类化管理。namespace作用都是限定！！英语的定语
+ 注意:如果使用mapper代理开发，namespace就有特殊重要的作用：namespace等于mapper接口的地址(全限定名)
+  -->
+<mapper namespace="springmybatis.mapper.Demo17_UserMapper">
+
+<cache type="org.mybatis.caches.ehcache.EhcacheCache"/>
+
+<!-- 根据主键查询用户信息。单条记录
+	userCache=false禁用二级缓存，每次执行这个statement，都向数据库中查询。但会入二级缓存中吗？
+ -->
+<select id="findUserById" parameterType="int" resultType="user">
+<!-- <select id="findUserById" parameterType="int" resultType="user" -->
+<!-- 	useCache="false" > -->
+	SELECT * FROM `user` WHERE id=#{id};
+</select>
+
+<select id="findUsersByName" parameterType="java.lang.String" resultType="user">
+	SELECT * FROM `user` WHERE username LIKE '%${value}%'
+</select>
+
+
+<insert id="insertUser" parameterType="user">
+	<!-- 返回刚插入记录的主键到user对象中 （主键生成方式自增长）
+		SELECT LAST_INSERT_ID():得到刚insert进去记录的主键值，只适用与自增主键
+		keyProperty:将查询到主键值设置到parameterType指定对象的哪个属性
+		order：指的是在insert语句前或者后，执行selectKey指定的SQL语句。
+		resultType:指的是SELECT LAST_INSERT_ID()的结果类型
+	-->
+	<selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+		SELECT LAST_INSERT_ID()
+	</selectKey>
+	INSERT INTO `user`(username,birthday,sex,address) VALUE(#{username},#{birthday},#{sex},#{address})
+</insert>
+
+<!--  根据id删除用户删除用户 -->
+<delete id="deleteUserById" parameterType="java.lang.Integer">
+	DELETE FROM `user` WHERE id=#{id}
+</delete>
+
+<!-- 更新用户
+	parameterType指定实体类，其中id必须存在
+	当输入参数是实体类时，#{}里面的就是实体类的属性
+ -->
+<update id="updateUser" parameterType="user">
+	UPDATE `user` SET username=#{username},birthday=#{birthday},seX=#{sex},address=#{address} WHERE id=#{id}
+</update>
+
+</mapper>

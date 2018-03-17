@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jaxws="http://cxf.apache.org/jaxws"
+	xmlns:jaxrs="http://cxf.apache.org/jaxrs" xmlns:cxf="http://cxf.apache.org/core"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+        				http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+			            http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd
+			            http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd
+			            http://cxf.apache.org/core http://cxf.apache.org/schemas/core.xsd">
+	<!-- address是请求服务的地址，就是wsdl文件的location。serviceClass是生成的服务接口文件-->
+	<jaxws:client id="helloService" 
+		address="http://localhost:8080/WebServiceDemo10/cxf/hello" 
+		serviceClass="demo10.client1.HelloService">
+	</jaxws:client>
+</beans>

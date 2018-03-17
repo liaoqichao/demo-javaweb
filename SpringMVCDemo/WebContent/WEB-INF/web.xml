@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd" id="WebApp_ID" version="3.1">
+  <display-name>SpringMVCDemo</display-name>
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+    <welcome-file>index.htm</welcome-file>
+    <welcome-file>index.jsp</welcome-file>
+    <welcome-file>default.html</welcome-file>
+    <welcome-file>default.htm</welcome-file>
+    <welcome-file>default.jsp</welcome-file>
+  </welcome-file-list>
+  
+  <!-- 配置SpringMVC前端控制器 -->
+  <servlet>
+  	<servlet-name>springmvc</servlet-name>
+  	<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+  	<!-- 通过contextConfigLocation配置SpringMVC所需要加载的配置文件，配置文件中需要配置映射器、处理器、适配器等.
+  		如果不配置contextConfigLocation，默认加载/WEB-INF/servlet名称-servlet.xml(springmvc-servlet.xml)
+  	 -->
+  	<init-param>
+  		<param-name>contextConfigLocation</param-name>
+  		<param-value>classpath:springmvc.xml</param-value>
+  	</init-param>
+  </servlet>
+  <servlet-mapping>
+  	<servlet-name>springmvc</servlet-name>
+  	<!-- 
+  		第一种方式： *.action，访问.action结尾的url，由DispatcherServlet进行解析。
+  		第二种方式：/，所有访问的url都由DispatcherServlet解析，对于静态文件的解析，需要配置不让DispatcherServlet解析
+  			使用第二种方式可以使用RESTful风格的url。
+  		第三种方式：/*，这样配置不对。因为转发到jsp时，DispatcherServlet会解析JSP，不能根据jsp页面找到handler，会报错。
+  	 -->
+  	<url-pattern>*.action</url-pattern>
+  </servlet-mapping>
+</web-app>

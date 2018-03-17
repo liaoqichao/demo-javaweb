@@ -1,0 +1,14 @@
+demo1 = 处理器控制器(Handler,通常叫Controller)的实现，使用XML配置方式映射Handler的请求URL
+demo2 = 非注解的HandlerMapping和HandlerAdapter。使用HttpRequestHandlerAdapter非注解适配器
+demo3 = 注解的HandlerMapping和HandlerAdapter。开发注解的Handler
+demo4 = SSM整合(SSMDemo项目)
+demo5 = 参数绑定(默认支持类型、简单类型、pojo)，ItemsController的editItemsSubmit方法(SSMDemo项目)
+demo6 = 包装类型的pojo的参数绑定，ItemsController的queryItems方法
+demo7 = 集合类型的参数绑定(数组、List、Map)，deleteItems方法
+demo8 = 校验Validation(使用的是Hibernate的校验框架、但和Hibernate没关系)、数据回显。itemsEditSubmit、getItemsType
+demo9 = 统一的异常处理.editItems
+demo12 = 上传,editItemsSubtmit
+demo10 = JSON数据的交互。JsonTestController
+demo11 = RESTful支持。itemsView
+demo13 = 下载
+demo14 = 拦截器

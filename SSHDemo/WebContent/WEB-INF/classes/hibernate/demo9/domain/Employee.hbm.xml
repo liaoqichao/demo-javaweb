@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+ <hibernate-mapping package="hibernate.demo9.domain">
+	<class name="Employee" table="demo9_employee">
+<!-- 		<id name="id" type="int" column="id"> -->
+		<id name="id" type="int" column="id">
+			<generator class="native"/>
+		</id>
+    	<property name="name" type="string" column="name" length="20"/>
+    	<!-- department属性，表达本类与Department的多对一关系 -->
+    	<many-to-one name="department" class="hibernate.demo9.domain.Department" column="departmentId">
+    		<!-- name指定的是属性名。class写全限定名,colume（指定外键的列）不写的话，默认为many-to-one的name -->
+    	</many-to-one>
+     </class>
+ </hibernate-mapping>

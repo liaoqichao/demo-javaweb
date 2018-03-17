@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>通过ajax调用WebService服务</title>
+<script type="text/javascript" src="../js/jquery.min.js"></script>
+<script type="text/javascript" src="../js/ajaxutils.js"></script>
+<script type="text/javascript">
+// $(document).ready(function(){
+// 	$('#btn').click(function(){
+// 		/*
+// 			请求url：http://127.0.0.1:6789/hello
+// 			请求方式：post
+// 			请求数据：
+// 				1. 复制http://127.0.0.1:6789/hello?wsdl
+// 				2. 点击上面倒数第六个按钮[地球+向右绿色箭头]（Launch the Web Service Explorer）
+// 				3. 点击右上角WSDL Page按钮
+// 				4. 点击左边navigator的WSDL Main
+// 				5. 把第一步复制的url粘贴到输入框，然后点go
+// 				6. 左边就出现HelloServiceService，HelloServicePortbinding，sayHello，然后点击sayHello方法。
+// 					点击Add，输入参数，然后点GO，就会调用sayHello方法。在下面的status框中的sayHelloResponse有调用sayHello
+// 					的返回结果：hello aaa!
+// 					-----------------------------
+// 					sayHello	 
+// 					arg0	string	Add	Remove	
+// 					------------------------------
+// 				7. 点击下面status框的Source
+// 					里面有SOAP Request Envelope和SOAP Response Envelope。
+// 					复制SOAP Request Envelope的内容，作为ajax调用WebService的POST请求参数
+// 			重新设置请求头：text/xml;charset=utf-8。默认是application/x-www-form-urlencoded
+// 			设置返回类型：dataType：'xml'
+// 			回调函数：
+// 		*/
+// // 		$.ajax({
+// // 			url:'http://127.0.0.1:6789/hello',type:'post',
+// // 			contentType:'text/xml;charset=utf-8',
+// // 			// data必须以key/value的形式
+// // 			data:'<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:q0="http://ws.demo2/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><soapenv:Body><q0:sayHello><arg0>aaa</arg0></q0:sayHello></soapenv:Body></soapenv:Envelope>',
+// // 			dataType:'xml',
+// // 			success:function(msg){
+// // 				// ...
+// // 				alert("调用WebService成功！");
+// // 			},
+// // 			error:function(XMLHttpRequest,textStatus,errorThrown){
+// // 				alert("ajax调用错误！");
+// // 			}
+// // 		});
+// 		// 1. 创建XMLHttpRequest
+// 		var xmlHttpRequest = createXMLHttpRequest();
+// 		// 2. 打开连接
+// 		var wsUrl = "http://127.0.0.1:6789/hello";
+// 		xmlHttpRequest.open("POST",wsUrl,true);
+// 		// 3.设置ContentType
+// 		xmlHttpRequest.setRequestHeader("Content-Type","text/xml;charset=UTF-8");
+// 		// 5. 设置回调函数
+// 		xmlHttpRequest.onreadystatechange = function(){
+// 			if(xmlHttpRequest.readyState == 4 && xmlHttpRequest.status == 200){
+// 				alert("ajax发送成功");
+// 			}
+// 		};
+// 		// 4. 发送请求
+// 		var soap = '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:q0="http://ws.demo2/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><soapenv:Body><q0:sayHello><arg0>aaa</arg0></q0:sayHello></soapenv:Body></soapenv:Envelope>';
+// 		xmlHttpRequest.send(soap);
+		
+// 	});
+
+// });
+window.onload = function(){
+	var btn = document.getElementById('btn');
+	btn.onclick = function(){
+		// 1. 获取xmlHttpRequest
+		var xmlHttp = createXMLHttpRequest();
+		// 2. 打开连接
+		xmlHttp.open('POST','http://127.0.0.1:6789/hello',true);
+		// 3. 设置请求头
+		xmlHttp.setRequestHeader("Content-Type","text/xml;charset=UTF-8");
+		// 4. 发送异步请求
+		xmlHttp.send('<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:q0="http://ws.demo2/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><soapenv:Body><q0:sayHello><arg0>aaa</arg0></q0:sayHello></soapenv:Body></soapenv:Envelope>');
+		// 5. 设置回调函数
+		xmlHttp.onreadystatechange = function(){
+			if(xmlHttp.readyState == 4 && xmlHttp.status == 200){
+				alert("ajax调用WebService");
+				var data = xmlHttp.responseXML;
+				var msg = data.getElementsByTagName('return')[0]; //SOAP Response Envelope
+				alert(msg.innerHTML);
+			}
+		};
+	};
+};
+</script>
+</head>
+<body>
+	<input id="btn" type="button" value="发送SOAP请求"/><br/>
+	<div>报错：<br/>
+		二月 27, 2016 12:00:53 下午 com.sun.xml.internal.ws.transport.http.server.WSHttpHandler handleExchange
+		警告: 无法处理 HTTP 方法: OPTIONS
+	</div>
+</body>
+</html>

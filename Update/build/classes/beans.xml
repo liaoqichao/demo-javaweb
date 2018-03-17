@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-4.0.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
+        
+        <!-- 使用注解。注册解析注解的处理器 -->
+        <context:annotation-config></context:annotation-config>
+        <!-- 让spring自动扫描和bean.base-package表示要扫描哪个包下的类（包括子包）
+        	这个的注解处理器有很多，包括了上面的，所以上面的可以去掉。
+         -->
+        <context:component-scan base-package="update"></context:component-scan>
+        
+        <!-- 使用aop，支持aspect注解 -->
+        <aop:aspectj-autoproxy></aop:aspectj-autoproxy>
+        
+        
+        <!-- 整合jdbc -->
+        <!-- 使用属性占位符,告诉spring占位符代替的是哪些属性
+        	classpath:是明确指明文件是在类路径底下。
+        	使用方法：${属性文件中的key}
+         -->
+        <context:property-placeholder location="classpath:jdbc-c3p0.properties"/>
+        <!-- 配置数据源 -->
+        <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+    		<property name="jdbcUrl" value="${jdbcUrl}"></property>
+			<property name="driverClass" value="${driverClass}"></property>
+			<property name="user" value="${user}"></property>
+			<property name="password" value="${password}"></property>
+			<property name="acquireIncrement" value="${acquireIncrement}"></property>
+			<property name="initialPoolSize" value="${initialPoolSize}"></property>
+			<property name="minPoolSize" value="${minPoolSize}"></property>
+			<property name="maxPoolSize" value="${maxPoolSize}"></property>
+        </bean>
+        
+        <!-- 配置hibernate的sessionFactory，没有指定scope="prototype"，所以是单例的 
+        	org.springframework.orm.hibernate5.LocalSessionFactoryBean
+        -->
+        <bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+	        <property name="dataSource" ref="dataSource" /><!-- 引用数据源 -->
+	        <!-- 
+	        	4个指定.hbm.xml文件的属性mappingResources、mappingLocations、
+	        	mappingDirectoryLocations与mappingJarLocations 
+	         -->
+	         <!-- hibernate.cfg.xml中的<mapping>标签 -->
+<!-- 	         <property name="annotatedClasses"> -->
+<!-- 	         	<list> -->
+<!-- 	         		<value>update.domain.User</value> -->
+<!-- 	         	</list> -->
+<!-- 	         </property> -->
+			<property name="packagesToScan">
+				<list>
+					<value>update.domain</value>
+				</list>
+			</property>
+	        <property name="mappingResources">
+	            <list>
+	            	<!-- 指定.hbm.xml文件 -->
+	                <!-- 加载hibernate的映射文件*.hbm.xml -->
+<!-- 						<value>/update/domain/VerUpdate.hbm.xml</value> -->
+<!-- 						<value>/update/domain/UpdateFile.hbm.xml</value> -->
+<!-- 						<value>/update/domain/ClientBean.hbm.xml</value> -->
+	            </list>
+	        </property>
+	        <!-- 这里对应的是hibernate.cfg.xml的配置 -->
+	        <property name="hibernateProperties">
+	            <props>
+	            	<!--
+	            		这里的配置对应的是hibernate.cfg.xml中的<property>的配置 
+	            		配置数据库方言。 
+	            	-->
+	                <prop key="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</prop>
+	                <prop key="hibernate.show_sql">true</prop>
+	                <prop key="hibernate.format_sql">false</prop>
+	                <!-- 自动建表 -->
+	                <prop key="hibernate.hbm2ddl.auto">update</prop>
+	                
+					<!--  打开二级缓存 -->
+	                <prop key="hibernate.cache.use_second_level_cache">true</prop>
+					<!--  这里选择提供商，记得要导包 -->
+					<prop key="hibernate.cache.region.factory_class">org.hibernate.cache.ehcache.EhCacheRegionFactory</prop>  
+					<!--  开启查询缓存，如果查询的命中率不高，可以设置为false -->
+					<prop key="hibernate.cache.use_query_cache">false</prop>
+					
+<!-- 					打开查询缓存 -->
+<!-- 					<prop key="hibernate.cache.use_query_cache">true</prop> -->
+					<!-- 不用下面这句也可以使用sessionFactory.getCurrentSession -->
+<!-- 	                <prop key="hibernate.current_session_context_class">thread</prop> -->
+	            </props>
+	        </property>
+    	</bean>
+
+        <!-- 配置事务管理，这里不再试指定dataSource了，而是指定sessionFactory
+        	这里的对应class也改变了。
+         -->
+        <bean id="txManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+        	<property name="sessionFactory" ref="sessionFactory"></property>
+        </bean>
+        <!-- 开启和事务相关的注解 -->
+        <tx:annotation-driven transaction-manager="txManager"/>
+        
+<!--     <bean class="org.springframework.web.portlet.mvc.annotation.DefaultAnnotationHandlerMapping"/> -->
+
+<!--     <bean class="org.springframework.web.portlet.mvc.annotation.AnnotationMethodHandlerAdapter"/> -->
+
+<!--     // ... (controller bean definitions) ... -->
+
+		<bean id="verUpdateDao" class="update.dao.impl.VerUpdateDaoImpl"></bean>
+		<bean id="updateFileDao" class="update.dao.impl.UpdateFileDaoImpl"></bean>
+		<bean id="clientBeanDao" class="update.dao.impl.ClientBeanDaoImpl"></bean>
+		<bean id="versionDao" class="update.dao.impl.VersionDaoImpl"></bean>
+<!-- 		<bean id="serverService" class="update.service.impl.ServerServiceImpl"></bean> -->
+		<bean id="clientAction" class="update.web.action.ClientAction"></bean>
+		<bean id="clientBeanService" class="update.service.impl.ClientBeanServiceImpl"></bean>
+		<bean id="verUpdateAction" class="update.web.action.VerUpdateAction"></bean>
+		<bean id="verUpdateService" class="update.service.impl.VerUpdateServiceImpl"></bean>
+		<bean id="versionService" class="update.service.impl.VersionServiceImpl"></bean>
+		<!-- 下面这个没有代码 -->
+		<bean id="updateFileService" class="update.service.impl.UpdateFileServiceImpl"></bean>
+		<bean id="versionAction" class="update.web.action.VersionAction"></bean>
+		<bean id="versionJSONAction" class="update.web.action.VersionJSONAction"></bean>
+		<bean id="userDao" class="update.dao.impl.UserDaoImpl"></bean>
+		<bean id="userService" class="update.service.impl.UserServiceImpl"></bean>
+		<bean id="userAction" class="update.web.action.UserAction" scope="prototype"></bean>
+<!-- 		<bean id="uploadifyServlet" class="update.web.servlet.UploadifyServlet"></bean> -->
+</beans>

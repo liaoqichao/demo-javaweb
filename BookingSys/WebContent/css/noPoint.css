@@ -1,0 +1,7 @@
+@CHARSET "UTF-8";
+/**
+	ul,ol,li前面没有点
+*/
+ul,ol,li{
+	list-style-type: none;
+}

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>demo13 request获取请求参数</title>
+</head>
+<body>
+	<h1>测试请求参数</h1>
+	<a href="/JavaWebDemo/demo13?xxx=XXX&yyy=YYY">点击这里</a>	<!-- get请求 -->
+	<hr/>
+	<form action="/JavaWebDemo/demo13" method="post">	<!-- post请求 -->
+		用户名:<input type="text" name="user"/><br>
+		密码:<input type="password" name="psw"/><br/>
+		爱好:<input type="checkbox" name="hobbies" value="food"/>吃饭<!-- 爱好就是一个多值的属性 -->
+			<input type="checkbox" name="hobbies" value="bed"/>睡觉
+			<input type="checkbox" name="hobbies" value="coding"/>敲代码<br/>
+			<input type="submit" value="提交"/><input type="reset" value="重置"/>
+	</form>
+</body>
+</html>

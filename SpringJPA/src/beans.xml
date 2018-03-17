@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-4.0.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
+        
+        <!-- 
+        	关于依赖注入的注解。
+        	向spring容器注册
+        	AutowiredAnnotationBeanPostProcessor、
+        	CommonAnnotationBeanPostProcessor、
+			PersistenceAnnotationBeanPostProcessor 以及 
+			RequiredAnnotationBeanPostProcessor 这 4 个BeanPostProcessor。
+			作用是为了系统能够识别注解。
+         -->
+		<context:annotation-config></context:annotation-config>        
+		<!-- 整合JPA,这个相当于session的FactoryBean，这里属性的value="lqc"对应的是META-INF/persistence.xml中的
+			<persistence-unit name="lqc" transaction-type="RESOURCE_LOCAL">的lqc
+		-->
+		<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+			<property name="persistenceUnitName" value="lqc"></property>
+		</bean>
+	    <bean id="txManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+	  	  <property name="entityManagerFactory" ref="entityManagerFactory"/>
+	  	</bean>
+ 		<tx:annotation-driven transaction-manager="txManager"/>
+		<!-- 以上 JPA的配置完毕 -->
+		
+<!--     // ... (controller bean definitions) ... -->
+
+		<bean id="personService" class="sj.service.impl.PersonServiceBean"></bean>
+</beans>

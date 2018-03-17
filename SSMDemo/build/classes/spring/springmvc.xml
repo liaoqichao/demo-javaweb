@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans-4.2.xsd 
+		http://www.springframework.org/schema/mvc 
+		http://www.springframework.org/schema/mvc/spring-mvc-4.2.xsd 
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context-4.2.xsd 
+		http://www.springframework.org/schema/aop 
+		http://www.springframework.org/schema/aop/spring-aop-4.2.xsd 
+		http://www.springframework.org/schema/tx 
+		http://www.springframework.org/schema/tx/spring-tx-4.2.xsd ">
+		
+		<!-- 使用mvc注解驱动可以代替下面两个配置。
+			mvc:annotation-driven还支持很多参数的绑定方法。比如默认加载了json转换的解析器。
+			实际开发使用这个方式
+		 -->
+		<mvc:annotation-driven conversion-service="conversionService" validator="validator"/>
+		
+		<!-- 静态资源的解析(js,css,img...)
+			location表示url路径的片段，mapping表示被映射的文件，包括子目录。
+			** 表示全部文件
+			就是把mapping里面的文件通过location(url片段)来访问。
+		 -->
+		<mvc:resources location="/js/" mapping="/js/**"></mvc:resources>
+		<mvc:resources location="/css/" mapping="/css/**"></mvc:resources>
+		<mvc:resources location="/img/" mapping="/img/**"></mvc:resources>
+		
+		
+		<!--拦截器 -->
+		<mvc:interceptors>
+			<!-- 登录认证拦截器 -->
+			<mvc:interceptor>
+				<mvc:mapping path="/**"/>
+				<bean class="ssm.interceptor.LoginInterceptor"></bean>
+			</mvc:interceptor>
+			
+			<!--多个拦截器,顺序执行 -->
+			<mvc:interceptor>
+				<!-- /**表示所有url，包括子url路径
+					/*表示只拦截最根的那层url
+				 -->
+				<mvc:mapping path="/**"/>
+				<bean class="ssm.interceptor.HandlerInterceptor1"></bean>
+			</mvc:interceptor>
+			<mvc:interceptor>
+				<mvc:mapping path="/**"/>
+				<bean class="ssm.interceptor.HandlerInterceptor2"></bean>
+			</mvc:interceptor>
+		</mvc:interceptors>
+		
+		
+		<!-- 配置视图解析器 
+			解析jsp视图，默认使用jstl标签。需要导入jstl包
+		-->
+		<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+			<!-- 指定前缀和后缀，modelAndView.setViewName指定的url就可以省去前缀和后缀的内容 -->
+			<property name="prefix" value="/jsps/"/>
+			<property name="suffix" value=".jsp"/>
+		</bean>
+	 
+		 <!-- 使用组件扫描，可以扫描controller、service、repository组件
+		 	这里扫描controller、指定Controller的包
+		  -->
+		 <context:component-scan base-package="ssm.controller"></context:component-scan>
+		 
+		 <!-- 自定义参数绑定,class是Spring提供的对外的一个Converter接口 -->
+		 <bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+	 		<!--注入自定义转换器 -->
+			<property name="converters">
+				<list>
+					<!-- 日期类型转换器 -->
+					<bean class="ssm.controller.converter.CustomDateConverter"/>
+				</list>
+			</property>
+		 </bean>
+		 
+		<!-- 校验器 ，class是Spring提供的校验器接口-->
+		<bean id="validator"
+				class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean">
+				<!-- 配置校验器实现类-->
+				<property name="providerClass" value="org.hibernate.validator.HibernateValidator" />
+				<!-- 指定校验使用的资源文件，配置校验错误信息，如果不指定则默认使用classpath下的ValidationMessages.properties 
+					如果校验不通过要显示错误信息，就在配置文件里面写错误信息，不要在代码写死。
+				-->
+				<property name="validationMessageSource" ref="messageSource" />
+		</bean>
+		<!-- 校验错误信息配置文件 -->
+		<bean id="messageSource"
+			class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+			<!-- 资源文件名-->
+			<property name="basenames">   
+	       	 <list>    
+	            <value>classpath:CustomValidationMessages</value> 
+	       	 </list>   
+	    	</property>
+			<!-- 资源文件编码格式 -->
+			<property name="fileEncodings" value="utf-8" />
+			<!-- 对资源文件内容缓存时间，单位秒 -->
+			<property name="cacheSeconds" value="120" />
+		</bean>
+		 
+		 <!-- 全局异常处理器,不需要配置id
+		 	只要实现了HandlerExceptionResolver接口就是全局异常处理器。如果有2个类都实现这个接口只有一个类起作用。
+		  -->
+		 <bean class="ssm.exception.CustomExceptionResolver"></bean>
+		 
+		 <!-- 文件上传 -->
+		<bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<!-- 设置上传文件的最大尺寸为5MB -->
+		<property name="maxUploadSize">
+			<value>5242880</value>
+		</property>
+	</bean>
+		 
+	<!--使用JSON,注解适配器 ,如果使用mvc:annotation-driven则不需要下面配置-->
+<!-- 	<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter"> -->
+<!-- 		<property name="messageConverters"> -->
+<!-- 		<list> -->
+<!-- 		<bean class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter"></bean> -->
+<!-- 		</list> -->
+<!-- 		</property> -->
+<!-- 	</bean> -->
+	
+</beans>

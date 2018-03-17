@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+ <hibernate-mapping package="hibernate.demo3.domain">
+ 	<!-- 映射类到表 -->
+	<class name="User" table="t_user">
+	<!-- 映射属性名，类型到列名（主键） -->
+		<id name="id" type="int" column="id">
+			<generator class="native"/><!-- 主键自增长 -->
+		</id>
+		<!-- 映射属性名，类型到列名（非主键） -->
+    	<!-- 不写length默认255,alt+/查看属性有很多，例如非空等 -->
+    	<property name="name" type="string" column="name" length="20"/>
+    	<property name="age" type="int" column="_age"/>
+    	<!-- 类型还有date（年月日，sql的date）timestamp（年月日时分秒）等。 -->
+    	<property name="birthday" type="date" column="_birthday"></property>
+    	<!--  自动对应列，自动对应类型，默认长度.text大文本类型，长度5000，使用大文本类型最好指定长度 -->
+    	<property name="desc" type="text" length="5000" column="desc_"/> 
+<!--     	<property name="desc" type="string" column="`desc`"/>解决关键字冲突 -->
+		<property name="photo" type="binary" length="102400"/><!-- 102400表示100K，binary表示二进制类型 -->
+     </class>
+ </hibernate-mapping>

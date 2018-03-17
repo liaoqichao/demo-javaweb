@@ -1,0 +1,10 @@
+@CHARSET "UTF-8";
+ul{
+	list-style-type:none;
+/* 	padding-left: 567px; */
+	font-size: 20px;
+	background-color: highlight;
+}
+li{
+/* 	background-color: highlight; */
+}

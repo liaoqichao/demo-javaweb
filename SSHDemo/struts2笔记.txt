@@ -1,0 +1,564 @@
+1.struts2环境搭建
+	* 所需jar包：不同应用所需的jar包不一样（2.3.24.1版本一共有107个jar包），以下jar包是必须要有的。
+		视频太古老，只需要6个jar包，这里需要9个jar包
+		> struts2-core-2.3.24.1		struts2框架核心类库
+		> xwork-core-2.3.24.1		XWork类库，struts2在其上的构建
+		> ognl-3.0.6				对象图导航语言，struts2框架通过其读写对象的属性
+		> freemaker-2.3.22			struts2的UI标签的模板使用FreeMaker编写
+		> commons-logging-1.1.3		struts2框架使用这个日志包来支持Log4j和jdk1.4+的日志记录
+		> commons-fileupload-1.3.1	文件上传组件，struts2-2.1.6版本后必须加入此文件
+		> commons-io-2.2
+		> commons-lang3-3.2
+		> javassist-3.11.0.GA
+		----------------------------------------
+		添加Struts2库
+		Window->Preferences->Java->Build Path->User Library
+		new Library。写上库的名字，然后add jars（从已经有的项目中）或者add External Jars（从本地硬盘中）添加jar包到该类库。
+		使用Struts类库
+		右键项目名->Build Path->Config Build Path
+		点击Add Library，双击User Library，选择Struts2点Finish。
+		***但是这样读取不到类，会出现ClassNotFoundException，所以不要这样！
+		----------------------------------------
+		
+	* 配置文件：
+		> strut2的默认配置文件为struts.xml,该文件应该存放在WEB-INF/classes下。开发阶段可以放在src下
+		> 获取配置文件。在apps里面有几个例子，解压blank项目，在WEB-INF/classes下找到struts.xml复制到项目中
+		
+	* 在web.xml中加入struts2 MVC框架启动配置。
+		> struts2中，struts框架是通过Filter来启动的。在blank项目下的WEB-INF/web.xml复制<filter>
+		      和<filter-mapping>标签
+		      
+	* 注意：struts2读取到struts.xml文件内容后，以JavaBean的形式把struts.xml加载到内存中，以后struts2对用户的每次请求处理都
+		      将使用内存中的数据，而不是每次都读取struts.xml文件。
+		      
+2.Struts2的第一个程序Hello World
+	* struts.xml中的配置。
+		<package name="stucts2" namespace="/demo1" extends="struts-default">
+			<action name="hello" method="execute" class="struts2.demo1.HelloAction">
+				<result name="success">/WEB-INF/pages/hello.jsp</result>
+			</action>
+		</package>
+		> package：类似于java的包，为了便于管理和解决重名问题。在实际应用中应该把一组业务功能相关的action放在一个包下。
+				       如果把一个包定义为抽象（abstract属性值为true）就不能在里面定义action
+			<> name：即包的名称，必须是唯一的。包的名称不对应java中类包的名称。
+			<> namespace：命名空间。会作为访问该包下action路径的一部分。上面的例子访问路径为:/test/hello.action。
+				相当于bookstore项目中的后台的servlet，全部路径前面都加了一个/admin
+			<> extends:继承了struts-default这个包。可以这么说当包继承了struts-default包才可以使用struts2的核心功能。
+		> action：
+			name：action的名称，作为访问action路径的一部分。访问路径=package.namespace/action.name
+			class:访问类的名称(就是要访问哪个action？)
+			method:要访问action的哪个方法(相当于BaseServlet的JSP提供method参数)
+				
+		> result:定义视图
+			name：视图的名称
+			type:默认时dispatcher（请求转发）。它的值出了请求转发和重定向还有其他值。
+			内容：/WEB-INF/page/hello.jsp是视图的路径。
+			
+	* HelloAction
+		无入侵式设计：代码里面没有HttpServlet，没有request，response
+		> 里面的方法要对应action里面的method属性
+		> 返回类型要为String，返回值要为result标签的name属性的值
+	
+	* /WEB-INF/pages/hello.jsp
+		使用el表达式输出action中的message属性。这里默认的是request域.
+
+3.Action名称的搜索顺序。
+	在HelloWorld中，在地址栏输入http://localhost:8080/SSHDemo/demo1/abc/def/hello也能访问到action。
+	
+	* 如果action存在，包不存在。
+	     没有/demo1/abc这个包（package），就会找上一层，如果也没有再找上一层，然后找到/demo1，发现有这个包，再从这个包里面找action。
+	     
+	* 如果包存在，但是这个包不存在指定的action。
+	      有/demo1这个包，但是这个包下没有指定的action，会取默认命名空间下寻找action。
+	  	> 默认命名空间：不设置namespace或者设置为空字符串。
+	  	
+4.action的各项配置默认值
+	action的name不能省略。<result>的内容（返回的视图）不能省略
+	<action name="abc">
+		<result>/WEB-INF/pages/lalala.jsp</result>
+	</action>
+	* 如果action没有指定class，其默认值：ActionSupport。
+	* 如果action没有指定method，其默认值：execute
+	* 如果result没有指定name，其默认值：success
+	
+	如果只是为了请求转发或者重定向（result加上type="redirect"）的话可以这样
+	<action name="abc">
+		<result>/jsps/a.jsp<result>
+	</action>
+	它会调用ActionSupport的execute方法，该方法只有一行代码，就是return "success";。所以就直接转发到指定页面，不需要action。
+	例如：
+		<action name="redirect">
+			<result type="redirect">http://www.baidu.com</result>
+		</action>
+	
+5.result配置的各种视图转发类型
+	就是result中type属性的值
+	* dispatch：默认，就是请求转发。request.getRequestDispatcher("/jsps/a.jsp").forward(request,response);
+	* redirect:浏览器重定向response.sendRedirect("URL")。包括JSP和action
+	* redirectAction：重定向到某个action。前面是重定向到某个URL，包括了jsp和action
+		<result type="redirectAction">redirect</result> 
+		等于	<result type="redirect">/demo2/redirect</result>
+		> 如果重定向的Action不在同一个包里面：result标签里面需要配置2个param，分别是namespace和actionName.
+			<action name="redirectAction">
+				<result type="redirectAction">
+					<param name="namespace">/demo1</param>
+					<param name="actionName">redirect</param>
+				</result>
+			</action>
+	* plainText：原样显示出视图的代码（会显示JSP代码，而不会执行jsp变成一个网页）。地址栏没变，是请求转发。
+				会产生乱码问题。因为文件是UTF-8存放，读取的时候默认使用系统默认的GBK编码读取。GBK方式读取UTF-8文件。
+				需要给<result>注入2个属性:
+					<param name="location">/abc.jsp</param>
+					<param name="charSet">UTF-8</param>
+				<result>的子标签<param>的name属性都是对应result的type值对应的类的属性（javabean的属性）。
+				
+6.全视图
+	* 在<package>标签下添加<global-results>标签。如：
+		<global-results>
+			<result name="message">/msg.jsp</result>
+		</global-results>
+	
+	* 但是这样只能让一个package的所有action访问"message"，怎么让全部package的action都可以访问这个message呢？
+		> 定义一个base。
+			<package name="base" extends="struts-default"><!-- 没有命名空间，默认空字符串 -->
+				<global-results>
+					<result name="msg">/msg.jsp</result><!-- 方法里面要return "msg" -->
+				</global-results>
+			</package>
+			
+		> 其他package的extends="base"，而不是struts-default。这样所有package都能返回这个视图。
+		    （但是他们的action不是共有的，所以地址栏不能只是换个包名）
+		    
+7.为action的属性注入值。
+	* 在struts.xml中的action配置param子标签，name属性为action的属性（提供get、set）。param的内容为属性的值。
+	
+8.struts2的常用常量。指定struts2处理请求的后缀  
+	<struts>
+	<constant name="struts.action.extension" value="do,action"></constant>
+	</struts>
+    <!-- 这是是将action的URL后缀从.action改成.do -->
+    * 但是如果不打后缀，默认还是.action所以不可以访问。
+    * 可以有多个后缀可以在value的值里面加逗号。value="do,action",但是还是不能不带后缀。
+    * 除了可以在struts.xml中配置，还可以在struts.properties中配置
+    	> struts.action.extension=do.
+    * 在struts-default.xml, struts-plugin.xml, struts.xml, struts.properties, web.xml中都可以定义这个常量。
+      struts加载常量（constant）的顺序（从先到后）就是上面列出来的顺序。如果多个配置文件中都定义了同一个常量，后面加载的会覆盖前面加载的常量。
+      > 建议常量都定义在struts.xml中
+    * 常用常量：
+    	> struts.action.extension:value属性为指定action的后缀
+    	> struts.i18n.encoding:value属性为指定默认编码集(UTF-8)。作用于request.setCharacterEncoding,
+    		freemaker,velocity的输出。
+    	> struts.serve.static.browserCache:浏览器时候缓存静态内容。value属性的值为true或者false。默认为false，
+    		开发阶段建议设置为false。
+    	> struts.configuration.xml.reload:设置为true后，修改配置文件不需要重启服务器。更改配置文件就会自动的把配置文件
+    		的内容更新加载到内存中。
+    	> struts.devMode:value为true，就会打印错误信息。
+    	> struts.ui.theme：value="simple"。默认的视图主题。不太实用后面会讲。
+    	> struts.objectFactory:value="spring"。与spring集成时，指定spring负责action对象的创建。
+    	> struts.enable.DynamicMethodInvocation：value=false。指定时候支持动态方法调用。什么是动态方法后面会讲。
+    	> struts.multipart.maxSize:value=10701096设置上传文件的大小限制（是总大小，不是单个文件大小）。单位为B
+    	
+ 9.struts的处理流程（面试问题）
+ 	* 用户请求-->StrutsPrepareAndExecuteFilter-->Interceptor-->Action-->Result-->JSP/HTML-->响应。
+ 	* 用户请求会经过过滤器（web.xml配置的StrutsPrepareAndExecuteFilter）。如果这个请求是以.action结尾或者不带后缀，这个
+ 	      请求就会转入到struts框架中处理。否则不会转入到struts框架处理。在struts框架中，请求首先会经过一系列的拦截器（Interceptor，
+ 	      包括内置和自定义的拦截器），然后进入到action（用户编写）执行指定方法（默认execute），然后返回result中指定的视图（jsp、html），
+ 	      响应到用户浏览器。
+ 	* struts的action和struts2的action的不同。Struts2的action对用户的每一次请求都会创建一个Action，所以struts2是线程安全的。
+ 		struts2使用原型设计模式（Prototype），而struts的action是单例模式（singleton）
+ 		
+ 10.为用户指定多个Struts配置文件.
+ 	作用：避免所有配置都放在一个配置文件中，这样很难找到想改的action。在实际应用中，通常以模块来划分配置文件。
+ 	<struts>
+ 		<include file="struts-user.xml"/>
+ 		<include file="struts-order.xml"/>
+ 	</struts>
+ 	在struts-user.xml中，配置和用户模块相关的action。 模块配置文件中也是struts.xml中的格式。只是把action移动到另外一个文件中。
+ 	
+11.动态方法调用和使用通配符定义
+ 	1个action里面有多个方法，要选择执行哪个？（BaseServlet中是通过method=func1的方法）
+ 	* 在struts2中有2中方法：
+ 		> 动态方法调用（不建议使用）：
+ 			<constant name="struts.enable.DynamicMethodInvocation" value="true" />
+ 			设置为支持动态方法调用。因为不建议使用，所以默认为false。
+ 			http://localhost:8080/SSHDemo/demo7/aaction!methodB
+ 			在地址栏中的action后面加上"!方法名"
+ 		> 使用通配符定义action：
+			<action name="aaction_*" class="struts2.demo7.AAction" method="{1}">
+			这里的下划线只是为了区分action和method的名字，木有意义，不加也可以。这里的{1}的值就是第一个*的值。
+			如果有2个action都使用通配符，那么method的占位符还是{1}.不会变成2。
+			
+12.接收请求参数
+	* 只需要在action中定义一个与请求参数同名的属性（提供set就够），就可以直接获取该请求参数（通过反射）。get/post方法都一样。
+	      因为get/post都是可以通过request.getParameter()方法得到。struts内部就是用这个方法获得参数。
+	* 把参数传递到视图中只需要${属性}。例如${requestScope.username}。这里的username就是action的一个属性（需要提供get方法）。
+	* 也可以使用复合类型（javabean）来接收参数。建议使用javabean来封装。不要使用上面的方式。如果javabean没有提供默认构造器会报错。
+		> 创建User类
+		> 在Action中提供User的get、set方法
+		> 在表单（超链接）中的name的值从username改为user.username
+		 
+13.自定义类型转换器
+	* birthday=2016-3-21,2016-3-21是字符串类型，怎么变成Date类型让action能接收到呢？
+	      输出结果：Mon Mar 21 00:00:00 CST 2016
+	* 如果格式为20160321呢?结果不能接收（setBirthday(Date birthday)出现类型转换错误，它把20160321当做字符串代用这个方法。）
+	* 自定义类型转换器：如果就是要用20160321的方式把，用Date类型来存储呢？这时候需要定义类型转换器。struts2中提供了2中类型转换器。
+		> 局部类型转换器：只对某个action起作用。
+			<1> 继承DefaultTypeConverter，并重写
+			   public Object convertValue(Map context,Object value, Class toType)方法。
+			         参数：
+			   context:和ognl表达式有关。
+			   value:请求参数的值。Struts2是用request.getParameterValues(String paramName);的值获取请求参数的值的，
+			   		所以需要String[] params = (String[])value; params[0]来使用参数。
+			   toType:要转换成的类型。
+			         注意：
+			   struts2是双向转换。所以写的时候需要
+			   	if(toType == String.class){
+			   		String[] params = (String[])value;
+			   		String[0] --> A
+			   	}else if(toType == A.class){
+			   		A --> String类型
+			   	}
+				DefaultTypeConverter是在XXX.conversion.impl包下的
+			<2> 注册类型转换器到需要类型转换的Action上。
+				在Action类所在的包下创建ActionSimpleClassName-conversion.properties文件。
+				ActionSimpleClassName是Action的简单类名（不包含包名），这里就是AAction-conversion.properties。
+				文件内容为：属性名称=类型转换器的类全名（birthday=struts2.demo8.converter.DateTypeConverter）
+		> 全局类型转换器：对整个项目起作用。
+			<1> 同局部类型转换器的第一步。
+			<2> 在WEB-INF/classes(/src)下创建xwork-conversion.properties文件。文件内容为：
+				待转换类型 = 类型转换器的全称
+				本例为：java.util.Date = struts2.demo8.converter.DateTypeConverter
+				不能为birthday = ... 因为这是action类的一个属性名而已，全局的话可以有不同的名字，那么怎么对应起来？！所以要用
+				属性对应的类型（全称）。
+				
+14.获取和添加request/session/application的属性。
+	* 往request/session/application域添加属性：
+		> ActionContext ctx = ActionContext.getContext();
+		> ctx.getApplication().put("application", "往application添加属性");
+		> ctx.getSession().put("session", "往session添加属性");
+		> ctx.put("request", "往request添加属性");
+	* 获取三大域的属性
+		> System.out.println(ctx.getApplication().get("application"));
+		> System.out.println(ctx.getSession().get("session"));
+		> System.out.println(ctx.get("request"));
+	* 获取request/session/application对象。有两种方法（建议使用第一种）。
+		> 通过ServletActionContext直接获取的
+			HttpServletRequest request = ServletActionContext.getRequest();
+			HttpServletResponse response = ServletActionContext.getResponse();
+			HttpSession session = request.getSession();
+			ServletContext application = request.getServletContext();
+			PageContext pageContext = ServletActionContext.getPageContext();
+		> 实现指定接口，有struts运行时注入。
+			接口：ServletRequestAware,ServletResponseAware,ServletContextAware
+			action需要给request设置成员变量:private HttpServletRequest request;
+			public void setServletRequest(HttpServletRequest request){
+				this.request = request;
+			}
+			response和application一样。session通过request获取。
+			
+15.文件上传
+	* 这里的上传不适合大文件。大文件上传需要用socket
+	* 上传三步：
+		> 在/WEB-INF/lib下添加commons-io和commons-fileupload。肯定添加了，不然strurs2配置不成功！
+		> 把表单的enctype修改为"multipart/form-data",默认是"application/x-www-form-urlencoded"
+		> 在Action中添加以下属性。
+			<> private File uploadFile;//得到上传文件。
+				其中这个名称要和表单中<input type="file" name="uploadFile"/>的name一样
+			<> private String uploadFileContentType;//得到文件的MIME类型。名称必须是“属性名ContextType”
+			<> private String uploadFileFileName;//得到文件的名称。名称必须是“属性名FileName”
+			<> 提供3个属性的get，set
+		> 在action的方法中：
+			<> 创建或者获取保存目录
+			<> 获取文件名称。
+			<> 用FileUtils.copyFile(上传的文件,保存的文件（名称用UUID+文件名称）)
+	* 多文件上传：
+		只需要把属性的类型变成数组类型或者List类型都可以。例如：
+		private File uploadFile -> private File[] uploadFiles
+		private String uploadFileContentType -> private String[] uploadFileContentType
+											-> private String[] uploadFileFileName;
+		> 注意：这样的话form中三个<input type="file" name="uploadFile"/>中的name的值都要相同。
+			上传文件的顺序和数组保存的文件的顺序是一样的。第一个<input type="file">为File[0]。这里要用循环来批量保存。
+			
+16.拦截器
+	* 可以实现权限拦截等业务需求。
+	* 定义拦截器需要实现Interceptor接口
+	* 给action注册拦截器。有两步
+		> 在struts2.xml的<package>里面配置<interceptors>，里面再配置<interceptor>
+			<interceptors>
+				<interceptor name="permission" class="struts2.demo11.interceptor.Permission"></interceptor>
+				<interceptor-stack name="permissionStack">
+					<interceptor-ref name="defaultStack"></interceptor-ref>
+					<!-- struts自带的拦截器栈，这样要放在最前面，这样才能最先执行 -->
+					<interceptor-ref name="permission"></interceptor-ref><!--自己的拦截器  -->
+				</interceptor-stack>
+			</interceptors>
+		> 在action里面配置<interceptor-ref>,但是这样会失去原先struts2的拦截器。不希望这样！
+			所以需要定义一个拦截器栈。action会执行一个拦截器栈里面的所有拦截器。
+			<action name="aaction_*" class="struts2.demo11.action.AAction" method="{1}">
+				<interceptor-ref name="permissionStack"></interceptor-ref>
+			</action>
+		> 重启服务器，如果没有报错，说明已经拦截器已经注册到action上了。
+		*****注意：一定要给拦截器栈添加struts默认的拦截器站。不然struts2很多功能都实现不了（struts2是通过拦截器来实现功能。）
+		> 如果希望包下所有的action都使用自定义拦截器，可以通过<default-interceptor-ref name="permissionStack"/>，
+		      把拦截器栈定义为默认拦截器栈。注意每个包只能有一个默认拦截器栈。
+		      如果action里面有拦截器，默认拦截器就会失去效果。如果又想保留默认的拦截器，可以在action里面定义两个拦截器引用，第一个要为默认
+		      拦截器引用。
+		      
+17.输入校验
+	输入校验分为对多有action进行输入校验和对指定action进行输入校验。输入校验的方法有两种：才有手工代码实现和基于XML配置方式实现。
+	* 对action的所有方法进行输入校验
+		> 采用手工代码实现
+			<> 继承ActionSupport通过重写validate方法对action中的所有方法进行校验。
+			<> 通过addFieldError("表单属性名","错误信息")来添加错误信息。
+			<> 如果系统的FieldError包含错误信息，struts2会请求转发到名为input的视图。
+			<> 在input视图中可以通过<s:fielderror/>来显示错误信息。但是这样一次把全部错误信息都显示出来。
+		> 基于XML配置方式实现（比较方便）
+			<> 也要继承ActionSupport，并且提供校验文件。校验文件和action类放在同一个包下。
+				文件名称为：ActionClassName-validation.xml，其中ActionClassName为action的简单类名。
+				例如本例子就叫：BAction-validation.xml。模板在example中有。
+			<> 在配置文件中添加field标签，name属性为表单字段。
+			<> 在field标签内添加<field-validator>标签，type属性为校验器名。常用的是requirestring（字符串不能为空）
+				regex（正则表达式）。使用regex需要regex的regex属性注入值。
+				<param name="regex"><![CDATA[^1[358]\d{9}$]]></param>
+	* 对action的指定方法进行输入校验
+		> 采用手工代码实现
+			<> 实现validateXxx()方法，Xxx会校验为xxx的方法
+			<> 方法里面的代码和对action所有方法进行校验的代码一样。一样有addFieldError
+		> 基于XML配置方式实现（比较方便）
+			<> 配置文件名为：ActionClassName-ActionName-validation.xml ，其中ActionName为struts.xml中的action
+				名称，。实际应用中通常有如下配置。
+				<action name="user_*" class="a.b.c.UserAction" method={1}>
+					<result name="success">success视图</result>
+					<result name="input">input视图</result>
+				</action>
+				访问update方法：配置文件名称：BAction-baction_update-validation.xml
+				访问save方法：配置文件名称：BAction-baction_save-validation.xml
+			<> 里面的代码和指定action的所有方法的代码一样，不需要修改。
+	* 手工写代码输入校验流程
+		点击表单提交后。
+		> 类型转换器对请求参数进行类型转换，并把转换后的值赋给action中的属性。
+		> 如果执行类型转换中出现异常，系统会把异常信息保存到ActionContext。conversionError拦截器把异常信息封装到fieldErrors里。
+		      不管类型转换是否出现异常，都会进入第三步。****也就是说类型转换出现异常也会返回到input视图。
+		> struts通过反射先调用action中validateXxx()方法，Xxx为方法名。
+		> 在调用action中的validate()方法。也就是说即会校验指定方法（先），也会校验全部方法（后）
+		> 经过上面4步，如果FieldErrors存在错误信息(size>0),系统自动将请求发至名为input的视图。如果fieldErrors没有错误信息，
+		  struts2会执行action中的方法。
+	* 基于XML配置的特点
+		点击表单提交后
+		> 如果为action提供了校验action的全部方法和校验action的指定方法，寻找校验文件ActionClassName-validation.xml
+		> 然后校验ActionClassName-ActionName-validation.xml
+		> 把两个校验的所有校验规则进行汇总。全部应用于action方法的校验。如果两个校验规则冲突，那么struts2使用后面文件中的校验规则
+		> * 当action继承另外一个action，父类的action会**优先(比子类的两种校验文件都先)被搜索到。
+	* 校验器列表：具体有什么用，怎么用百度！
+		> required：必填校验器
+		> requiredstring：必填字符串校验器
+		> stringlength：字符串长度校验器，需要指定最大长度，最小长度
+		> email:邮件地址校验器
+		> regex:正则表达式校验器
+		> int:整数校验器，需要指定最大整数，最小整数。
+		> double:双精度浮点数校验器，需要知道你个最大浮点数，最小浮点数。
+		> fieldexpression：字段OGNL表达式校验器
+		> url:网址校验器
+		> date：日期校验器，max，min指定日期区间。
+		> conversion：转换校验器，指定在类型转换失败时，提示的错误信息。弥补了手写代码校验的fielderrors中有类型转换异常的情况
+		> visitor：用于校验action中的符合属性，它指定一个校验文件用于校验符合属性中的属性（javabean的属性）
+		> expression:OGNL表达式校验器
+
+18.国际化
+	* 准备资源文件：全局范围的资源文件，包范围的资源文件，action范围的资源文件。
+	* 资源文件命名：baseName_language_contry.properties。其中baseName是文件基本名称，我们可以定义
+		例如：baseName_zh_CN.properties,baseName_en_US.properties.
+	* 全局范围的资源文件：
+		> 添加资源文件。itcast_zh_CN.properties	.内容为welcome=欢迎来到传智播客
+		      第二个文件为：itcast_en_US.properties.内容为welcome = welcome to itcast
+		> 在struts2通过常量<constant name="struts.custom.i18n.resources" value="文件的baseName"/>
+		> 在jsp访问资源文件的内容
+			<s:text name="welcome(资源文件的键)"/>。通过IE选项修改语言环境改变就可以换成别的语言。struts2是根据浏览器的
+			语言来决定使用什么语言的。(结果出现乱码，properties从ISO-5589-1变成UTF-8才可以)
+		> 在action访问资源文件的内容
+			<> 	action需要继承ActionSupport。
+			<> 	String text = this.getText("welcome");//获取资源文件的key
+				text = new String(text.getBytes("ISO-8859-1"),"UTF-8");//解决编码问题
+				ActionContext.getContext().put("message", text);
+			return "msg"; 
+		> 输出带有占位符的国际化信息。
+			<> 在页面下访问带占位符的属性：
+				在<s:text>添加<param>子标签
+			<> 在action中访问带占位符的属性：
+	* 配置包范围的资源文件
+		在java包下放置package_language_country.properties资源文件，package_为固定写法。处于该包和它的子包的action都能
+		访问该资源内容。当查找指定key的value时，系统会先从包下的资源文件查找，然后往上一层包查找，如果最后找不到才会从常量
+		struts.custom.i18n.resources指定的文件中查找。
+		> Action中访问资源：不用修改代码，只需要在包下配置package_language_country.properties
+	* 配置action范围的资源文件
+		在action所在路径放置ActionClassName_language_country.properties文件。ActionClassName为Action的简单名称。
+		> 先找action范围，然后找包范围（逐层向上找），然后找全局范围
+	* JSP中直接访问某个资源文件，无须进行任何配置。
+		> 资源文件在/src路径下。这个和全局读取资源不一样
+			<s:i18n name="这里是baseName">
+				<s:text name="welcome"/>
+			<s:i18n/>
+		> 资源文件在包路径下
+			<s:i18n name="struts2/demo13/action/package"><!--包路径/package-->
+				<s:text name="welcome">
+					<s:param>张三</s:param>
+				</s:text>
+			<s:i18n/>
+			
+19.ognl表达式
+	ognl：Object Graphic Navigation Language 对象图导航语言。
+	ognl功能比jstl+el表达式强大，但是可以避免。ognl表达式完全可以被JSTL+EL表达式代替。建议使用JSTL+EL表达式，不使用OGNL表达式。
+	* 相对于EL表达式，ognl表达式有一些新功能：
+		> 支持对象方法的调用，如xxx.sayHello()
+		> 支持类静态方法调用和值访问，表达式格式为@[类全名]@[方法名或值名]
+			 例如：@java.lang.String@format(str, obj);
+			 	@java.lang.Thread@MAX_PRIORITY
+		> 操作集合对象。
+	* OGNL Context：ognl有上下文（context）的概念，其存储结构为Map。ActionContext是OGNL Context的实现
+	  OGNL Context(也就是ActionContext)由如下部分（对象）组成：
+	  	> ValueStack(值栈，它是根对象)
+	  	> parameters(用于访问HTTP请求参数。#parameter['username']等于request.getParameter('username'))
+	  	> request(#request['username'] == request.getAttribute('username'))
+	  	> session(#session['username'] == session.getAttribute('username'))
+	  	> application(ServletContext同上。#application.username == #application['username'],
+	  		用中括号加引号是为了和一些关键字冲突。)
+	  	> attr(按page->request->session->application顺序访问其属性)
+	  	当struts2接收到一个请求后，会创建ActionContext对象，ValueStack对象，action对象，然后把action放进ValueStack，
+	  	所以action实例变量可以被OGNL访问。
+	 * 访问OGNL Context的对象
+	 	需要访问对象的属性时，要访问的对象前面加#。例如#request，#session。ValueStack是根对象，不需要用#号，直接ValueStack。
+	 	ValueStack的实现类为OgnlValueStack。这个类有一个List类型的root变量，存放着一组对象。
+	 * List<Object>root的第一个元素是action，第二个是OGNLUtil。在root的第一个对象叫做栈顶对象。通常在OGNL表达式直接写上
+	 	属性名称就可以访问root变量的对象属性。访问的搜索顺序是从栈顶对象开始寻找，如果找不到该对象的属性，就会在第二个对象寻找。
+	 * OGNL表达式必须配合struts2的标签才可以使用。例如：<s:property value="name"/>property用来输出值，value接收的是
+	 	OGNL表达式。在JSP页面中，也可以用EL表达式访问ValueStack中对象的属性。
+	 * struts2采用EL表达式只能访问ValueStack的某个属性。如果要访问其他对象的属性就只能使用#号，例如：
+	 	#session['username']
+	 * 用OGNL表达式创建list，map对象。例如：
+	 	> 创建List。直接用大括号{ele1,ele2,...}
+	 	<s:set name="list" value="{'张三','李四'，'王五'}"/><!--set标签还有scope标签，来指定变量放在哪个域-->
+	 	<s:iterator value="#list"><!--这个list和request，session一样都是OGNL Context中的一个对象-->
+	 		<s:property/><br/>
+	 	</s:iterator>
+	 	> 创建Map。用#号和大括号来创建。#{key1:value1, key2:value2, ...}
+	 		栈顶元素是Map.Entry entry,entry有getValue()和getKey()方法，所以直接写key和value。
+	 		<s:property value="key" /> = <s:property value="value"/><br/>
+	 	> OGNL表达式判断对象是否在集合中。
+	 		in表达式：
+				<s:if test="'d' in {'a','b','c'}">在</s:if>
+				<s:else>不在</s:else>
+	 		not in表达式：同理，就是把in改成not in
+	 * OGNL表达式实现投影功能。(不实用：因为要满足条件直接在dao层查询的时候就过滤掉了，不是在表述层过滤)
+	 	> 投影：允许使用某个规则得到集合的子集（满足规则的元素）
+	 	> bookList.{条件}：从bookList中筛选出满足条件的元素的集合
+	 	> 条件里面的符号：
+	 		<> ? ：获取符合逻辑的元素
+	 		<> ^ ：获取第一个符合逻辑的元素
+	 		<> $ ：获取最后一个符合条件的元素
+	 	> bookList.{?#this.price > 60} 这样就得到了满足条件的自己和
+	 	
+20.struts2常用标签
+	* property标签
+		> 用于输出OGNL表达式的值<s:property value="#session.user.username"/>。
+			如果value的内容不是OGNL表达式，会原样输出字符串。
+		> 属性：
+			<> default：可选属性，如果输出的值为null，那么输出default指定的值
+			<> escape：可选属性，是否格式化HTML代码，如果需要设置为true
+			<> value：可选属性，指定输出的属性值，如果没有指定该属性，默认输出ValueStack栈顶的值
+			<> id：可选属性，指定元素的标识
+	* iterator标签
+		> 用于对集合进行迭代。这里的集合包括List，Map，Set（？）数组
+		> 被迭代的集合的元素会放在栈顶，可以直接用<s:property/>输出这个元素的属性值
+		> 属性：
+			<> value：指定被迭代的集合
+			<> id：可选属性，指定元素的标识
+			<> status:用来表示迭代的状态。这个对象（元素）存放在OGNL上下文中，所以要用#号来
+				进行访问。status的值也是一个对象，有以下属性：这些都是属性，在jsp中st.count来访问。
+					-> int getCount();	当前迭代了多少个元素
+					-> int getIndex();	返回当前迭代元素的索引（数组下标）
+					-> boolean isEven();	返回当前迭代元素的索引是否为偶数
+					-> boolean isOdd();		返回当前迭代元素的索引是否为偶数
+					-> boolean isFirst();	返回当前迭代元素是否是第一个元素
+					-> boolean isLast();	返回当前迭代元素是否是最后一个元素
+	* if标签、elseif标签、else标签
+	* url标签
+		> 属性：
+			<> action：struts.xml中配置的名称例如action="aaction_test1"
+			<> namespace:指定action所在的命名空间.如namespace="/demo15"
+			<> value：url标签的值为value里面的内容（当做字符串处理）。例如<s:url value="#request.age"/>
+				页面输出"#reques.age"字符串,而不是输出23。可以通过%{#request.age}，让它变成属性，而不是字符串。
+		> 子标签:
+			<s:param name="username" value="zhangSan"/>
+			这里的value也可以是OGNL表达式，如果不满足OGNL表达式的格式会原样输出字符串。
+		> 通过属性和子标签就会形成以下的url路径
+			<s:url action="aaction_test1" namespace="/demo15">
+				<s:param name="age" value="#request.age"/>
+			</s:url>
+			/项目名/demo15/aaction_test1?age=23。只是构建路径，实际路径是否存在没关系
+		> %{...}的作用，就是如果一些属性的值是以字符串接收的，可以用%{#myurl}让它变成OGNL表达式。例如：
+			<s:url value="%{#myurl}"/>如果没有%{},那么输出的就是字符串#myurl，如果使用了%{}就会变成OGNL表达式，
+			变成#myurl的值。
+	* 表单标签
+		> checkboxlist 复选框标签
+			<> 集合为List
+				<s:checkboxlist name="list" list="{'java', '.Net', 'RoR', 'PHP'}" 
+				value="{'java','.Net'}"/>
+				对应的html代码(最自动加<tr><td>标签)
+				<input type="checkbox" name="list" value="java" checked="checked"/><label>java</label>
+				<input type="checkbox" name="list" value=".Net" checked="checked"/><label>.Net</label>
+				<input type="checkbox" name="list" value="RoR"/><label>RoR</label>
+				<input type="checkbox" name="list" value="PHP"/><label>PHP</label>
+				其中value和label值一样。
+				但是，struts2还会生成一些HTML代码
+				    <td class="tdLabel"></td>等，这些是用不上的。需要在struts.xml配置常量
+				    <constant name="struts.ui.theme" value="simple"/>
+			<> 集合为Map
+				<s:checkboxlist name="map" list="#{1:'java', 2:'.Net', 3:'RoR', 4:'PHP'}" 
+					listKey="key" listValue="value" value="{1,2,3}"/>
+					这里的key是栈顶对象的属性.value是label的值。  value="{1,2,3}"是checked="checked"
+				对应下面html代码
+				<input type="checkbox" name="map" value="1" checked="checked"/><label>java</label>
+				<input type="checkbox" name="map" value="2" checked="checked"/><label>.Net</label>
+				<input type="checkbox" name="map" value="3" checked="checked"/><label>RoR</label>
+				<input type="checkbox" name="map" value="4"/><label>PHP</label>
+			<> 如果集合存放的是javabean
+				<s:checkboxlist name="personList" list="#request.persionList" 
+				listKey="pid" listValue="pname"/>
+				其中pid是person的属性（主键），pname也是person的属性。为什么直接这么写，因为需要迭代，person对象放到栈顶，所以
+				不需要#号直接访问。listKey对应input的value，listValue对应label的值。
+				生成如下代码：
+				<input type="checkbox" name="personList" value="1"/><label>张三</label>
+				<input type="checkbox" name="personList" value="2"/><label>李四</label>
+	* radio单选框
+		> 使用方法基本和复选框一样，只是标签为<s:radio>
+		> 不同。复选框的value属性可以为集合（多选），但是单选框的value为一个值（单选）
+	* select下拉选择框
+		> 例子
+		<s:select name="list" list="{'java', '.Net'}" value="java"/>
+		生成如下代码
+		<select name="list" id="list">
+			<option value="java" selected="selected">java<option>
+			<option value=".Net" >.Net<option>
+		</select>
+		> 集合为list和集合为map的区别：
+			<> 如果用list，那么表单标签的value和显示值一样。
+			<> 如果用map，那么表单标签的value就是listKey迭代输出的属性的值，显示值就是listValue迭代输出的属性的值。
+	* <s:token/>标签防止表单重复提交
+		使用<s:form>进行表单提交。提交后进过某个action到达某个结果视图。但是在结果视图按刷新，如果action中有向数据库插入数据的方法，
+		每次刷新都会想数据库插入记录。所以要防止重复提交（每次刷新都算提交一次）。
+		> <s:token/>的用法:
+			<> 第一步：在表单中添加<s:token/>标签
+			<> 第二步：在struts.xml中向action添加拦截器。配置如下：
+				<action>
+					<!--无论自定义还是直接使用，第一个永远是默认拦截器栈里面的所有拦截器-->
+					<interceptor-ref name="defaultStack"/>
+					<!--<interceptor-ref name="token"/> 添加token拦截器，用这个会出现空指针异常-->
+					<interceptor-ref name="tokenSession"/><!--用这个不会出错。-->
+					<result name="invalid.token">/jsps/demo15/b.jsp</result>
+				</action>
+			<> 第三步：准备invalid.token视图（重复提交后回到的视图）
+		> 原理：当token拦截器拦截到请求后，会判断表单中<s:token/>生成的tokenid，和保存在session中的id是否一致.
+				如果相等，则是第一次提交。提交完后，token拦截器会改变session中的值。再次按提交两个id就会不同，拦截器就会把请求转发到
+				明为invalid.token这个视图
+				
+21. Struts2使用json数据交互

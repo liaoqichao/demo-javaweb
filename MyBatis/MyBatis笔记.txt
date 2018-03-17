@@ -1,0 +1,1018 @@
+1. jdbc存在的问题
+	* jdbc例子
+		> 1.导jar包
+			- 数据库驱动包mysql-connector-java.5.1.13-bin.jar
+		> 步骤：
+			1. 准备4大参数，驱动、url、账号、密码
+			2. 加载驱动类（需要驱动参数）
+			3. 通过驱动管理器得到数据库连接（需要url、账号、密码）
+			4. 准备sql模板
+			5. 通过连接和sql模板得到预编译的statement
+			6. 向preparedStatement设置参数
+			7. 通过preparedStatement执行数据库的操作。如果是是查询操作返回结果集
+			8. 解析结果集，结果集初始化位置为第一个之前，需要rs.next()，结果集指向结果集的第一个元素。数据集获取第n列是从1开始算起的
+			9. 释放资源，释放顺序rs、pstmt、conn
+	* jdbc问题：
+		1.	> 问题： 需要就创建，不需要就立即释放。频繁操作对数据库资源造成浪费，影响数据库性能。
+			> 解决：使用数据库连接池
+		2.  > 问题：准备sql模板将sql语句硬编码到java程序中，如果sql语句要修改，需要重新编译java代码，不利于系统维护。
+			> 设想：将sql语句配置在xml中，sql语句变化不需要对java代码重新编译。
+		3. 	> 问题：向pstmt设置参数时，对占位符的位置和要设置的变量参数值硬编码在java代码中，不利于系统维护
+				pstmt.setString(1,"张三");
+			> 设想：sql语句及占位符和参数全部配置在xml中。
+		4.	> 问题：从rs中遍历结果集时，存在硬编码，将获取的字段进行硬编码，不利于系统维护
+			> 设想：将查询的结果自动映射成java对象，这样就不用把要查询的字段写死
+
+2. mybatis框架
+	* mybatis是什么？
+		> mybatis是apache的持久层的项目
+		> mybatis让程序员的主要精力放在sql上面，通过mybatis的映射方式可以自由灵活生成（半自动化，大部分需要程序员编写sql）
+			需要的sql语句。
+		> mybatis可以将pstmt输入参数自动进行输入映射，将查询结果集灵活的映射出java对象（输出映射）。
+	* mybatis框架
+		> SqlMapConfig.xml
+			- SqlMapConfig.xml是mybatis的全局配置文件，需要配置数据源、事务等mybatis运行环境
+			- 配置文件名称不是固定的
+		> mapper.xml
+			- mapper.xml是映射文件。用来描述映射关系，在配置文件里配置sql语句
+		> SqlSessionFactory
+			- SqlSessionFactory(会话工厂)用来创建SqlSession
+			- 根据主配置文件创建工厂
+		> SqlSession
+			- 用于操作数据库，发出sql语句(crud)
+		> Executor
+			- 执行器。SqlSession内部是通过执行器来操作数据库
+			- Executor是一个接口（基本执行器、缓存执行器）
+		> MappedStatement
+			- 底层的封装对象。对操作数据库存储封装，包括sql语句，输入参数，输出结果类型
+		> 输入类型
+			- java简单类型
+			- hashmap
+			- pojo
+		> 输入结果类型
+			- java简单类型
+			- hashmap
+			- pojo
+			
+3. 入门程序
+	* 单表操作
+		> 根据用户id（主键）查询用户信息
+		> 根据用户名称模糊查询用户信息
+		> 添加用户
+		> 删除用户
+		> 更新用户
+	* 准备jar包
+		> mysql驱动包
+		> mybatis-3.3.1.jar(核心包)
+		> mybaties的依赖包(3.2.7lib目录下)
+	* 准备配置文件
+		> 新建Source Folder，文件夹名为config，在里面新建log4j.properties。内容在mybaties的pdf里面
+			Create a file called log4j.properties as shown below and place it in your classpath:
+		> 在config创建SqlMapConfig.xml(名字不是固定的)
+		> 在config下新建文件夹名为sqlmap，sqlmap目录下放mapper.xml映射文件
+		> 在sqlmap文件夹下创建User.xml。模板在pdf里面有
+	* 编写代码：
+	
+4.  mapper.xml
+	* 看config/sqlmap/User.xml的注释
+	* 输入映射
+		> 通过parameterType指定输入参数类型(简单类型，hashMap，pojo)
+			1. 传递简单类型. parameterType="int"或者java.lang.Integer,还有String等。参数是java的类型
+				sql语句中用#{value}来占位。#{}里面的内容可以是value或其他
+			2. 
+				2.1 传递pojp. parameterType="mybatis.po.User"。
+					sql语句中的#{username}表示user.username。
+					使用ognl来读取属性。#{user.user.username}表示输入类型的user属性的user属性的username属性
+				2.2 传递pojo的包装对象
+					2.2.1 需求：
+						完成用户信息的综合查询，需要传入很复杂的查询条件(可能包括用户信息、其他信息，比如商品、订单等。
+						查询买了这个笔记本的所有用户).针对上面需求，使用自定义的包装类型的pojo，把复杂的查询条件包装
+						进去。	
+				2.2.2 创建包装类型UserQueryVo
+				2.2.3 mapper.xml(映射文件)
+						<select id="findUserList" parameterType="mybatis.po.UserQueryVo" 
+							resultType="mybatis.po.UserCustom">
+						  SELECT * FROM `user` WHERE user.sex=#{userCustom.sex} 
+						  AND user.username LIKE '%${userCustom.username}%';
+						</select>
+					2.2.4 mapper.java(mapper接口，使用mapper代理方式)
+						List<UserCustom> findUserList(UserQueryVo userQueryVo) throws Exception;
+			3. 传递hashMap. parameterType="hashmap"
+				select * from user where id=#{id} and username like '%${username}%'
+				中的#{id}和${username}就是hashmap中key为id和key为username的value
+	* 输出映射
+		> resultType
+			1. 问题：
+				当使用SELECT * id id_, username username_,address FROM `user` 时，
+				1.1 使用resultType，返回出来的List<User>中的user.id和user.name为默认值，分别为0,null。
+					因为是通过名字映射到实体类，而起了别名，所以映射不到。
+				1.2 返回的sex,birthday结果也是为null。因为查询的时候没有查询这两个字段。
+			2. 总结
+				2.1 使用resultType进行输出映射，只有查询出来的列名和pojo中的属性名一致，该列才可以映射成功。
+				2.2 如果查询出来的列名和pojo字段全不相同，则不创建pojo对象。
+				2.3 如果查询出来的列名和pojo属性名中至少有一个，就会创建pojo对象。	
+			3. 输出简单类型
+				3.1 需求:用户信息的综合查询列表总数，通过查询总数和用户综合查询列表才可以实现分页。
+				3.2 mapper.xml
+					<select id="findUserCount" parameterType="mybatis.po.UserQueryVo"
+						resultType="int">
+						SELECT COUNT(*) FROM `user` WHERE user.sex=#{userCustom.sex} AND user.username LIKE '%${userCustom.username}%';
+					</select>
+				3.3 mapper.java
+					int findUserCount(UserQueryVo userQueryVo) throws Exception;
+				3.4 总结
+					只有查询结果为1行1列，可以使用简单类型进行映射。
+			4. 输出pojo和pojo列表
+				不管输出单个pojo还是pojo列表，resultType指定的类型是一样的。不一样的是在mapper接口中方法的返回类型。
+				mybatis根据返回类型来判断返回的是单个pojo还是pojo列表。
+			5. 输出hashmap
+				输出pojo对象可以改用hashmap类型输出，将输出的字段名称作为key，value作为字段值。
+				User -> HashMap<String,Object> [key_id:value_id,key_username:value_username,...]
+					List<User> -> List<HashMap<String,Object>>
+		> resultMap
+			1. mybatis中可以使用resultMap来完成高级输出结果映射(一对一、一对多、多对多)。
+			2. 如果查询出来的列名和pojo的属性名不一致，可以定义一个resultMap对列名和pojo属性名作一个映射关系。
+				2.1 定义resultMap
+				2.2 使用resultMap作为statement的输出映射类型
+				3.3 使用resultMap将下面的sql映射到User
+					SELECT id id_ , username username_ FROM USER WHERE id=#{id}
+					3.3.1 user中的属性名和sql查询结果中的字段名不一致。
+						3.3.1.1 定义resultMap
+							<resultMap type="user" id="userResultMap">
+								<!-- id表示查询结果集中记录的主键(唯一标识)映射的定义 
+									colume:查询结果的列名
+									property：type指定的pojo中的属性名
+								-->
+								<id column="id_" property="id"/>
+								<!-- result表示对普通列的映射定义 	-->
+								<result column="username_" property="username"/>
+							</resultMap>
+						3.3.1.2 使用resultMap
+							<select id="findUserByIdResultMap" parameterType="int" resultMap="userResultMap">
+						 		SELECT id id_ , username username_ FROM USER WHERE id=#{id}
+							</select>
+							resultMap指定resultMap的id
+							如果要使用其他mapper.xml中的resultMap需要接那个mapper.xml的namespace前缀。
+						3.3.2 mapper.java
+							User findUserByIdResultMap(int id) throws Exception;
+							其中返回类型就是resultMap的type属性所指定的java类型
+							
+	* #{}：
+		> 表示占位符，不会引起sql注入
+		> 如果接收简单类型，里面的内容可以是value或者其他
+		> #{}和${}都可以接收pojo，是通过OGNL读取对象中的属性值。通过属性.属性.属性....的方式获取属性
+	* ${}：
+		> 表示拼接符号，引起sql注入
+		> 如果接收简单类型，里面内容只可以是value。即${value}
+	* 动态sql：
+		mybatis的核心就是对sql语句的灵活操作，通过一些表达式进行判断，对sql进行灵活的拼接，组装。
+		> 需求：用户信息综合查询列表和用户信息查询列表总数这两个statement的定义————使用动态sql
+			1. 对查询条件进行判断，如果输出参数不为空才进行查询条件的拼接
+		> 使用动态sql，如果不设置某个值，条件不会拼接到sql中
+		> 标签:
+			- <where>: 条件部分会自动去掉第一个AND
+			- <if>: 满足条件才拼接标签体内的sql片段。
+				test中可以直接使用ognl表达式字符串，根对象是输入参数(user.id表示的是userQueryVo.user.id)。
+				空用null表示，并且用AND表示。
+			- <foreach>:如果向sql中传递一个list或者数组，就需要foreach标签来解析。
+				1. 需求：在用户查询列表和用户查询列表总数的statement中增加多个id输入查询
+					sql语句：SELECT * FROM USER WHERE id=1 OR id=10 OR id=24;
+					或 SELECT * FROM USER WHERE id IN(1,10,24);
+				2. 在输入类型中要添加List<Integer> idList 传入多个id
+				3. 修改mapper.xml，需要修改sql片段
+					<foreach collection="idList" item="item_id" open="AND (" close=")" separator="OR">
+						id=#{item_id}
+					</foreach>
+					collection：被遍历的数组或列表。idList表示结输入类型的idList属性
+					item：每个被遍历的对象的引用
+					open：遍历之前添加的sql串
+					close：遍历结束后添加的sql串
+					separator：遍历两个对象之前添加的sql串
+					标签体：每次遍历时候所需要拼接的sql串
+		> sql片段：
+			- 问题：用户信息综合查询和用户信息综合查询总数从FROM 开始后面都一样。能否抽取出来?抽取出来可以方便程序员开发。
+			- 需求：将上面实现动态sql的判断代码块抽取出来，组成一个sql片段。其他的statement中就可以引用sql片段。
+				1. 定义sql片段
+					1.1 使用sql标签标签体为sql片段，id属性为sql片段的唯一标识。
+					1.2 经验：
+						1.2.1 定义sql片段是基于单表定义，这个sql片段的可重用性高。
+						1.2.2 在sql片段中不要包括WHERE,因为一个sql语句可能要多个片段，如果每个片段都有where就会报错。
+				2. 引用sql片段
+					<include refid="query_user_where"></include>
+					其中refid指的是被引用的sql片段的id。
+5. SqlMapConfig.xml
+	* 看SqlMapConfig.xml
+	* 配置内容如下(必须按照这个顺序，不然xml规则出错)：
+		> properties(属性)
+			1.需求：将数据库连接参数单独配置到db.properties中，在SqlMapConfig.xml中加载db.properties的属性值。
+				这样不需要再SqlMapConfig.xml中对数据库连接参数硬编码。
+			2.问题：为什么不在SqlMapConfig.xml中硬编码，要在db.properties中硬编码?
+				2.1 因为以后可能是很多台机器。如果系统升级(修改数据库密码)，不可能是人手修改配置文件，只可能是写程序修改配置文件。
+					写程序修改db.properties配置文件比写程序修改SqlMapConfig.xml方便很多。
+			3.作用：加载配置文件。
+			4.用法：
+				4.1
+					<properties resource="db.properties"></properties>
+					后面的硬编码改成${properties文件的键}。即<property name="driver" value="${jdbc.driver}" />
+				4.2 
+					properties的url属性则是写文件的绝对路径，用来引用磁盘的一些文件。resource则是在classpath下引用
+			5.测试是否成功：
+				5.1 正常测试，运行之前demo的方法，如果运行成功说明没错
+				5.2 异常测试，配置文件故意该错，运行之前的demo，如果运行失败说明没错
+				5.3 如果两个都达到预期情况说明测试成功。
+			6.其他：properties标签里面还有property标签，用来定义属性。properties的resource属性则是应用别的配置文件的
+				属性。
+				6.1 属性读取顺序。
+					6.1.1 先读取property属性
+					6.1.2 再读取properties resource或url引用的属性。
+					6.1.3 最后再读取parameterType(映射文件里的)的属性
+					后面读取会覆盖前面读取的属性。
+				6.2 例如：映射文件里面的sql语句中有${name}，db.properties中也有name属性，最后主配置文件读取到的${name}是
+					映射文件里面的值。所以db.properties的用户名最好添加前缀，改为jdbc.username
+				6.3 建议：
+					6.3.1 不要使用<property key="" value=""/>，只用<properties resource""/>
+					6.3.2 建议properties文件定义的属性要有一定特殊性，例如添加前缀。
+		> settings(全局配置参数)
+			1. mybatis框架运行时可以调整一些运行参数，比如：开启二级缓存、开启延迟加载。如果加载不对，mybatis运行可能就会报错。
+				看day01\mybatis第一天\res\mybatis学习资料\mybatis-settings.xlsx文件
+		> typeAliases(类型别名)重点！常用！
+			1. 需求：在mapper.xml中定义了很多statement，statement需要parameterType来指定输入参数类型、resultType
+				来指定输出结果的映射类型。这些类型名字都很长(java.lang.String)不利于开发程序，可以针对
+				parameterType和resultType指定的类型设置别名,在mapper.xml中就可以使用别名，方便开发。mybatis默认
+				支持很多别名，例如_int和int都对应Integer。但是自定义的pojo并没有，全限定名很长，所以需要自定义类型别名，简化
+				mapper.xml中输入参数类型和结果参数类型的书写。
+			2. 别名的定义
+				2.1 针对单个别名的定义：
+					2.1.1 在<typeAliases>标签内添加<typeAlias type="mybatis.po.User" alias="user"/>
+					2.1.2 在mapper.xml中引用别名
+						<select id="findUsersByName" parameterType="java.lang.String" resultType="user">
+				2.2 批量别名的定义(常用):
+					2.2.1在<typeAliases>标签内添加<package name="mybatis.po"/>这个包里的类在映射文件中可以使用简单类名，
+						简单类名的首字母大小写都可以(一般使用小写)。定义多个包就会自动扫描很多包。如果简单类名相同怎么办?
+		> typeHandlers(类型处理器)
+			1. mybatis中通过typeHandlers完成数据库类型和java类型的转换.一般情况下自带的类型处理器就够用，不需要自定义。
+		> objectFactory(对象工厂)	: 一般不用
+		> plugins(插件)	: 一般不用
+		> environments(环境集合属性对象) : 这些以后被Spring管理后就不会配置
+			- environment(环境自属性对象)
+				-> transactionManager(事务管理器)
+				-> dataSource(数据源)
+		> mappers(映射器)
+			1. 通过resource加载单个映射文件
+				<mapper resource="mapper/UserMapper.xml"/>
+			2. 通过url加载单个映射文件
+				<mapper url="file:///E:a\b\c\UserMapper.xml"/>
+			3. 通过mapper接口加载单个映射文件
+				<mapper class="mapper.Demo4_UserMapper"/>
+				3.1 要求：要求使用mapper代理方式开发。且映射文件名称和类名称相同，且映射文件和类在同一目录下
+			4. 批量加载(推荐使用)
+				<package name="mapper"/>
+				4.1 要求：要求使用mapper代理方式开发。且映射文件名称和类名称相同，且映射文件和类在同一目录下。
+					即和通过mapper接口加载单个映射文件方式的要求一样。
+
+5. 单表操作
+	* 查询：
+		> 查询结果为一条记录：
+			- 使用selectOne方法。如果使用selectOne查询结果不唯一会抛出异常
+			- 第一个参数：statement的id，第二个参数：sql模板的参数，返回类型:映射文件的resultType
+		> 查询结果为多条记录：
+			- 使用selectList方法。
+			- 第一个参数：statement的id，第二个参数：sql模板的参数，返回类型:映射文件的resultType
+		> 模糊查询：
+		 	- 使用selectList方法。
+			- 第一个参数：statement的id，第二个参数：sql模板的参数，返回类型:映射文件的resultType
+				其中第二个参数要"%模糊查询%",要添加百分号。
+			- ${}如果接收参数是简单类型，只能使用${value}，内容不能是其他。使用${}是简单的字符串拼接，会引起sql注入
+	* 插入：
+		> 使用insert方法，第一个参数为statement的id，第二个参数为被插入到数据库的实体类
+		> 因为不是自动提交，所以要调用sqlSession.commit()提交
+		> 主键的返回：
+			- 因为有主键生成策略，所以插入的时候不知道该实体类对应的主键。
+			- 自增主键的返回
+				- mysql自增主键，执行insert提交之前，自动生成一个自增主键。
+					通过mySql函数获取刚插入记录的主键。
+				- 函数名：LAST_INSERT_ID(),在insert之后立即调用
+				- 在insert标签里添加<selectKey>标签。
+					-> selectKey标签的keyProperty属性指的是将查询到的主键值设置到实体类(结果类型)的哪个属性
+					-> order属性指的是在insert语句前还是后执行selectKey的sql语句
+					-> resultType指的是LAST_INSERT_ID()的返回类型
+					-> 标签内容LAST_INSERT_ID()指的是查询最近一次插入记录主键的id
+					<selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+						SELECT LAST_INSERT_ID()
+					</selectKey>
+					INSERT INTO `user`(username,birthday,sex,address) VALUE(#{id},#{username},#{birthday},#{sex},#{address})
+			- 非自增主键的返回(主键生成策略为uuid)
+				- 要求：主键字段类型为varchar，长度设置为35
+				- 思路：先通过uuid()查询到主键，将主键输入到sql语句中
+				- 执行顺序：先执行uuid()，将uuid设置到该记录的主键，再执行插入语句。执行插入语句后获取user对象的id
+				- 注意：插入语句要求必须写上主键字段！！
+				<selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+					SELECT LAST_INSERT_ID()
+				</selectKey>
+				INSERT INTO `user`(id,username,birthday,sex,address) VALUE(#{id},#{username},#{birthday},#{sex},#{address})
+			- 费自增主键的返回(oracle的序列)
+				<selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+					SELECT 序列名.nextVal() <!-- 就这里和uuid方式不同 -->
+				</selectKey>
+				INSERT INTO `user`(id,username,birthday,sex,address) VALUE(#{id},#{username},#{birthday},#{sex},#{address})
+	* 删除
+		> 根据主键删除用户
+			<delete id="deleteUserById" parameterType="java.lang.Integer">
+				DELETE FROM `user` WHERE id=#{}
+			</delete>
+	* 更新
+		> sql模板 	
+			UPDATE `user` SET username=#{username},birthday=#{birthday},seX=#{sex},address=#{address} 
+			WHERE id=#{id}
+			- 其中#{}里面的内容就是parameterType指定的实体类的属性
+
+6. Hibernate和mybatis的区别和应用场景
+	* Hibernate
+		> Hibernate是一个标准的ORM框架，对象关系映射时为了不写sql语句，sql语句根据对象的关系和操作自动生成。使用Hibernate对
+			sql语句进行优化、修改比较困难。
+		> Hibernate的目标是不写sql语句
+		> 应用场景：
+			- 适用于需求变化不多的中小型项目，比如:后台管理系统，erp、oa
+	* mybatis
+		> mybatis专注的是sql本身，需要程序员自己编写sql语句，修改和优化sql语句就比较方便。mybatis是一个不完全的ORM框架，
+			虽然需要程序员写sql，但mybatis也存在映射（输入映射，输出映射）
+		> mybatis目标是写sql语句，sql语句可以灵活修改。
+		> 应用场景：
+			- 适用于需求变化较多，比如互联网项目。
+			
+7. mybatis开发dao的方法
+	* SqlSessionFactoryBuilder
+		> 用于创建SqlSessionFactory
+		> SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder()//
+			.build(Resources.getResourceAsStream("SqlMapConfig.xml"));
+		> 将SqlSessionFactoryBuilder当做一个工具类即可，不需要使用单例管理。因为目标是为了得到SqlSessionFactory，
+			而SqlSessionFactory是单例，所以只需要new一次builder就可以得到SqlSessionFactory，后面只用这个
+			SqlSessionFactory就可以。
+	* SqlSessionFactory
+		> SqlSessionFactory是单例
+		> 将来mybatis和Spring整合，使用单例模式管理SqlSessionFactory
+	* SqlSession
+		> SqlSession是一个面向用户(程序员)的接口，提供了很多操作数据库的方法。
+		> SqlSession是线程不安全的，在SqlSession实现类中除了有操作数据库的方法还有数据域的属性。
+			- 数据域的属性，例如struts2里面action定义用于接收页面数据的成员变量，private String username;
+		结论： SqlSession最佳应用场合在方法体内。线程不安全的对象最好都放在方法体内（局部变量）
+	* mybatis开发dao方法一：原始dao开发方法(程序员需要些dao接口和实现类)
+		> 写dao接口和dao实现类
+		> 需要向dao注入SqlSessionFactory，在方法体内通过工厂创建SqlSession
+		> 原始dao开发的问题：
+			- dao接口实现类存在大量模板方法(代码重复，例如获取session，提交事务，释放资源)
+			- 调用sqlSession方法时(selectOne,selctList,insert等)，其中一个参数是statement的id，这里的statement
+				的id属于硬编码
+			- 调用sqlSession方法时(selectOne,selctList,insert等)，其中一个参数是提供设置sql模板占位符的值的参数，
+				这个参数是Object类型，如果类型不同也编译成功，这样不利于程序员开发。
+	* mybatis开发dao方法二：mapper代理方法(程序员只需要些mapper接口(相当于DAO接口))
+		> 程序员还需要编写映射文件
+		> 程序员需要编写mapper接口(相当于dao接口)
+			- 程序员编写mapper接口需要遵循一些规范，mybatis可以自动生成mapper接口实现类的代理对象
+		> 注意：主配置文件 要加载映射文件
+		> mapper接口开发规范
+			1.mapper.xml中的namespace要等于mapper接口的地址(全限定名)。
+				<mapper namespace="mapper.Demo4_UserMapper">
+			2.mapper接口的方法名要和mapper.xml中的statement的id相同
+				即<update id="updateUser" parameterType="mybatis.po.User">
+				对应mapper接口的void updateUser(User user) throws Exception;
+			3.mapper接口中的方法中的输入参数类型与statement的parameterType指定的类型相同
+				则上面的parameterType="mybatis.po.User"，对应(User user)
+			4.mapper接口中的返回值与statement的resultType指定的类型相同
+				上面更新方法中接口的返回类型是void，resultType的resultType是缺省值。
+		> 总结：以上规范主要是对以下的代码统一生成：
+			- sqlSession.selectOne(),sqlSession.selectList(),sqlSession.insert(),
+				sqlSession.update(),sqlSession.delete().
+			- 这些代码的参数就可以通过这写规范同一获得。
+				-> statement的id就等于namespace+statement的id就是mapper接口的全限定名+方法名。
+				-> 对应方法的参数和返回值就对应statement的parameterType和resultType
+		> 如果mapper接口的方法的返回值类型是pojo(非集合对象)，那么代理对象内部通过selectOne查询数据库，
+			如果mapper接口的方法的返回值类型是集合对象，那么代理对象内部通过selectList查询数据库。
+		> mapper代理方法步骤：
+			1. 根据根据规范写好mapper.xml和mapper接口
+			2. 得到sqlSessionFactory
+			3. 通过sqlSessionFactory得到sqlSession
+			4. 通过mapper接口 mapper = sqlSession.getMapper(mapper接口.class);得到mapper接口的代理对象
+			5. 调用mapper的方法操作数据库
+			6. 提交事务
+			7. 释放资源(sqlSession)
+		> 问题：使用mapper代理方法，parameterType只有一个，但是需要2个参数怎么办?
+			- 解决：系统框架中，dao层代码是被业务层公用的。
+				即使mapper接口只有一个参数，可以使用包装类型(Map)的pojo满足不同业务方法的需求。
+				例如：Map<String,Object>:"ip":"localhost","user":mybatis.po.User
+			- 注意：持久层方法的参数可以使用包装类型(map等)，service方法中不建议使用包装类型(不利于业务层的可扩展性)。
+
+8. 高级映射
+	* 数据模型分析思路
+		> 每张表记录的内容
+			- 分模块对每张表的内容进行熟悉，相当于学习系统需求(功能)的过程。
+		> 了解每张表的重要字段
+			- 重要字段就是非空字段和外键字段。
+		> 数据库级别表与表之间的关系
+			- 外键关系
+		> 表与表之间的业务关系
+			- 在分析表与表之间的业务关系时一定要建立在某个业务意义基础上来分析。
+			- 先分析数据库级别有外键关系的表之间的业务关系。
+	* 数据模型分析
+		> 用户表(User)：
+			-(熟悉每张表的内容) 记录了购买商品的用户信息(注意定语，没有定语就是废话。分析要根据业务分析！！用户也可能是后台管理的用户！)
+			-(了解每张表的重要字段) 非空字段(除主键)：
+				1. id：主键，自增主键
+				2. username：用户名称
+			-(分析表与表之间的关系)
+			-(表与表之间的业务关系)
+				<> 数据库级别有外键关系
+					1. user -> orders ： 一个用户可以创建多个订单，一对多关系。
+				<> 数据库级别无外键关系
+					2. user -> orderDetail：
+						user -> orders -> orderDetail
+						一对多，一对多，综合起来一对多。
+						与 OrderDetail -> User为一对一关系。
+					3. user -> items：
+						user -> orders -> orderDetail -> items
+						一对多，一对多，一对一，综合起来一对多
+						Items -> OrderDeatail -> Order -> User
+						多对一，一对一，一对一，综合起来多对一
+						综合起来User和Items关系为多对多。
+		> 订单表(Orders):
+			-(熟悉每张表的内容) 记录了用户所创建的订单，就是购买商品的订单。
+			-(了解每张表的重要字段) 非空字段：
+				1. number：订单号
+				2. user_id:外键，用户的id
+			-(分析表与表之间的关系)
+				1. 与用户表(User)有外键关系，维护关系的字段：user_id。Orders表是子表，User表是父表。
+			-(表与表之间的业务关系)
+				<> 数据库级别有外键关系
+					1. orders -> user ： 一个订单只由一个用户创建，一对一关系。
+					2. orders -> orderDetail ： 一个订单可以有多个订单明细。因为一个订单可以购买多个商品，每个商品的购买信息
+						在orderDetail记录，所以是一对多关系。
+				<> 数据库级别无外键关系
+					3. orders -> items : 可以通过OrderDetail建立关系。
+						orders -> OrderDetail -> items : 一对多，一对一。综合起来一对多。
+						和 Items -> Orders 综合起来为多对多关系。
+		> 订单明细表(OrderDetail)
+			-(熟悉每张表的内容) 记录的订单条目(详细信息)，即购买商品的信息(商品名字，数目，单价，该商品总价等)
+			-(了解每张表的重要字段) 非空字段：
+				1. order_id:订单的id
+				2. items_id:商品的id
+			-(分析表与表之间的关系)
+				1. 与订单表(Orders)有外键关系,维护关系的字段：order_id。OrderDetail表是子表，Orders表是父表
+				2. 与商品表(Items)有外键关系，维护关系的字段：items_id。OrderDetail表是子表，Items表是父表
+			-(表与表之间的业务关系)
+				<> 数据库级别有外键关系
+					1. OrderDetail -> Orders : 一个订单的明细只能包括在一个订单中，所以是一对一关系。
+					2. OrderDetail -> Items : 一个订单名字只能包括一个商品，一对一关系。
+				<> 数据库级别无外键关系
+					3. OrderDetail -> User:
+						OrderDetail -> Orders -> User
+						一对一，一对一，综合起来一对一。
+		> 商品表(Items)
+			-(熟悉每张表的内容) 记录了商品的信息(商品名字等)
+			-(了解每张表的重要字段) 非空字段：
+				1. name:商品名称
+				2. price:商品价格
+			-(表与表之间的业务关系)
+				<> 数据库级别有外键关系
+					1. Items -> OrderDetail : 一个商品，可以包括在多个订单明细中，一对多关系。
+				<> 数据库级别无外键关系
+					2. Items -> Orders
+						items -> OrderDetail -> orders : 多对一，一对第一。综合起来多对一。
+						和 Orders -> Items 综合起来为多对多关系
+					3. Items -> User
+						Items -> OrderDetail -> Orders -> User
+						多对一，一对一，一对一，综合起来多对一
+						user -> orders -> orderDetail -> items
+						一对多，一对多，一对一，综合起来一对多
+						综合起来User和Items关系为多对多。
+	* 一对一查询
+		> 需求：查询订单信息，关联查询创建订单的用户信息。
+		> sql语句：
+			1. 确定查询的主表(订单信息)，再确定查询的关联表(用户信息)
+			2. 关联查询
+				- 使用内连接还是外链接?
+					由于orders表的外键(user_id)是User表的主键，只能查询到一条记录，可以使用内连接
+			3. sql
+				SELECT orders.*,user.username,user.sex,user.address 
+				FROM orders,USER 
+				WHERE orders.user_id = user.id;
+				- 为什么不用SELECT * ？
+				- 因为用了后有两个字段都有id(orders的id和user的id)，而user的id不需要。
+		> 使用ResultType
+			- pojo
+			- mapper.xml
+				<select id="findOrdersUser" resultType="mybatis.po.OrdersCustom">
+					SELECT orders.*,user.username,user.sex,user.address 
+					FROM orders,USER 
+					WHERE orders.user_id = user.id;
+				</select>
+			- mapper.java
+		> 使用ResultMap
+			 使用resultMap将查询结果映射到Orders类中
+			 在Order类中添加User属性(一对一).
+			 将查询到的用户信息映射到Orders.user.属性中
+			- pojo
+				因为是一对一关系，所以添加User属性。和Hibernate差不多。一对一就一个属性，一对多就List(Hibernate习惯用Set)
+			- mapper.xml
+				<resultMap type="mybatis.po.Orders" id="OrdersUserResultMap">
+					<id column="id" property="id"></id>
+					<result column="uers_id" property="userId"/>
+					<result column="number" property="number"/>
+					<result column="createtime" property="createtime"/>
+					<result column="note" property="note"/>
+					
+					<association property="user" javaType="mybatis.po.User">
+						<id column="user_id" property="id"></id>
+						<result column="username" property="username"/>
+						<result column="sex" property="sex"/>
+						<result column="address" property="address"/>
+					</association>
+				</resultMap>
+				
+				<select id="findOrdersUserResultMap" resultMap="OrdersUserResultMap">
+					SELECT orders.*,user.username,user.sex,user.address 
+					FROM orders,USER 
+					WHERE orders.user_id = user.id;
+				</select>
+				
+				** 其中association指定的是关联的单个实体。
+			- mapper.java
+		> 总结一对一查询用ResultType好还是ResultMap好
+			- 使用ResultType实现较为简单。ResultType的唯一要求：查询结果的列明要和pojo的属性名一致。(建议使用)
+			- 需要单独定义ResultMap，实现起来比较麻烦。但这个方法比较万能，通用！而且ResultMap可以实现延迟加载，
+				ResultType无法实现延迟加载。
+	* 一对多查询
+		> 需求：查询订单及订单明细
+		> pojo:主查询表(Orders)添加List<Orderdetail> orderdetails属性。
+		> sql:
+			- 先确定主查询表，再确定关联表。主表是订单表，关联表是订单明细表
+			- 在一对一的“查询订单信息，关联查询创建订单的用户信息”基础上添加订单明细表即可。
+			- 要求：查询结果映射到pojo中orders的属性不能重复
+				<> 不可以(两个pojo，orders表的属性重复)
+					id,user_id,createtime,items_id,items_num,username
+					1 	1		时间a			2        3                         张三
+					1   1      	时间a			3		 1		       张三
+				<> 可以(1个pojo，不同的用List<OrderDetail>来封装多个订单明细)
+					id,user_id,createtime,items_id,items_num,username
+					1 	1		时间a			2        3                         张三
+											3		 1		       张三
+			- 如果使用内连接，订单和订单明细是一对多的关系，查询结果是多一方的记录数，也就是查询结果里面属于订单表有相同，而
+				订单表+订单明细表一定不相同。但是我们的主查询表是订单表。如果返回的结果又订单id一样的记录，这样不符合常理(业务)。
+				使用ResultType接受结果的时候List<OrderCustom>里面的Order表的属性会重复。所以不能使用内连接查询。
+				
+				SELECT user.username,user.sex,user.address,
+				orders.*,
+				orderdetail.items_id,orderdetail.items_num
+				FROM USER , orders , orderdetail 
+				WHERE user.id = orders.user_id AND orderdetail.orders_id = orders.id;
+		> mapper.xml
+			- 定义resultMap，其中一对多关系使用collection标签。collection标签的ofType属性指定映射出来的pojo中的
+				集合的类型。例如List<OrderDetail> orderDetails。 那么ofType就是mybatis.po.Orders
+			- collection标签里面一定要有id，但是业务需求查询不需要id，也要添加id标签，添加id标签后SQL语句也要添加。
+			 	但是这样查询结果会有2个id字段(orders的id和orderdetail的id)，所以要把sql语句中orderdetail的id
+			 	起别名，<collection>里的<id>的column属性值就为该别名。
+			- 如果一个resultMap中有部分代码刚好是别的resultMap的代码，可以使用extends属性，继承resultMap。从而减少
+				配置代码。
+			<resultMap type="mybatis.po.Orders" id="findOrdersAndOrderDetailResultMap" extends="OrdersUserResultMap">
+				<collection property="orderdetails" ofType="mybatis.po.Orders">
+					<id column="orderdetail_id" property="id"></id>
+					<result column="ordersId" property="ordersId"/>
+					<result column="itemsId" property="itemsId"/>
+					<result column="itemsNum" property="itemsNum"/>
+				</collection>
+			</resultMap>
+			<select id="findOrdersAndOrderDetailResultMap" resultMap="findOrdersAndOrderDetailResultMap">
+				SELECT user.username,user.sex,user.address,orders.*,orderdetail.id AS orderdetail_id,orderdetail.items_id,orderdetail.items_num
+				FROM USER , orders , orderdetail 
+				WHERE user.id = orders.user_id AND orderdetail.orders_id = orders.id;
+			</select>
+		> mapper.java
+	* 多对多查询
+		> 需求：查询用户及用户所购买的商品信息
+			- 数据库级别中用户和商品没有关系，是通过订单和订单明细建立关系。
+			- 主表是用户表，关联表：orders，orderdetail，items
+		> pojo：
+			- 主表(user)对应的pojo中添加订单列表属性List<Orders> ordersList
+			- Orders中添加List<Orderdetail> orderdetails属性 (已添加)
+			- Orderdetail中添加List<Items> itemsList属性
+			- 问题：为什么不直接在User中添加List<Items> itemsList?
+				<> 因为在数据库级别中User和Items没有直接关系，是通过Orders和Orderdetail建立关系。
+		> sql:
+			SELECT user.username,user.sex,user.address,
+			orders.*,
+			orderdetail.id AS orderdetail_id,orderdetail.items_id,orderdetail.items_num,
+			items.name AS items_name, items.detail AS items_detail,items.price AS items_price
+			FROM USER , orders , orderdetail , items
+			WHERE user.id = orders.user_id AND orderdetail.orders_id = orders.id AND orderdetail.items_id=items.id
+			ORDER BY orders.id;
+		> mapper.xml
+			<resultMap type="mybatis.po.User" id="UserAndItemsResultMap">
+				<!-- 用户信息 -->
+				<id column="user_id" property="id"></id>
+				<result column="sex" property="sex"/>
+				<result column="address" property="address"/>
+				<result column="username" property="username"/>
+				<!-- 订单信息 
+					一个用户对应多个订单
+				-->
+				<collection property="ordersList" ofType="mybatis.po.Orders">
+					<id column="id" property="id"></id>
+					<result column="uers_id" property="userId"/>
+					<result column="number" property="number"/>
+					<result column="createtime" property="createtime"/>
+					<result column="note" property="note"/>
+					<!-- 一个订单对应多个订单明细 -->
+					<collection property="orderdetails" ofType="mybatis.po.Orderdetail">
+						<id column="orderdetail_id" property="id"></id>
+						<result column="ordersId" property="ordersId"/>
+						<result column="itemsId" property="itemsId"/>
+						<result column="itemsNum" property="itemsNum"/>
+						<!-- 一个订单明细对应一个商品 -->
+						<association property="items" javaType="mybatis.po.Items">
+							<id column="items_id" property="id"></id>
+							<result column="items_name" property="name"/>
+							<result column="items_detail" property="detail"/>
+							<result column="items_price" property="price"/>
+						</association>
+					</collection>
+				</collection>
+			</resultMap>
+			<select id="findUserAndItemsResultMap" resultMap="UserAndItemsResultMap">
+				SELECT user.username,user.sex,user.address,
+				orders.*,
+				orderdetail.id AS orderdetail_id,orderdetail.items_id,orderdetail.items_num,
+				items.name AS items_name, items.detail AS items_detail,items.price AS items_price
+				FROM USER , orders , orderdetail , items
+				WHERE user.id = orders.user_id AND orderdetail.orders_id = orders.id AND orderdetail.items_id=items.id
+				ORDER BY orders.id;
+			</select>
+		> mapper.java
+		> 总结
+			- 需求1：查询用户购买的商品明细清单(用户名称、用户地址、购买商品名称、购买商品时间、购买商品数量)。
+				<> 由于查询结果的字段名并没有冲突，没有起别名，所以可以使用ResultType，封装到扩展的pojo中，可以很简单实现
+					明细清单功能。
+			- 需求2：查询用户账号、用户名称、购买商品数量、商品明细(鼠标移上显示明细)。
+				<> 使用resultMap。 为什么？？？
+			- 如果使用ResultMap，是针对对查询结果映射有特殊要求(？？)的功能。如果没有特殊要求只用ResultType就可以。
+	* 高级映射总结
+		> resultType
+			- 作用：
+				将查询结果按照sql列明和pojo属性名一致性映射到pojo中。如果全部不相同，pojo则为null，否则只是缺的属性为缺省值，
+				pojo不为null。
+			- 使用场合：
+				明细记录的展示。
+		> resultMap
+			- 使用association和collection完成一对一和一对多的映射。
+			- association
+				<> 作用
+					将关联信息映射到一个pojo中(这个pojo是输出映射类型的一个属性)
+				<> 场合
+					不懂！！例子：查询订单及关联用户
+			- collection
+				<> 作用
+					将关联信息映射到一个List集合中(这个list是输出映射类型的一个属性)
+				<> 场合
+					不懂！例子：遍历显示左边的分级菜单。这样方便获取每个一级菜单里面的二级菜单。					
+9. 延迟加载
+	* 什么是延迟加载
+		> resultMap可以实现高级映射(association、collection)。association、collection具备延迟加载
+			的功能。
+		> 需求:查询订单，关联查询用户信息。如果先查询订单信息就可以满足当前业务需求，当我们用户信息时再查询用户信息。把
+			对用户信息的按需去查询，就是延迟加载。
+		> 延迟加载：先单表查询，如果需要时再关联查询，也可以先关联2张表查询，需要时再关联n张表查询。延迟可以大大提高数据库的性能，
+			因为查询单表要比关联查询多表速度快。
+	* 使用association实现延迟加载。
+		> 需求：查询订单，关联查询用户。
+		> sql
+		> pojo
+		> mapper.xml
+			- 步骤：
+				1. 单表查询.这里是SELECT * FROM orders
+				2. 使用resultMap进行输出映射。
+				3. 本身的属性照样写，association或collection里面的配置不写。
+				4. 写association或collection的属性。包括以下：property,javaType或ofType,select,colume
+				5. 写要延迟加载所执行的statement。
+				5. 把要statement配置位需要延迟执行的statement。select属性指定定要要延迟加载执行的statement的id
+				6. column属性指定确定关联关系的字段名(即外键)
+			- 配置：
+				<resultMap type="mybatis.po.Orders" id="OrdersUserLazyLoading">
+					<id column="id" property="id"></id>
+					<result column="user_id" property="userId"/>
+					<result column="number" property="number"/>
+					<result column="createtime" property="createtime"/>
+					<result column="note" property="note"/>
+					<association property="user" javaType="mybatis.po.User" 
+						select="mapper.Demo4_UserMapper.findUserById" column="user_id">
+					</association>
+				</resultMap>
+				<select id="findOrdersUserLazyLoading" resultMap="OrdersUserLazyLoading">
+				 	 SELECT * FROM orders;
+				</select>
+			- 上面配置会先去执行findOrdersUserLazyLoading，当需要查询用户信息的时候，
+				在执行mapper.Demo4_UserMapper.findUserById。两个statement是通过resultMap的
+				association或者collection的select属性和column属性建立联系。
+		> mapper.java
+			1.得到列表。
+			2.遍历列表，先输出订单号，再输出用户姓名
+			- 分析
+		 		得到列表：执行了SELECT * FROM orders
+				第一个：订单3，用户王五。执行了SELECT username FROM `user` WHERE id=?
+			 	第二个：订单4，用户王五。没有执行statement。因为一级缓存！！缓存中已经有王五对应的对象(主键?)
+			 	第三个: 订单5，用户张三。执行了SELECT username FROM `user` WHERE id=?
+	* mybatis默认没有开启延迟加载，需要在SqlMapConfig的settings中的setting中配置
+		> 配置
+			<setting name="lazyLoadingEnabled" value="true"/>
+			<setting name="aggressiveLazyLoading" value="false"/>
+		> lazyLoadingEnabled
+			打开延迟加载,默认为false
+		> aggressiveLazyLoading
+			设置为消极加载，默认为true。默认为积极加载，还没调用关联对象的方法或者获取关联对象就直接发出sql加载完毕 
+10. 缓存(查询缓存)
+	* mybatis的查询缓存用于减轻数据库压力，提高数据库性能。mybatis提供一级缓存和二级缓存。
+		> 一级缓存是sqlSession级别的缓存。
+			在操作数据库时，需要创建sqlSession对象。在sqlSession对象中有一个数据结果(hashMap),用于存储缓存数据，
+			这个hashMap就是一级缓存。不同sqlSession的缓存数据是互相不影响的。
+		> 二级缓存是mapper级别的缓存。
+			多个sqlSession去操作同一个mapper的SQL语句，多个sqlSession操作数据库得到的数据会存在二级缓存区域，
+			二级缓存是夸SqlSession。
+	* 一级缓存
+		> 工作原理
+			- 第一次查询id为1的用户，如果hashMap中没有该对象，则向数据库查询，结果保存到sqlSession的hashMap中。
+				第二次查询，直接从hashMap中获取，不向数据库中获取。
+				当对该对象，进行增、删、改用户，提交事务之后，删除hashMap中原来保存的对象。这样是为了让缓存中的数据永远是
+				最新的，避免脏读。
+			- 问题：用什么标准来判断这2次查询是查询同一个对象?
+				<> hashMap的key是通过哈希值，statement的id，sql语句，输入参数等字符串用冒号(:)拼接起来。两次查询同一个对象，
+					他们的肯定是一样的。
+		> mybatis默认开启一级缓存
+		> 应用
+			- 在正式开发通常是将Spring和mybatis整合开发。事务的控制是在service层中，一个service方法中包括很多mapper接口方法
+				的调用。
+			-	service{
+					// 两个方法是使用同一个SqlSession
+					// 开始调用业务方法，开启事务，创建SqlSession对象
+					// 第一次调用mapper方法的findUserById(1)
+					// 第二次调用mapper方法的findUserById(1)
+					// Spring使用AOP，业务方法结束，sqlSession关闭
+				}
+				如果调用两个Service层的方法，都有创建sqlseesion，他们使用的不是同一个sqlSession，他们的缓存不共用，
+				service方法结束，sqlSession就关闭，一级缓存就清空。
+	* 二级缓存
+		> 原理
+			- 前提：开启mybatis的二级缓存。
+			- sqlSession1查询用户id为1的用户信息，查询到用户信息将查询数据放到二级缓存中，sqlSession2，查询用户id为1的
+				用户信息，去找缓存中是否存在数据，如果存在则直接从缓存中取出数据。usermapper有自己的缓存区域，其他mapper也有自己
+				的缓存区域。每个mapper的缓存区域是按照namespace来划分缓存区域的，如果namespace区域相同则缓存区域相同。
+				如果sqlSession3去执行相同mapper下的sql，执行commit后，清空该mapper下的二级缓存区域。
+		> 开启二级缓存
+			- mybatis的二级缓存是mapper级别，除了在SqlMapConfig.xml设置总开关，还要在mapper.xml中开启二级缓存。
+			- SqlMapConfig.xml的配置
+				<setting name="cacheEnabled" value="true"/>
+				默认值为true
+			- mapper.xml中的配置
+				在Demo4_UserMapper.xml中开启二级缓存。Demo4_UserMapper.xml下的sql执行会存储到它的缓存区域(HashMap)。
+				<cache/>
+				cache的属性等下讲。
+			- pojo类实现序列化接口
+		> 注意
+			- 要sqlSession.close()才会将sqlSession里面的数据写到二级缓存。
+		> 二级缓存参数
+			1. mapper.xml中的二级缓存参数
+			- 禁用二级缓存
+				<> 在statement中设置userCache=false，可以禁止当前select语句的二级缓存，每次查询都会向数据库
+					发出sql语句。默认值为true。
+			- 刷新二级缓存(就是清空二级缓存)
+				<> 在执行增、删、改的sql语句后都需要刷新缓存，如果不刷新缓存会出现脏读。
+				<> 在insert、update、delete的statement中设置flushCache=false，则不会刷新缓存，默认值为true。
+				<> 一般情况下执行commit操作都需要刷新缓存。所以基本都不需要改这个属性的值。
+			2. SqlMapConfig.xml中二级缓存参数
+			- flushInterval(刷新间隔)：每个一段时间自动清空缓存，单位为毫秒。
+			- size(引用数目)：缓存存储实例引用的大小。就是hashMap的初始化大小，默认为1024
+			- readOnly(只读)：只读缓存会给调用者返回相同的实例，这些对象都不能被修改。可读写的缓存是通过序列化返回缓存的对象，
+				速度比只读要慢。readOnly默认为false
+		> mybatis整合ehcache
+			ehcache是一个分布式的缓存框架。
+			- 分布式缓存
+				<> 为了提高系统并发、性能，一般对系统进行分布式部署(最常用的集群部署方式)。
+				<> 如果不使用分布式缓存，缓存数据在各个服务器单独存储。
+					例如：用户登录，访问服务器A，HttpSession存储登录信息，但是用户访问服务器B的时候，服务器B没有该用户的
+						HttpSession数据，就会认为用户没有登录。
+					因此，需要把缓存数据进行集中管理(这里的集中管理也是一个集群),所有服务器都向一个缓存框架存/取缓存数据。所以要使用
+					分布式缓存框架(redis、memcached、ehcache)
+			- 整合方法
+				<> mybatis提供一个cache接口，可以自己写缓存框架实现cache接口，不一定用ehcache。
+					cache接口在mybatis-3.3.1.jar包下的org.apache.ibatis.cache.Cache.class
+					mybatis默认支持的cache实现类 org.apache.ibatis.cache.impl.PerpetualCache
+				<> mapper.xml的cache标签的type属性就是指定缓存实现类，type的值为对应类的简单类名。如果不是自带的实现类
+					需要写类的全限定名
+				<1> 导入ehcahe.jar和mybatis-ehcache.jar
+					ehcache的唯一依赖包slf4j-api.jar也要导入(mybatis本身就有，所以不用导)
+					mybatis-ehcache.jar在github的mybatis/ehcache有下载
+				<2> 在mapper.xml中设置
+					<cache type="org.mybatis.caches.ehcache.EhcacheCache"/>
+				<3> 添加ehcache的配置文件
+					ehcache.xml的配置和在hibernate中使用ehcache的配置一样。
+		> 二级缓存的应用场景
+			- 对于访问的查询请求多且对用户查询结果实时性不高，可以使用二级缓存。
+				<> 例如：查某用户最近一个月的账单，可以在SqlMapConfig.xml设置flushinterval(刷新间隔时间)
+			- 执行的sql需要耗时很久(使用关系型数据库，没有使用大数据分析)，可以使用二级缓存。
+		> 二级缓存的局限性
+			例如：对细粒度缓存级别实现不好：
+				二级缓存存储了1万个商品的信息。当某个卖家修改了某个商品的信息。提交事务时，清空了二级缓存中了一万个商品信息，
+				当买家查询商品信息时又要从数据库中查询。(缓存命中率低)
+				这个问题mybatis解决不了，需要自己实现业务层缓存(三级缓存)。
+		> 注意
+			1. 多表操作一定不能使用二级缓存。二级缓存是以namespace为单位的，增删改了User,userMapper对应的数据会刷新，
+				但是其他mapper里面也操作了user，user缓存不会刷新,这样就造成缓存数据不同(脏数据)。 
+			
+11. 和Spring整合
+	* 思路
+		> 1. 通过Spring单例管理SqlSessionFactory和数据源(c3p0)
+		> 2. spring和mybatis整合生成代理对象，使用SqlSessionFactory创建SqlSession。(spring和mybatis整合自动完成)
+		> 3. 持久层的mapper或dao都由spring进行管理
+	* 整合环境搭建
+		> 创建新的java工程(接近实际开发的工程结构)
+		> jar包
+			- mybatis核心包：mybatis-3.3.1.jar
+			- spring全部包：spring-4.2.3RELEASE.jar
+			- mybatis和spring的整合包：mybatis-spring-1.2.2.jar
+			- mysql驱动包
+			- ehcache二级缓存包
+			- 数据源包：c3p0
+		> 准备配置文件
+			- 创建config源文件夹
+			- 复制SqlMapConfig.xml、log4j.properties、db.properties文件和Spring
+				的配置文件
+	* 在beans.xml配置SqlSessionFactory
+		> 在bean.xml中配置sqlSessionFactory
+			- sqlSessionFactory在mybatis和spring的整合包下
+			<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+				<property name="configLocation" value="mybatis/SqlMapConfig.xml"></property>
+				<property name="dataSource" ref=""></property>
+			</bean>
+	*  在beans.xml配置数据源
+		> 加载数据库配置文件
+			<context:property-placeholder location="classpath:db.properties"/>
+		> 配置
+			<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+			   		<property name="jdbcUrl" value="${jdbc.Url}"></property>
+					<property name="driverClass" value="${jdbc.driver}"></property>
+					<property name="user" value="${jdbc.user}"></property>
+					<property name="password" value="${jdbc.password}"></property>
+					<property name="acquireIncrement" value="${c3p0.acquireIncrement}"></property>
+					<property name="initialPoolSize" value="${c3p0.initialPoolSize}"></property>
+					<property name="minPoolSize" value="${c3p0.minPoolSize}"></property>
+					<property name="maxPoolSize" value="${c3p0.maxPoolSize}"></property>
+			</bean>
+	* 原始dao开发(和Spring整合后)
+		> 创建mapper.xml
+			- 改下po的包名，其他没多大变化
+		> 创建dao
+			- 实现类需要使用spring注入sqlSessionFactory
+				<> 继承sqlSessionDaoSupport
+			- dao实现类这个类SqlSessionDaoSupport
+				<> 好处:这个类有sqlSessionFactory的getter/setter，获取sqlSession只需要this.getSqlsession()
+					即可。
+			- dao类交给spring管理，close()方法和commot方法不再需要，方法调用结束自动执行(AOP)
+		> 在beans.xml中配置dao
+			- beans.xml中配置，这里的sqlSessionFactory是从父类SqlSessionDaoSupport继承的：
+				<bean id="userDao" class="springmybatis.dao.impl.UserDaoImpl">
+					<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+				</bean>
+	* mapper代理开发(和Spring整合后)
+		> mapper.xml
+		> mapper.java
+		> 在beans.xml中配置
+			<bean id="userMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+				<!-- 指定mapper接口 -->
+				<property name="mapperInterface" value="springmybatis.mapper.Demo17_UserMapper"></property>
+				<!-- 配置SqlSessionFactory -->
+				<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+			</bean>
+			- 其中MapperFactoryBean是泛型类，可以不写泛型。MapperFactoryBean继承了SqlSessionDaoSupport，
+				有sqlSession的getter/setter方法。
+		> 此方法的问题
+			- 需要针对每个mapper进行配置。如果有多个Mapper就需要配置多个bean。麻烦！
+	* mapper代理方法2 -- mapper代理的批量扫描(建议使用)
+		> 通过org.mybatis.spring.mapper.MapperScannerConfigurer类进行mapper包下的mapper接口进行扫描，
+			自动创建对象，并且在spring容器中注入。
+		> 这个扫描是为了自动创建mapper代理对象。
+			SqlMapConfig.xml的扫描是加载映射文件。
+			但是使用了自动创建mapper代理对象，可以去掉SqlMapConfig.xml中的自动扫描加载映射文件配置。但是mapper接口
+			还是要遵循mapper代理开发的4个规范(命名空间、mapper接口和statement的id、输入类型、输出类型)且在同一目录中。
+		> 配置
+			<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+				<property name="basePackage" value="springmybatis.mapper"></property>
+				<!-- 如果使用sqlSessionFactoryBean，那么扫描加载db.properties的配置会不起作用，
+					原因是：使用sqlSessionFactoryBean的话，会先执行sqlSessionFactoryBean，后执行扫描加载
+					db.properties和创建数据源。  
+				 -->
+				<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property>
+			</bean>
+			- basePackage指定要扫描的包。
+			- sqlSessionFactoryBeanName指定sqlSessionFactory(bean的id)
+				<> 为什么用sqlSessionFactoryBeanName而不是用sqlSessionFactoryBean？
+					因为加载顺序是先加载sqlSessionFactoryBean后加载db.properties和数据源。
+					而我们需要的是先加载数据源，后加载sqlSessionFactory。而sqlSessionFactoryBeanName
+					不会有这个问题，所以只能用sqlSessionFactoryBeanName。
+		> 注意：
+			- 如果需要扫描多个包不能使用通配符，只能用逗号隔开
+			- 使用自动扫描后bean的id为mapper接口的简单类名(首字母小写)
+			
+12. 逆向工程
+	* 什么是逆向工程
+		> mybatis需要些sql语句，针对每张表都需要些大量sql语句工作量很大。mybatis提供逆向工程，可以针对单表自动
+			生成mybatis执行所需要的代码(mapper.java、mapper.xml、po)。
+			就是根据数据库表生成java代码。
+			- 限制：针对单表
+		> 实际开发中有两种情况：
+			1. Java代码 -> 数据库表(少数)：通过UML工具设计好类，并自动转换成po，然后通过po自动生成数据库表。
+			2. 数据库表 -> Java代码(多数)：在设计阶段设计好数据库表，然后通过数据库表生成对应的po、dao/mapper、映射文件等。	
+	* 下载逆向工程
+		mybatis-generator-core-1.3.2
+	* 使用方法
+		> 看帮助文档
+		> 使用Mybatis生成器方式(帮助文档中没有写的)
+			- 使用Eclipse插件
+		> 讲使用Java程序和XML配置文件方式生成代码。建议使用这种方式(不依赖开发工具)。
+	1.  通过Mybatis生成器，使用Java程序和XML配置文件方式生成代码
+		- 配置generatorConfig.xml
+			<?xml version="1.0" encoding="UTF-8"?>
+			<!DOCTYPE generatorConfiguration
+			  PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+			  "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+			
+			<generatorConfiguration>
+			  <classPathEntry location="/Program Files/IBM/SQLLIB/java/db2java.zip" />
+			
+			<!-- 配置jdbc4大参数 -->
+			  <context id="DB2Tables" targetRuntime="MyBatis3">
+			    <jdbcConnection driverClass="COM.ibm.db2.jdbc.app.DB2Driver"
+			        connectionURL="jdbc:db2:TEST"
+			        userId="db2admin"
+			        password="db2admin">
+			    </jdbcConnection>
+			
+			<!-- value为false表示数据库的DECIMAL和NUMBERIC类型对应Integer类型，
+				true表示数据库的DECIMAL和NUMBERIC类型对应java.math.BigDecimal -->
+			    <javaTypeResolver >
+			      <property name="forceBigDecimals" value="false" />
+			    </javaTypeResolver>
+			
+			<!-- targetPackage指定生成po类的位置，例如为mybatis.po
+				targetProject指定在哪个项目的源文件夹下
+			-->
+			    <javaModelGenerator targetPackage="test.model" targetProject="\MBGTestProject\src">
+			      <property name="enableSubPackages" value="true" />
+			      <property name="trimStrings" value="true" />
+			    </javaModelGenerator>
+			
+			<!-- 指定mapper映射文件的生成位置 -->
+			    <sqlMapGenerator targetPackage="test.xml"  targetProject="\MBGTestProject\src">
+			      <property name="enableSubPackages" value="true" />
+			    </sqlMapGenerator>
+			<!-- 指定mapper接口的生成位置-->
+			    <javaClientGenerator type="XMLMAPPER" targetPackage="test.dao"  targetProject="\MBGTestProject\src">
+			      <property name="enableSubPackages" value="true" />
+			    </javaClientGenerator>
+			<!-- 指定数据库表，只指定tableName就可以，前提po类名要和tableName一样，属性名和字段名一样 -->
+			    <table schema="DB2ADMIN" tableName="ALLTYPES" domainObjectName="Customer" >
+			      <property name="useActualColumnNames" value="true"/>
+			      <generatedKey column="ID" sqlStatement="DB2" identity="true" />
+			 	<!-- columnOverRide 的colume和javaType属性可以指定某些表的指定Java类型-->
+			      <columnOverride column="DATE_FIELD" property="startDate" />
+			      <ignoreColumn column="FRED" />
+			      <columnOverride column="LONG_VARCHAR_FIELD" jdbcType="VARCHAR" />
+			    </table>
+			
+			  </context>
+			</generatorConfiguration>
+			
+			- 需要配置的主要内容：
+				<> 配置table 
+				<> 配置mapper.xml
+				<> 配置mapper.java
+				<> 配置po
+	2. 执行生成程序，根据配置文件generatorConfig.xml生成对应的po,mapper.java,mapper.xml
+		> 代码在帮助文档有例子
+			List<String> warnings = new ArrayList<String>();
+			boolean overwrite = true;
+		    File configFile = new File("generatorConfig.xml");
+		    ConfigurationParser cp = new ConfigurationParser(warnings);
+		    Configuration config = cp.parseConfiguration(configFile);
+		    DefaultShellCallback callback = new DefaultShellCallback(overwrite);
+		    MyBatisGenerator myBatisGenerator = new MyBatisGenerator(config, callback, warnings);
+		    myBatisGenerator.generate(null);
+	3. 使用生成的代码
+		> 将生成工程中所生成的代码拷贝到自己的工程中。(如果直接生成到自己的工程中，有相同就覆盖了)
+		> 以Items为例测试ItemsMapper的方法：这里复制ItemsMapper、ItemsMapper.xml、Items、ItemsExample
+			到mybatis.po和mapper包下其中Items类已经有，覆盖掉。
+		> 建议不要在po里修改代码，因为需求修改可能要重新生成逆向工程，覆盖掉之前生成的代码
+		> po的Example是用来组合条件查询的
+			ItemsExample itemsExample = new ItemsExample();
+			ItemsExample.Criteria criteria = itemsExample.createCriteria();
+			criteria.andNameEqualTo("笔记本"); // 添加查询条件name属性等于笔记本，字符串拼接  and name='笔记本'
+			List<Items> itemsList = itemsMapper.selectByExample(itemsExample);// 返回多条查询记录
+		> 对所有字段进行更新(需要先查询，后更新)
+			itemsMapper.updateByPrimaryKey(items);
+		> 对非空字段进行更新(通常用于批量更新，前提需要知道主键)
+			itemsMapper.updateByPrimaryKeySelective(record);

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script type="text/javascript" src="../js/jquery.js"></script>
+</head>
+<body>
+	<h1>jQuery元素属性的操作-获取子元素和兄弟元素练习</h1>
+	
+	<form method="post" action="">
+		   	请选择您的爱好!
+			<br><input type="checkbox" id="checkedAll_2"/>全选/全不选
+		   	<br/>
+		    <input type="checkbox" name="items"  value="足球"/>足球
+			<input type="checkbox" name="items" value="篮球"/>篮球
+			<input type="checkbox" name="items" value="游泳"/>游泳
+			<input type="checkbox" name="items" value="唱歌"/>唱歌
+		   	<br/>
+		    <input type="button" id="CheckedAll" value="全　选"/>
+		    <input type="button" id="CheckedNo" value="全不选"/>
+		    <input type="button" id="CheckedRev" value="反　选"/> 
+		
+			<input type="button" id="send" value="提　交"/> 
+		</form>
+</body>
+<script type="text/javascript">
+	$('#checkedAll_2').click(function(){
+		// checked属性判断有没被选中
+		if(this.checked){
+			// jquery.1.6以上用prop设置checked，不用attr
+			$('input[name="items"]').prop("checked","checked");
+// 			$.each($('input[name="items"]'),function(){
+// 				alert($(this).val()+":"+this.checked);
+// 			});
+		} else{
+			$("input[name='items']").prop("checked","");	
+// 			$("input[name='items']").removeProp("checked");	
+// 			$.each($('input[name="items"]'),function(){
+// 				alert($(this).val()+":"+this.checked);
+// 			});
+		}
+	});
+	
+	$('#CheckedAll').click(function(){
+		$('input[name="items"]').prop("checked","checked");
+	});
+	
+	$('#CheckedNo').click(function(){
+		$('input[name="items"]').prop("checked","");
+	});
+	
+	$('#CheckedRev').click(function(){
+		var $checkbox = $('input[name="items"]');
+		$checkbox.each(function(){
+			if(this.checked){
+				$(this).prop("checked","");
+			} else{
+				$(this).prop("checked","checked");
+			}
+		});
+	});
+	
+	
+
+
+	// DOM
+// 	var checkedAll_2 = document.getElementById("checkedAll_2");
+// 	checkedAll_2.onclick = function(){
+// 		if(this.checked){
+// 			var items = document.getElementsByName("items");
+// 			for (var i = 0; i < items.length; i++) {
+// 				items[i].checked = "checked";
+// 			}
+// 		} else{
+// 			var items = document.getElementsByName("items");
+// 			for (var i = 0; i < items.length; i++) {
+// 				items[i].checked = "";
+// 			}
+// 		}
+// 	};
+
+// 	var checkedAll = document.getElementById("CheckedAll");
+// 	checkedAll.onclick = function(){
+// 		var items = document.getElementsByName("items");
+// 		for (var i = 0; i < items.length; i++) {
+// 			items[i].checked = "checked";
+// 		}
+// 	};
+	
+// 	var checkedNo = document.getElementById("CheckedNo");
+// 	checkedNo.onclick = function(){
+// 		var items = document.getElementsByName("items");
+// 		for (var i = 0; i < items.length; i++) {
+// 			items[i].checked = "";
+// 		}
+// 	};
+	
+// 	var checkRev = document.getElementById("CheckedRev");
+// 	checkRev.onclick = function(){
+// 		var items = document.getElementsByName("items");
+// 		for (var i = 0; i < items.length; i++) {
+// 			if(items[i].checked){
+// 				items[i].checked = "";
+// 			} else{
+// 				items[i].checked = "checked";
+// 			}
+// 		}
+// 	};
+	
+	//  jQuery
+	
+// 			$("#checkedAll_2").click(
+// 		function (){
+// 			if(this.checked){
+// 				$("input[name='items']").attr("checked","checked");
+// 			}else{
+// 				$("input[name='items']").attr("checked","");
+// // 				$("input[name='items']").removeAttr("checked");
+// 			}
+// 		}
+// 		);
+		
+// 		$('#CheckedAll').click(function(){
+// 			$("input[name='items']").attr("checked", "checked");
+// 		}
+// 		);
+// 		$('#CheckedNo').click(function(){
+// 			$("input[name='items']").attr("checked", "");
+// 		}
+// 		);
+		
+// 		//反选
+// 		$('#CheckedRev').click(function(){
+// 			$("input[name='items']").each(function(){
+// 				if(this.checked){
+// 					$(this).attr("checked","");
+// 				}else{
+// 					$(this).attr("checked","checked");
+// 				}
+// 			})
+// 		}
+// 		);
+</script>
+</html>

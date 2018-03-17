@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script type="text/javascript" src="../js/jquery.js"></script>
+<link rel="stylesheet" type="text/css" href="../css/demo6.css"/>
+</head>
+<body>
+	<h1 class="title" align="center" title="h1" id="h1">属性过滤选择器</h1>
+	
+		<div id="div-1" class="layer-0" title="t1">我是div-1</div><br/>
+	<div id="div-2" class="layer-0" title="t2">我是div-2
+		<div id="div-2-1" class="layer-1" style="display:none">我是div-2-1</div>
+		<div id="div-2-2" class="layer-1">我是div-2-2</div>
+	</div><br/>
+	<div id="div-3" class="layer-0" style="display:none">我是div-3
+		<div id="div-3-1" class="layer-1" title="t3">我是div-3-1</div>
+		<span id="div-3-span-1" class="layer-1">我是div-3-span-1</span>
+	</div>
+	<div id="div-4" class="layer-0" title="h1"></div>
+	<br/>
+	<span class="layer-0" id="span-1">这里是span-1</span>
+	<span class="layer-0" id="span-2" style="display:none">这里是span-2</span>
+	<br/>
+	<input type="hidden" id="hidden1" value="hidden1"/>
+	<input type="hidden" id="hidden2" value="hidden2"/>
+	<input type="hidden" id="hidden3" value="hidden3"/>
+	<input type="hidden" id="hidden4" value="hidden4"/>
+	<br/>
+	<button id="btn-1">改变含有属性title的div元素的背景色</button>
+	<button id="btn-2">改变含有属性title，且title属性的值为t2的div元素的背景色</button>
+	<button id="btn-3">改变属性title值不为t1的div元素的背景色（没有title属性也被选中）</button>
+	<button id="btn-4">改变属性title值以“h”开头的div元素的背景色</button>
+	<button id="btn-5">改变属性title值以“1”结尾的div元素的背景色</button>
+	<button id="btn-6">改变属性title值含有“1”的div元素的背景色</button>
+	<button id="btn-7">选择有属性id的元素，然后在结果中选取属性title含有1的元素（组合关系）</button>
+	
+	<br/>
+	
+<script type="text/javascript">
+$('#btn-1').click(function(){
+	$('div[title]').css("background","#00ffff");
+});
+
+$('#btn-2').click(function(){
+	$('div[title="t2"]').css("background","#00ffff");
+});
+
+$('#btn-3').click(function(){
+	$('div[title!="t1"]').css("background","#00ffff");
+});
+
+$('#btn-4').click(function(){
+	$('div[title^="h"]').css("background","#00ffff");
+	alert($('div[title^="h"]')[0].id);
+});
+
+$('#btn-5').click(function(){
+	$('div[title$="1"]').css("background","#00ffff");
+});
+
+$('#btn-6').click(function(){
+	$('div[title*="1"]').css("background","#00ffff");
+});
+
+$('#btn-7').click(function(){
+	$('*[id][title*="1"]').css("background","#00ffff");
+});
+</script>
+</body>
+</html>

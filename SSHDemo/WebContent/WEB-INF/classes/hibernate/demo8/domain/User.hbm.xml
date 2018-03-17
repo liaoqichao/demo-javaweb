@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+ <hibernate-mapping package="hibernate.demo8.domain">
+	<class name="User" table="demo8_user">
+<!-- 		<id name="id" type="int" column="id"> -->
+		<!-- 使用uuid主键生成策略 -->
+		<id name="id" type="int" column="id">
+			<generator class="native"/>
+		</id>
+    	<property name="name" type="string" column="name" length="20"/>
+    	<!-- addressSet属性，Set集合的映射,用map标签中的sort属性进行排序，但是这是在内存中排序，效率低下。
+    		使用order-by排序，在数据库中排序，对应ORDER BY语句，是查询的时候对集合表的元素进行排序。
+    		如果按照address降序排序，order-by="address DESC" 升序可以不用写ASC
+    	-->
+		<set name="addressSet" table="demo8_user_addressSet" order-by="address DESC" lazy="false">
+			<key column="userId"></key>
+			<element type="string" column="address"></element>
+		</set>
+     </class>
+ </hibernate-mapping>

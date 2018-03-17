@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ehcache>  
+  <!--如果缓存中的对象存储超过指定的缓存数量的对象存储的磁盘地址-->  
+  <diskStore path="E:/Eclipse/ehcache"/>  
+  
+  <!-- 默认cache：如果没有对应的特定区域的缓存，就使用默认缓存 -->  
+  <!-- 
+	maxElementsInMemory				：	内存中最大存储元素（对象），超过就存到硬盘
+	eternal							：	是否永久有效，一旦为true，timeout将不起作用  
+	timeToIdleSeconds				：	设置对象最大空闲时间，超过这个时间缓存就失效。默认为0，表示无穷大，eternal为false这项才有效
+	timeToLiveSeconds				：	失效前允许存活时间，eternal为false才有效
+	overflowToDisk					：	当内存的对象超过maxElementsInMemory
+	diskSpoolBufferSizeMB			：	这个参数设置DiskStore（磁盘缓存）的缓存区大小。默认是30MB。每个Cache都应该有自己的一个缓冲区。 
+	maxElementsOnDisk				：	硬盘最大缓存个数。
+	diskPersistent					：	是否缓存虚拟机重启期数据。默认为false
+	diskExpiryThreadIntervalSeconds	：	磁盘失效线程运行时间间隔，默认是120秒。
+	memoryStoreEvictionPolicy		：	当达到maxElementsInMemory限制时，Ehcache将会根据指定的策略去清理内存。默认策略是LRU（最近最少使用）。
+										你可以设置为FIFO（先进先出）或是LFU（较少使用）。
+	clearOnFlush					：	内存数量最大时是否清除。
+	
+   -->
+  <defaultCache maxElementsInMemory="10000"  
+                eternal="false"  
+                timeToIdleSeconds="300"   
+                timeToLiveSeconds="600"  
+                overflowToDisk="false"/>  
+  <!-- 指定区域cache：通过name指定，name对应到Hibernate中的区域名即可-->  
+<!--   <cache name="hibernate.demo21.domain.Employee"   -->
+<!--                 eternal="false"   -->
+<!--                 maxElementsInMemory="10"   -->
+<!--                 timeToIdleSeconds="1200"   -->
+<!--                 timeToLiveSeconds="1200"   -->
+<!--                 overflowToDisk="true">   -->
+<!--   </cache>   -->
+	
+</ehcache>

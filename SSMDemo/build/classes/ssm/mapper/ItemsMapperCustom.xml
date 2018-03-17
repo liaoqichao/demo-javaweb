@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="ssm.mapper.ItemsMapperCustom" >
+
+<!-- 定义商品查询的sql片段,因为这部分商品查询和分页的SELECT COUNT(*)都有用到，所以抽取出来 -->
+<sql id="query_items_where">
+	<!-- 使用动态sql，因为还有查询日期、查询价格等。 -->
+	<!-- 商品的查询条件是通过ItemsQueryVo对象中的哪个属性来传递？ -->
+	<if test="itemsCustom!=null">
+		<if test="itemsCustom.name!=null and itemsCustom.name!=''">
+			AND items.name LIKE '%${itemsCustom.name}%'
+		</if>
+		<if test="itemsCustom.price!=null">
+			AND items.price &lt;= #{itemsCustom.price}
+		</if>
+	
+	</if>
+</sql>
+<!-- 商品的列表查询 -->
+<!-- 建议parameterType传入包装对象ItemsQueryVo -->
+<!-- resultType建议使用扩展对象ItemsCustom
+	resultType不能为Items，因为如果将来SQL语句扩展，不只查询Items，则映射不了，需要用ItemsCustom 
+-->
+<select id="findItemsList" parameterType="ssm.po.ItemsQueryVo"
+	 resultType="ssm.po.ItemsCustom">
+	SELECT * FROM items  
+	<!-- where标签自动去掉WHERE字句第一个AND -->
+	<where>
+		<include refid="query_items_where"></include>
+	</where>
+	
+</select>
+ 
+</mapper>

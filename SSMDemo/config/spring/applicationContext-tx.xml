@@ -1,0 +1,49 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans-4.2.xsd 
+		http://www.springframework.org/schema/mvc 
+		http://www.springframework.org/schema/mvc/spring-mvc-4.2.xsd 
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context-4.2.xsd 
+		http://www.springframework.org/schema/aop 
+		http://www.springframework.org/schema/aop/spring-aop-4.2.xsd 
+		http://www.springframework.org/schema/tx 
+		http://www.springframework.org/schema/tx/spring-tx-4.2.xsd ">
+
+	<!-- 配置事务管理 
+		mybatis操作的数据库的事务进行控制，spring使用jdbc的事务控制类
+		在SSH2Demo项目中是使用Hibernate的事务控制类
+	-->
+	<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<!-- 配置数据源，dataSource在applicationContext-dao.xml中 
+		
+		-->
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	<!-- 通知 -->
+	<tx:advice id="txAdvice" transaction-manager="txManager">
+		<tx:attributes>
+			<!-- 传播行为 ,REQUIRED表示必须使用事务
+				SUPPORTS表示支持，如果没有事务也没关系。
+				name=save*表示以save开头的方法名都开启事务
+			-->
+			<tx:method name="save*" propagation="REQUIRED"/>
+			<tx:method name="delete*" propagation="REQUIRED"/>
+			<tx:method name="insert*" propagation="REQUIRED"/>
+			<tx:method name="update*" propagation="REQUIRED"/>
+			<tx:method name="find*" propagation="SUPPORTS" read-only="true"/>
+			<tx:method name="get*" propagation="SUPPORTS" read-only="true"/>
+			<tx:method name="select*" propagation="SUPPORTS" read-only="true"/>
+			
+		</tx:attributes>
+	</tx:advice>
+	
+	<!-- 配置aop，需要在哪个类的哪个方法(切点)上增强(advice) -->
+	<aop:config>
+		<aop:advisor advice-ref="txAdvice" pointcut="execution(* ssm.service.impl.*.*(..))"/>
+	</aop:config>
+
+</beans>

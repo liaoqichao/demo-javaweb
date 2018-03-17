@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script type="text/javascript" src="../js/jquery.js"></script>
+</head>
+<body>
+	<h1>jQuery节点操作</h1>
+	<div>您喜欢的城市：<br/></div>
+	<div>
+		<ul id="city">
+			<li id="bj">北京</li>
+			<li id="sh">上海</li>
+			<li id="tj">天津</li>
+		</ul>
+	</div>
+	<br/>
+	<div>您爱好的游戏：<br/></div>
+	<div>
+		<ul id="game">
+			<li id="fk">反恐</li>
+			<li id="cq">传奇</li>
+		</ul>
+	</div>
+	<ul id="ul-3"></ul>
+	<span>span-1</span><span>span-2</span><span>span-3</span>
+	<br/>
+	<button id="btn-1">使用外部插入法，在上海后面添加反恐li，并制定id</button><br/>
+	<button id="btn-2">使用外部插入法，把反恐移动到天津后</button><br/>
+	<button id="btn-3">使用内部部插入法，把反恐移动到天津后</button><br/>
+	<button id="btn-4">删除所有li节点</button><br/>
+	<button id="btn-5">清空所有li节点</button><br/>
+	<button id="btn-6">删除上海li节点</button><br/>
+	<button id="btn-7">克隆li节点，添加到最后一个ul(id=ul-3)最后面（内部插入）,不保留li点击事件</button><br/>
+	<button id="btn-8">克隆li节点，添加到最后一个ul(id=ul-3)最后面（内部插入）,保留li点击事件</button><br/>
+	<button id="btn-9">替换所有li为button</button><br/>
+	<button id="btn-10">把所有li节点，替换为button,button文本内容为li文本内容，button事件为弹出button的文本内容，每个button后添加一个换行</button>
+	
+<script type="text/javascript">
+$('#btn-1').click(function(){
+	var $myli = $('<li id="fk">反恐</li>');
+	$('#sh').after($myli);
+});
+$('#btn-2').click(function(){
+	$('#tj').after($('#fk'));
+});
+$('#btn-3').click(function(){
+	$('#city').append($('#fk'));
+});
+$('#btn-4').click(function(){
+	$('li').remove();
+});
+$('#btn-5').click(function(){
+	$('li').empty();
+});
+$('#btn-6').click(function(){
+	$('li').remove('#sh');  // 通常用下面
+// 	$('#sh').remove();
+});
+
+$('li').click(function(){
+	alert($(this).text());
+});
+
+$('#btn-7').click(function(){
+	$('li').clone().appendTo($('#ul-3'));
+});
+$('#btn-8').click(function(){
+	$('li').clone(true).appendTo($('#ul-3'));
+});
+$('#btn-9').click(function(){
+	// 替换所有li为button
+	// 方法一：
+// 	$('li').replaceWith("<button>替换后的按钮</button><br/>");
+	
+	// 方法二：
+	var $button = $('<button>替换后的按钮</button>');
+	$button.replaceAll($('li'));
+});
+$('#btn-10').click(function(){
+	
+	var $lis = $('li');
+	$lis.each(function(){
+		var text = $(this).text();
+		var $button = $('<button></button>'); // 创建元素
+		$button.text(text);	// 添加文本内容
+		$button.attr("class","changed"); // 添加属性
+		$button.click(function(){ // 给按钮绑定事件
+			alert($button.text());
+		});
+		$(this).replaceWith($button); // 用button替换掉li
+		$br = $('<br/>');
+	});
+	$('.changed').after($('<br/>')); //添加换行
+	
+});
+
+</script>
+</body>
+</html>

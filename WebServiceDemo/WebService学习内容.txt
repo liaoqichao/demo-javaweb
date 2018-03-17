@@ -1,0 +1,13 @@
+demo1 = 复习网络编程（socket）
+demo2 = 发布WebService和使用cmd命令wsimport方式调用Web服务
+demo3 = 通过ajax调用WebService
+demo4 = 通过UrlConnection调用WebService。dom4j+XPath解析带命名空间的XML
+demo5 = 通过客户端编程方式调用WebService
+demo6 = 练习：调用WebService服务获取天气预报
+demo7 = 使用CXF开发WebService(使用ServerFactoryBean和JaxWsServerFactoryBean两种方法)
+demo8 = 使用CXF开发WebSercie，规范化代码和使用wsdl2java生成客户端代码。加入消息拦截器
+demo9 = 使用SOAP1.2访问WebService服务
+demo10 = 基于Web的使用CXF发布WebService，使用Spring方式调用服务
+demo11 = 使用jQuery的ajax方式调用服务
+demo12 = WebService传输实体对象
+demo13 = Web项目获取手机号码归属地

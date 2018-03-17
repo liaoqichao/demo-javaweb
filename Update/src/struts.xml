@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+
+	<constant name="struts.multipart.maxSize" value="1073741824"/>
+    <constant name="struts.enable.DynamicMethodInvocation" value="false" />
+    <!--  指定action的后缀 -->
+    <constant name="struts.action.extension" value="do,action"></constant>
+    <!-- 在页面打印更详细的错误信息，信息内容就是控制台打印的异常信息 -->
+    <constant name="struts.devMode" value="true" />
+    <!-- 指定WEB应用的默认编码集，相当于调用request.setCharacterEncoding("UTF-8") -->
+    <constant name="struts.i18n.encoding" value="UTF-8"></constant>
+    
+    <!-- 指定配置信息里面对应的action类有spring负责创建 -->
+    <constant name="struts.objectFactory" value="spring"></constant>
+   
+	<!-- 表单标签中的checkboxlist中会自动生成一些没用的html代码，例如主题，通过这个把和主题相关的html代码删除。 -->
+	<constant name="struts.ui.theme" value="simple"/>
+	
+	<!-- 上传文件存放临时目录 -->
+<!-- 	<constant name="struts.multipart.saveDir" value="E:/Eclipse/struts2tempfile"/> -->
+	
+    <package name="default" namespace="/" extends="struts-default">
+
+        <default-action-ref name="index" />
+
+        <global-results>
+            <result name="error">/WEB-INF/jsp/error.jsp</result>
+        </global-results>
+        
+
+        <global-exception-mappings>
+            <exception-mapping exception="java.lang.Exception" result="error"/>
+        </global-exception-mappings>
+
+    </package>
+
+    <include file="example.xml"/>
+
+    <!-- Add packages here -->
+    <!-- 
+    	xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    	xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    	xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+     -->
+	
+	<package name="client" namespace="/client" extends="json-default">
+<!-- 		<interceptors> -->
+<!-- 			<interceptor name="loginInterceptor" class="update.web.action.LoginInterceptor"></interceptor> -->
+<!-- 			<interceptor-stack name="loginStack"> -->
+<!-- 				<interceptor-ref name="defaultStack"></interceptor-ref> -->
+<!-- 				<interceptor-ref name="loginInterceptor"></interceptor-ref> -->
+<!-- 			</interceptor-stack> -->
+<!-- 		</interceptors> -->
+<!-- 		<default-interceptor-ref name="loginStack"></default-interceptor-ref> -->
+<!-- 		<global-results> -->
+<!-- 			<result name="login">/jsps/login.jsp</result> -->
+<!-- 			<result name="index">/index.jsp</result> -->
+<!-- 		</global-results> -->
+		<action name="clientAction_*" class="clientAction" method="{1}">
+		<!-- 如果少了type=json，返回的是整个页面，而不是json字符串 -->
+			<result name="searchClient" type="json">
+				<param name="location">/jsps/searchClient.jsp</param>
+				<param name="root" >cb</param>
+			</result>
+			<result name="showclient">/jsps/showclient.jsp</result>
+			<result name="showclientlist">/jsps/showclientlist.jsp</result>
+			<result name="specificUpdate" type="json">
+				<param name="location">/jsps/specificUpdate.jsp</param>
+				<param name="root">clientBeanList</param>
+			</result>
+<!-- 			<interceptor-ref name="loginStack"> -->
+<!-- 				需要拦截的方法，多个方法用逗号隔开 -->
+<!-- 				<param name="includeMethods"></param> -->
+<!-- 				不需要拦截的方法 -->
+<!-- 				<param name="excludeMethods">list,list2,single,single2</param> -->
+<!-- 			</interceptor-ref> -->
+		</action>
+	</package>
+	
+	<package name="verUpdate" namespace="/verUpdate" extends="struts-default">
+	<interceptors>
+			<interceptor name="loginInterceptor" class="update.web.action.LoginInterceptor"></interceptor>
+			<interceptor-stack name="loginStack">
+				<interceptor-ref name="defaultStack"></interceptor-ref>
+				<interceptor-ref name="loginInterceptor"></interceptor-ref>
+			</interceptor-stack>
+		</interceptors>
+		<default-interceptor-ref name="loginStack"></default-interceptor-ref>
+		<global-results>
+			<result name="login">/jsps/login.jsp</result>
+			<result name="index">/index.jsp</result>
+		</global-results>
+		<action name="verUpdateAction_*" class="verUpdateAction" method="{1}">
+			<result name="release">/jsps/release.jsp</result>
+			<result name="release_uploadify">/jsps/release_uploadify.jsp</result>
+			<result name="addLargeFile">/jsps/addLargeFile.jsp</result>
+		</action>
+	</package>
+	
+	<package name="version" namespace="/version" extends="json-default">
+		<interceptors>
+			<interceptor name="loginInterceptor" class="update.web.action.LoginInterceptor">
+				<param name="includeMethods">specificUseVersion</param>
+				<param name="excludeMethods">listc,list2,list</param>
+			</interceptor>
+			<interceptor-stack name="loginStack">
+				<interceptor-ref name="defaultStack"></interceptor-ref>
+				<interceptor-ref name="loginInterceptor"></interceptor-ref>
+			</interceptor-stack>
+		</interceptors>
+		<default-interceptor-ref name="loginStack"></default-interceptor-ref>
+		<global-results>
+			<result name="login">/jsps/login.jsp</result>
+			<result name="index">/index.jsp</result>
+		</global-results>
+		<action name="versionAction_*" class="versionAction" method="{1}">
+			<result name="showVersion">/jsps/showVersion.jsp</result>
+			<result name="useVersion">/jsps/useVersion.jsp</result>
+			<result name="specificUpdate" type="json">
+				<param name="location">/jsps/specificUpdate.jsp</param>
+				<param name="root">{versionList,message}</param>
+			</result>
+<!-- 			<interceptor-ref name="loginStack"> -->
+<!-- 				<param name="includeMethods">specificUseVersion</param> -->
+<!-- 				<param name="excludeMethods">list,list2,listc</param> -->
+<!-- 			</interceptor-ref> -->
+		</action>
+	</package>
+	
+	<package name="versionjson" namespace="/versionjson" extends="json-default">
+		<interceptors>
+			<interceptor name="loginInterceptor" class="update.web.action.LoginInterceptor">
+				<param name="includeMethods">useVersion</param>
+				<param name="excludeMethods">versionBean,versionBean2</param>
+			</interceptor>
+			<interceptor-stack name="loginStack">
+				<interceptor-ref name="defaultStack"></interceptor-ref>
+				<interceptor-ref name="loginInterceptor"></interceptor-ref>
+			</interceptor-stack>
+		</interceptors>
+		<default-interceptor-ref name="loginStack"></default-interceptor-ref>
+<!-- 		<global-results> -->
+<!-- 			<result name="login">/jsps/login.jsp</result> -->
+<!-- 			<result name="index">/index.jsp</result> -->
+<!-- 		</global-results> -->
+		<action name="versionJSONAction_*" class="versionJSONAction" method="{1}">
+			<result name="showVersion" type="json">
+				<param name="location">/jsps/showVersion.jsp</param>
+				<param name="root">version</param>
+			</result>
+			<result name="useVersion" type="json">
+<!-- 				<param name="location">/jsps/useVersion.jsp</param> -->
+				<param name="location">/version/versionAction_list2</param>
+				<param name="root">{message,version}</param>
+			</result>
+			<result name="specificUpdate" type="json">
+				<param name="location">/jsps/specificUpdate.jsp</param>
+				<param name="root">clientBeanList</param>
+			</result>
+			<result name="login">/jsps/login.jsp</result>
+			<result name="index">/index.jsp</result>
+		</action>
+	</package>
+
+	<package name="userAction" namespace="/user" extends="struts-default">
+		<action name="userAction_*" class="userAction" method="{1}">
+			<result name="index">/index.jsp</result>
+			<result name="login">/jsps/user/login.jsp</result>
+			<result name="modifyPsw">/jsps/user/modifyPsw.jsp</result>
+		</action>
+	</package>
+</struts>

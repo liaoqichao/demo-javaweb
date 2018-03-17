@@ -1,0 +1,56 @@
+# ...
+JavaWebDemo1 = Servlet : Servlet JavaWeb三大组件之一,实现Servlet的第一个方法
+JavaWebDemo2 = GenericServlet :  实现Servlet的第二个方法
+JavaWebDemo3 = HttpServlet : 实现Servlet的第三个方法
+JavaWebDemo4 = ServletContext : ServletContext域。传递信息。
+JavaWebDemo5 = ServletContext : 获取全局初始化参数
+JavaWebDemo6 = ServletContext : 获取真实路径(metadata或者tomcat的wtpwebapps)
+JavaWebDemo7 = ServletContext : 通过application进行流量统计
+JavaWebDemo8 = ClassLoader : 通过ClassLoader获取/src路径
+JavaWebDemo9 = HttpServletResponse : 发送状态码、响应头(refresh头定时刷新、禁用浏览器缓存)
+JavaWebDemo10 = HttpServletResponse : 重定向
+JavaWebDemo11 = HttpServletRequest : 获取ip、请求头(User-Agent、Referer[防盗链])，请求方式 
+JavaWebDemo12 = HttPServletRequest : 获取URL信息(协议名称、服务器名称、端口号、项目名称(上下文路径)、Servlet路径、部分参数、URI、URL)
+JavaWebDemo13 = HttpServletRequest : 获取请求参数
+JavaWebDemo14 = HttpServletRequest : 请求转发、请求包含
+JavaWebDemo15 = Encoding : POST请求和GET请求的请求编码问题和响应编码问题
+JavaWebDemo16 = JSP : Java Server Pages入门
+JavaWebDemo17 = JSP : JSP和Servlet的结合
+JavaWebDemo18 = Cookie : Cookie是响应头。服务器响应Cookie给浏览器，下次访问，浏览器把Cookie归还给服务器
+JavaWebDemo19 = Cookie : Cookie的最大存活时间maxAge
+JavaWebDemo20 = Session : 向Session域存取数据
+JavaWebDemo21 = Session : 案例:登录后把登录信息保存到session域中，访问其他网页不需要再次登录。如果session域没有该信息，访问网页都弹到登录页面。EX:验证码类
+JavaWebDemo22 = JSP : JSP命令<%@ page %>九大内置对象exception,<%@ page 中添加errorPage属性%>
+JavaWebDemo23 = JSP : JSP命令<%@ include %>静态包含。基本没用！补：JSP九大内置对象
+JavaWebDemo24 = JavaBean : JavaBean的必要条件和JavaBean属性的定义
+JavaWebDemo25 = JavaBean : 使用BeanUtils把map封装到JavaBean中(依赖内省，内省依赖反射)
+JavaWebDemo26 = EL : 使用EL表达式的JavaBean导航功能${requestScope.user.name } == request.getAttribute("user").getName();
+JavaWebDemo27 = EL : EL表达式的11大内置对象
+JavaWebDemo28 = EL : EL函数库(由jstl提供，<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>)
+JavaWebDemo29 = EL : 自定义EL函数库、tld文件
+JavaWebDemo30 = JSTL : JSTL核心标签库 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+JavaWebDemo31 = JSTL : JSTL格式化标签库(格式化日期，数字)<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+JavaWebDemo32 = JSTL : 自定义标签
+JavaWebDemo33 = JavaWeb : MVC设计模式、JavaWeb三层架构的Hello world
+JavaWebDemo34 = JavaWeb : 完成网页的注册和登录，数据库用XML
+# ...MySQL
+JavaWebDemo35 = JNDI : Tomcat配置JNDI资源、ThreadLocale
+JavaWebDemo36 = BaseServlet : 可以让一个Servlet可以处理多个请求。
+JavaWebDemo37 = Listener : 监听器的生命周期。JavaWeb三大组件之一、观察者模式、演示ServletContextListner监听ServletContext的创建和销毁。HttpSessionListener和ServletRequestListener一样
+JavaWebDemo38 = Listener : 演示ServletContextAttributeListener。HttpSessionAttributeListener和ServletRequestAttributeServlet一样
+JavaWebDemo39 = Listener : HttpSessionBindingListener。session的序列化、反序列化。
+JavaWebDemo40 = Listener : HttpSessionActivationListener。session的钝化、活化。
+JavaWebDemo41 = ResourceBundle : 国际化。Locale类、ResourceBundle类
+JavaWebDemo42 = Filter : 演示过滤器，过滤器的生命周期。
+JavaWebDemo43 = Filter : 多个过滤器的执行过程。(过了一关还有一关，全部都放行才给过)
+JavaWebDemo44 = Filter : 案例:分ip进行访问量统计
+JavaWebDemo45 = Filter : 案例:粗粒度权限控制。细粒度权限控制
+JavaWebDemo46 = Filter : 案例:解决全站乱码问题
+JavaWebDemo47 = Filter : 案例:页面静态化(减轻数据库压力、增加页面访问速度、提高收录比)
+JavaWebDemo48 = Upload/Download : 上传DiskFileItemFactory、ServletFileUpload、FileItem。表单属性enctype="multipart/form-data"。下载两个头一个流Content-Type、Content-Disposition、IOUtils.copy(in,out)，装饰response
+JavaWebDemo49 = JavaMail : 发送邮件,3个类(session、MimeMessage、Transport)和MailUtils的使用
+JavaWebDemo50 = ajax : ajax和封装成函数，json,JSONObject，JSONArray。XStream，把实体类转化为XML文件的标签
+JavaWebDemo51 = beanFactory
+JavaWebDemo52 = servlet3.0异步处理和上传
+JavaWebDemo53 = 动态代理
+JavaWebDemo54 = 类加载器ClassLoader

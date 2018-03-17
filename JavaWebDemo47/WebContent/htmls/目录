@@ -1,0 +1,4 @@
+E:\Eclipse\workspace\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\JavaWebDemo47\htmls\1.html
+或者E:\tomcatanzhuang\apache-tomcat-8.0.24-windows-x64\apache-tomcat-8.0.24\wtpwebapps\下
+右键下面的Tomcat Server，选择properties选择switch location，然后双击Tomcat  Server在Serverlocation中选择。
+第一个是metadata，第二个是tomcat，第三个是自定义

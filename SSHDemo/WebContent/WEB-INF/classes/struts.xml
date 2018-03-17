@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+
+    <constant name="struts.enable.DynamicMethodInvocation" value="false" />
+    <constant name="struts.devMode" value="true" />
+    <constant name="struts.multipart.maxSize" value="20971520"></constant>
+    <!-- 国际化：全局范围的资源文件 -->
+    <constant name="struts.custom.i18n.resources" value="itcast"></constant>
+    <!-- 设置上传文件总大小为20M,这是通过WEB上传文件，上传大文件经常失败的。实际上上传视频等大文件需要安装一个插件（通讯软件）
+		 这个插件可以理解为继承在浏览器的迅雷（通过socket连接到服务器，发送二进制服务器）。	    
+     -->
+<!--     <constant name="struts.action.extension" value="do,action"></constant> -->
+    <!-- 这是是将action的URL后缀从.action改成.do -->
+	
+	<!-- 表单标签中的checkboxlist中会自动生成一些没用的html代码，例如主题，通过这个把和主题相关的html代码删除。 -->
+	<constant name="struts.ui.theme" value="simple"/>
+	
+	<!-- 包含struts配置文件 -->
+	<include file="struts-department.xml"></include>
+	<include file="struts-employee.xml"></include>
+	
+    <package name="default" namespace="/" extends="struts-default">
+
+        <default-action-ref name="index" />
+
+        <global-results>
+            <result name="error">/WEB-INF/jsp/error.jsp</result>
+        </global-results>
+        
+
+        <global-exception-mappings>
+            <exception-mapping exception="java.lang.Exception" result="error"/>
+        </global-exception-mappings>
+
+<!--         <action name="index"> -->
+<!--             <result type="redirectAction"> -->
+<!--                 <param name="actionName">HelloWorld</param> -->
+<!--                 <param name="namespace">/example</param> -->
+<!--             </result> -->
+<!--         </action> -->
+    </package>
+
+    <include file="example.xml"/>
+
+    <!-- Add packages here -->
+    <!-- 
+    	xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    	xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    	xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+     -->
+	<package name="base" extends="struts-default"><!-- 没有命名空间，默认空字符串 -->
+		<global-results>
+			<result name="msg">/msg.jsp</result><!-- 方法里面要return "msg" -->
+		</global-results>
+	</package>
+	
+	<package name="demo1" namespace="/demo1" extends="base">
+		<action name="hello" method="execute" class="struts2.demo1.HelloAction">
+			<result name="success">/WEB-INF/pages/hello.jsp</result>
+		</action>
+		
+		<action name="redirect">
+			<result type="redirect">/index.jsp</result>
+		</action>
+		
+	</package>
+	
+	<package name="demo2" namespace="/demo2" extends="base">
+<!-- 		<global-results> -->
+<!-- 			<result name="msg">/msg.jsp</result>方法里面要return "msg" -->
+<!-- 		</global-results> -->
+	
+		<action name="redirect" class="struts2.demo2.Demo2Action">
+			<result type="redirect">
+				<param name="location">/jsps/demo2.jsp?username=${username}</param>
+				<param name="encode">true</param>
+			</result>
+		</action>
+		
+		<action name="redirectAction">
+			<result type="redirectAction">
+				<param name="namespace">/demo1</param>
+				<param name="actionName">redirect</param>
+			</result>
+<!-- 				<result type="redirect">/demo2/redirect</result> -->
+		</action>
+		
+		<action name="plainText">
+			<result type="plainText">
+				<param name="location">/index.jsp</param>
+				<param name="charSet">UTF-8</param><!-- 指定读取文件的编码 -->
+			</result>
+		</action>
+		
+		<action name="msg" class="struts2.demo2.Demo2Action" method="exec1">
+			<!-- 这里的exec1的return是"msg"，这个msg是它的包所继承的base包的global-results中的result的name -->
+		</action>
+	</package>
+	
+	<package name="demo3" namespace="/demo3" extends="base">
+		<action name="aaction" class="struts2.demo3.AAction" method="test1">
+			<param name="savePath">/images</param>
+			<result name="success">/msg.jsp</result>
+		</action>
+	</package>
+	
+	<package name="demo7" namespace="/demo7" extends="base">
+		<action name="aaction_*" class="struts2.demo7.AAction" method="{1}">
+		<!-- 下划线可以不加，这里只是为了区分action和方法名。
+			 *为通配符。
+			 这里metod中的{1}表示第一个*(通配符)
+			 aaction_execute  ->struts2.demo7.AAction#execute() /{1}.jsp   /execute.jsp
+		 -->
+			<result>/msg.jsp</result>
+		</action>
+		<action name="baction_*" class="struts2.demo7.BAction" method="{1}">
+			<result>/msg.jsp</result>
+		</action>
+	</package>
+	
+	<package name="demo8" namespace="/demo8" extends="base">
+		<action name="aaction_*" class="struts2.demo8.action.AAction" method="{1}">
+			<result>/jsps/demo8/b.jsp</result>
+		</action>
+	</package>
+	
+	<package name="demo9" namespace="/demo9" extends="base">
+		<action name="aaction_*" class="struts2.demo9.action.AAction" method="{1}">
+			<result>/jsps/demo9/a.jsp</result>
+		</action>
+	</package>
+	
+	<package name="demo10" namespace="/demo10" extends="base">
+		<action name="aaction_*" class="struts2.demo10.action.AAction" method="{1}">
+			<result>/jsps/demo10/a.jsp</result>
+		</action>
+	</package>
+	
+	<package name="demo11" namespace="/demo11" extends="base">
+		<interceptors>
+			<interceptor name="permission" class="struts2.demo11.interceptor.Permission"></interceptor>
+			<interceptor-stack name="permissionStack">
+				<interceptor-ref name="defaultStack"></interceptor-ref>
+				<!-- struts自带的拦截器栈，这样要放在最前面，这样才能最先执行 -->
+				<interceptor-ref name="permission"></interceptor-ref><!--自己的拦截器  -->
+			</interceptor-stack>
+		</interceptors>
+		<!-- 给这个包下所有action添加拦截器 -->
+		<default-interceptor-ref name="permissionStack"></default-interceptor-ref>
+		<action name="aaction_*" class="struts2.demo11.action.AAction" method="{1}">
+			<!--给一个action添加拦截器  -->
+<!-- 			<interceptor-ref name="permissionStack"></interceptor-ref> -->
+		</action>
+	</package>
+	
+	<package name="demo12" namespace="/demo12" extends="base">
+		<action name="aaction_*" class="struts2.demo12.action.AAction" method="{1}">
+			<!-- 这里用global的msg视图 -->
+			<result name="input">/jsps/demo12/a.jsp</result>
+			<!-- 如果fielderror有错误信息，就会返回到input视图，通常就是表单输入的那个网页，需要先准备好！ -->
+		</action>
+		<action name="baction_*" class="struts2.demo12.action.BAction" method="{1}">
+			<result name="input">/jsps/demo12/a.jsp</result>
+		</action>
+	</package>
+	
+	<package name="demo13" namespace="/demo13" extends="base">
+		<action name="aaction_*" class="struts2.demo13.action.AAction" method="{1}">
+			<result name="msg">/msg.jsp</result>
+		</action>
+	</package>
+	
+	<package name="demo14" namespace="/demo14" extends="base">
+		<action name="aaction_*" class="struts2.demo14.action.AAction" method="{1}">
+			<result>/jsps/demo14/a.jsp</result>
+		</action>
+	</package>
+	
+	<package name="demo15" namespace="/demo15" extends="struts-default">
+		<action name="aaction_*" class="struts2.demo15.action.AAction" method="{1}">
+			<interceptor-ref name="defaultStack"/>
+<!-- 			<interceptor-ref name="token"/> 用这个会出现空指针异常-->
+			<interceptor-ref name="tokenSession"></interceptor-ref>
+			<result name="success">/jsps/demo15/result.jsp</result>
+			<result name="invalid.token">/jsps/demo15/b.jsp</result>
+		</action>
+	</package>
+</struts>

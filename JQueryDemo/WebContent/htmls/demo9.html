@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script type="text/javascript" src="../js/jquery.js"></script>
+<link rel="stylesheet" href="../css/demo6.css" type="text/css"/>
+</head>
+<body>
+	<h1 class="title">内容过滤选择器</h1>
+	
+	<div id="div-1" class="layer-0">我是div-1</div><br/>
+	<div id="div-2" class="layer-0">我是div-2
+		<div id="div-2-1" class="layer-1">我是div-2-1</div>
+		<div id="div-2-2" class="layer-1">我是div-2-2</div>
+	</div><br/>
+	<div id="div-3" class="layer-0">我是div-3
+		<div id="div-3-1" class="layer-1">我是div-3-1</div>
+		<span id="div-3-span-1" class="layer-1">我是div-3-span-1</span>
+	</div>
+	<div id="div-4" class="layer-0"></div>
+	<br/>
+	<span class="layer-0" id="span-1">这里是span-1</span>
+	<span class="layer-0" id="span-2">这里是span-2</span>
+	<br/>
+	<button id="btn-1">改变含文本“-1”的div元素的背景色</button>
+	<button id="btn-2">改变不含子元素（或者文本元素）的div元素的背景色</button>
+	<button id="btn-3">改变含有class为layer-1（这个class是所指的元素是被选中的元素的子元素）的div元素的背景色</button>
+	<button id="btn-4">改变含子元素（或者文本元素）的div元素的背景色</button>
+	<button id="btn-5">改变不含文本“-1”的div元素的背景色</button>
+	<button id="btn-6">改变索引值大于3的div元素的背景色</button>
+<script type="text/javascript">
+$('.title').css("text-align","center");
+
+$('#btn-1').click(function(){
+	$('div:contains("-1")').css("background","#00ffff");
+});
+
+$('#btn-2').click(function(){
+	$('div:empty').css("background","#00ffff");
+});
+
+$('#btn-3').click(function(){
+	// 选的是.layer-1元素的父元素
+	$('div:has(.layer-1)').css("background","#00ffff");
+});
+
+$('#btn-4').click(function(){
+	$('div:parent').css("background","#00ffff");
+});
+
+$('#btn-5').click(function(){
+	// 与基本过滤选择器一起用
+	$('div:not(:contains("-1"))').css("background","#00ffff");
+});
+
+$('#btn-6').click(function(){
+	$('div:gt(3)').css("background","#00ffff");
+});
+</script>
+</body>
+</html>

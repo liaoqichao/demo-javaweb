@@ -1,0 +1,469 @@
+1.Spring是什么
+	* Spring是一个开源的控制反转(IoC)和面向切面(AOP)的容器框架。它的主要目的是为了简化企业开发。
+	
+2.控制反转(IoC)
+	代码：
+	class PersonServiceImpl{
+		private PersonDao personDao = new PersonDaoImpl();
+		//	这里的personDao是内部创建和维护的。反转控制就是应用不负责创建和维护，
+		//	依赖对象的创建和维护交给外部容器(Spring)负责。
+		//	控制权的转移，就叫做反转。
+	}
+	
+3.依赖注入(Dependency Injection)
+	所谓依赖注入是指：在运行期间，由外部容器动态地将依赖对象注入到组件中。
+	代码：
+	class PersonServiceImpl{
+		private PersonDao personDao;	//业务层只有DAO接口，并没有实现类，实现类在运行期外部注入。
+		//通过构造函数注入，也可以通过setter的方法进行注入
+		public PersonServiceImpl(PersonDao personDao){
+			this.personDao = personDao;
+		}
+		//业务
+		public void save (Person person){
+			personDao.save(person);
+		}
+	}
+	
+4.Spring的好处
+	* 降低组件之间的耦合度，实现各层之间的解耦。
+	* 使用spring时，容器提供众多服务
+		> 事务管理服务。业务层一个注解，dao层2个对象分别一个注解，通过修改注解来控制两个dao调用的方法是否在同一个事务
+		> JMS服务
+		> Sping Core 核心服务
+		> 持久化服务
+		> 其它...
+	* 容器提供单例模式支持，开发人员不再需要自己编码实现。
+	* spring容器提供AOP技术，利用它很容易实现如权限拦截、运行期监控等功能。
+	* spring提供辅助类，如：JdbcTemplate、HibernateTemplate
+	* spring对于主流应用框架提供了继承支持，如：struts2，hibernate。
+	
+5.搭建spring开发环境
+	* 导包
+		> E:\Java\JAR\SSH\spring都导入，commons-logging可能在别的框架已经导入了，如果导入了就不用再导入。
+	* 配置文件
+		> 名字随意。建议叫做beans.xml,默认叫做applicationContext.xml
+		> 路径随意。建议在/src下
+		> 模板：spring-framework-4.2.3.RELEASE\docs\spring-framework-reference\htmlsingle\index.html
+			搜索<beans>就找得到
+	* 检测环境是否搭建成功——实例化Spring容器
+		> (建议)方法一：在类路径下寻找配置文件来实例化容器
+		ApplicationContext ctx = new ClassPathXmlApplicationContext(new String[]{"beans.xml"});
+		> 方法二：在系统路径下寻找配置文件来实例化容器
+		ApplicationContext ctx = new FileSystemXmlApplicationContext(new String[]{e:\\beans.xml});
+		> Spring的配置指定多个，所以用String数组传入。
+		
+6.第一例：把业务bean交给spring管理
+	* 前提：要有service接口和实现类
+	* 配置文件：添加<bean name="personService" class="全限定名">就会被spring管理
+	* 代码：
+		> 获取ApplicationContext
+			ApplicationContext ctx = new ClassPathXmlApplicationContext("beans.xml");
+		> 接口类型引用被管理的对象
+			PersonService personService = ctx.getBean(PersonService.class,"personService");
+		> 接口类型调用方法
+			personService.save();
+			
+7.Spring管理bean的原理。
+	* dom4j解析beans.xml文件，把beans下的bean标签用一个Bean类存放，用一个List把所有Bean类存放。
+		每个Bean有id属性和class属性。
+	* 把List中的每个Bean实例化。并放到Map中，Map的key为Bean.id。Map的value为通过class属性的值反射出来的类的实例。
+	* 提供getBean(String id)方法。通过bean标签的id（即Map的key）返回实例化的对象（Map.value）
+	
+8.三种实例化Bean的方法
+	建议使用第一种。
+	* 用类构造器实例化
+		配置文件：<bean id="personService" class="spring.demo2.service.PersonService"/>
+		代码：
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("beans.xml");
+		PersonService personService = ctx.getBean(PersonService.class,"personService");
+		
+	* 使用静态工厂实例化
+		配置文件：
+		<bean id="demo3_personService" class="spring.demo3.service.PersonServiceFactory" factory-method="createPersonServiceBean"></bean>
+		代码：创建PersonServiceFactory类，里面创建个静态的createPersonServiceBean方法，返回PersonServiceBean
+		
+	* 实例化工厂方法实例化
+		配置文件：
+			> 把工厂bean交给spring管理
+			<bean id="demo3_personServiceFactory" class="spring.demo3.service.PersonServiceFactory"/>
+			
+			> 通过factory-bean引用工厂bean，factory-method指定工厂类的方法。这里的factory-bean要和工厂bean的id一样。
+			<bean id="demo3_personService2" factory-bean="demo3_personServiceFactory" factory-method="createPersonServiceBean2"/>
+			
+		代码：创建PersonServiceFactory类，里面创建个非静态的createPersonServiceBean方法，返回PersonServiceBean
+		
+7.配置spring管理的bean的作用域
+	* 默认从spring中getBean()得到的对象是单例的。
+	* bean的作用域
+		> singleton
+		> prototype
+		> request
+		> session
+		> global session 指的是ServletContext application
+	* 指定作用域范围是通过<bean scope=""/>来实现
+	* 注意：使用prototype时。这个时候只能用ctx.getBean(String name);获取bean。
+		不能使用ctx.getBean(Class<T> clazz, String name);来获取bean。
+		
+8.spring管理bean的生命周期
+	* 如何实验？
+		> 在PersonServiceBean添加构造函数，输出一句话。
+	* 作用域是单例：在spring容器实例化时就对bean实例化。
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("beans");就是spring容器。
+	* 作用域是prototype：
+		在ctx.getBean("...")的时候实例化
+	* bean的lazy-init属性：延迟初始化
+		> lazy-init="false"：在容器初始化时实例化bean
+		> lazy-init="true"：在getBean时候实例化bean
+		> lazy-init="default"：单例时在容器初始化时实例化bean，原型时在getBean时候实例化bean
+	* beans的lazy-init属性
+		> 在beans标签下的属性是全局的，beans下的所有bean都会使用lazy-init
+	* lazy-init="true"尽量少用true，因为要在运行期才会发现错误。
+	* init-method属性：
+		> 当bean被实例化之后就会执行init-method所指定的方法。通常用于打开数据库连接等打开资源。
+	* destory-mothod属性：
+		> 前提spring对象的引用类型为AbstractApplicationContext；调用ctx.close()关闭资源时，才会销毁bean。
+			bean要是单例的。
+		> 当bean被销毁前执行destory-method指定的方法。通常用于关闭资源。默认是在spring容器关闭才会销毁。
+		
+9.spring依赖注入
+
+	* 依赖注入可以采用手动装配和自动装配两种方式。建议使用手工装配，因为自动装配错了也不知道怎么办。
+		> 手工装配：前面的使用构造器，使用setter都要在配置文件进行配置，这叫做手工装配。
+			使用@Aotowrited和@Resource注解方式进行装配也属于手工装配。
+		> 自动装配：
+			bean上属性autowire="byType";
+			<> autowire属性的值：
+				byType:根据属性类型找，找到多个抛出异常，没找到设置为null
+				byName:根据成员变量名和bean的id来匹配，如果没找到设置为null
+				constructor:按照构造参数的类型来查找。如果没有找到抛出异常。例如：public abc(String.class,Person.class)
+				autodelect:通过内省机制，如果发现默认构造器就按照byType，如果没有就按照constructor
+				
+	* 结构：
+												    依赖注入
+										  			|
+									|----------------------------------------|
+						 		手工装配									    自动装配
+					|-----------------------------|							|
+		 		使用XML配置						使用注解				bean上添加autowire属性，有4个值（方案）
+		 	|----------------|			|----------------|
+		 使用构造器注入		使用setter注入	 @Resoure		 @Autowired
+		 
+	* 建议：成员变量如果是bean，建议用@Resource注解注入，如果是String和基本类型，建议用xml配置，提供setter方法注入。
+	* 为属性注入依赖对象：
+		> 使用构造器注入
+			<constructor arg index="" type="" value或者ref=""/>
+			index:参数下标，从0开始
+			type：参数类型。例如java.lang.String 或者spring.demo7.dao.PersonDao。
+				如果是基本类型或者String可以省略不写
+			value:值，直接写
+			ref:引用别的bean
+		> 使用Field注入（基于注解的方式）
+			导入commons-annotation.jar
+			引入命名空间.在beans的属性：
+			xmlns:context="http://www.springframework.org/schema/context" 
+			xsi:schemaLacation中添加
+			http://www.springframework.org/schema/context
+			http://www.springframework.org/schema/context/spring-context-4.0.xsd
+			
+			<> @Autowired默认按类型装配
+				成员通常是接口类型引用，@Autowired会找实现这个接口类型的bean来进行装配。
+				--> 在@Autowired后添加注解@Qualifier("demo8_personDao")
+					修改autowired的默认按类装配方式，变为按名称装配
+				--> Autowired的属性：
+					required：默认为true。表示被注解的成员变量必要给它注入值。如果实在找不到就抛出异常。如果设置为false
+						找不到就设置为null
+			<> @Resource默认按名称装配，如果找不到相对的名称才按照类型装配。@Resource如果不指定name属性，如果成员变量名
+				和配置文件中的bean的id相同，就会把那个bean注入进来，指定了name属性就是name属性值和配置文件中的bean的id
+				进行匹配。例如：@Resource(name="demo8_personDao")
+				--> 实在找不到就注入不了，属性为null.
+				--> 除了可以在成员变量上使用@Resource属性注入值，还可以在public void setXxx(..)方法上添加注解，
+					执行方法注入值。
+				
+			<> 建议使用@Resource注解，因为@Resource是JAVA EE提供，@Autowired是Spring提供。
+			<> 如果类型是不是bean而是基本类型或者String，推荐使用xml的方式注入
+			
+		> 提供setter注入
+			<> 基本类型注入
+				<bean>
+					<constructor-arg index="0" type="java.lang.String" value="xxx"/>构造器注入
+					<property name="name" value="zhangSan"/>使用属性的setter方法注入
+				</bean>
+		
+			<> 注入其他bean
+				--> 方法一：
+					<bean id="personABC" class="..."></bean>
+					<bean>
+						<property name="person" ref="personABC"/>使用属性的setter方法注入,引用别的对象
+					</bean>
+				--> 方法二：(使用内部bean，但该bean不能被其他bean引用)
+					<bean>
+						<property name="personABC">
+							<bean class="..."/>
+						</property>
+					</bean>
+			
+			<> 注入集合类型的对象
+				--> set	
+					<property>下使用set标签,set标签下使用value标签，标签内容为set集合的值
+				--> list	
+					<property>下使用list标签,list标签下使用value标签，标签内容为list集合的值
+				--> properties 
+					<property>下使用props标签，props标下下使用prop标签，key属性为properties的key，
+					标签内容为properties的值
+				--> map
+					<property>下使用map标签，map标签下使用entry标签，entry标签的key属性和value属性指定Map的键和值
+			
+10.让spring自动扫描和管理bean
+	存在的问题：一个项目有很多类，beans.xml中就会有很多<bean>标签，尽管用注解注入了一些bean的属性，但是还是很臃肿。
+	* 通过在classpath自动扫描方式把组件纳入spring容器管理。
+		> 第一步：引入context命名空间。注解注入的时候已经引入了。
+		> 第二步：打开组件扫描，并指定要扫描的包
+			 <context:component-scan base-package="spring.demo9"></context:component-scan>
+		> 第三步：组件自动扫描机制，可以在类路径下寻找标注了@Component，@Service，@Controller，@Repository
+			注解的类，并纳入spring容器管理。这样就相当于在beans.xml中配置<bean>
+			
+	* @Service用于标注业务层的组件。
+	* @Controller用于标注控制器组件。
+	* @Repository用于标注数据访问组件，即DAO组件。
+	* @Component泛指组件，当组件不好归类的时候用这个。
+	* 这些注解都是标在具体类上，而不是接口
+	* 但是用配置文件是通过bean的id来getBean。现在xml没配置，用什么来getBean呢？
+		> 默认是类的简单名称，例如PersonServiceBean  -> getBean("personServiceBean")
+		> 修改bean的默认名称  @Service("demo9_personService")  ->getBean("demo9_personService")
+		> 指定作用域:通过Scope注解指定作用域。@Scope("prototype")
+		> 指定初始化方法：在要初始化的方法上添加@PostConstruct注解。这个注解时EJB3的
+		> 指定销毁方法：在类要销毁前执行的方法上@PreDestroy注解。一个叫构造后，一个叫销毁前。
+		
+11.AOP
+	* 通常用于细粒度权限控制
+	* 横切性关注点：
+		> 思考的步骤，例如：
+			1.拦截所有业务方法
+			2.判断用户是否有权限
+				<> 如果user为null，表示没有权限，不能调用3个方法
+ 				<> 如果user不为null，表示又权限，可以调用3个方法。	
+	* 使用第三方创建代理对象的框架cglib。使用代理工厂,需要实现MethodInterceptor方法
+		> 创建public Object createProxy(Object targetObject)方法。返回代理对象
+			需要用到Enhancer类
+		> 重写intercept方法。这个是回调方法。
+	* AOP中的概念
+		> 关注点：
+			<> 核心关注点: 关注系统的业务逻辑 --> OOP
+			<> 横切性关注点：关注系统级服务,比如事务、安全、日志 --> AOP
+			
+		> Aspect（切面）：
+			<> 横切性关注点的抽象的实现就叫做切面。例如CGlibProxyFactory可以叫做切面。类是对物体的抽象，
+			而切面是对横切性关注点的抽象。
+			<> 把散落在系统各处与横切关注点相关的重复代码抽取出来归整到一处形成一个模块,我们称为方面。
+		> Joinpoint（连接点）：
+			<> 被增强的方法。被拦截的方法（对demo10而言）
+			<> 程序运行过程中的某一点.比如方法调用、属性访问、异常抛出、构造器。在spring中，连接点特指方法。
+		> Pointcut（切入点）：
+			<> 一组连接点
+			<> 拦截所有业务方法（对demo10而言），每一个方法都是一个连接点，组合起来叫做切入点。
+		> Advice（通知、增强）：
+			<> 拦截到连接点之后所要做的事情。
+			<> 分为前置通知（前置增强拦截器），后只通知（后置增强拦截器），异常通知（抛出增强拦截器），
+				最终通知（最终增强拦截器），环绕通知（环绕增强拦截器）。
+			<> 如：事务服务，日志服务，在spring中增强时通过拦截器实现的。
+		> Target（目标对象）：
+			<> 被代理的对象
+			<> 在spring中通常指service层接口的实现类。
+		> Weave（织入）：
+			<> 将aspects（切面）应用到target（目标对象，被代理对象）并导致代理对象创建的过程称为织入。
+			对应代码：PersonServiceBean psProxy = (PersonServiceBean) cglibFactory.createProxy(ps);
+		> Introduction（引入）：
+			<> 在不修改类代码的前提下，Introduction可以在运行期为类动态添加一些方法（成员方法）或者Filed（成员变量）。
+				这里是添加到代理对象上面。
+				
+	* spring提供两种实现面向切面的方式
+		> 基于XML配置
+			<> 第一步：创建切面类，里面也有增强方法，但是不用添加注解
+			<> 第二步：把切面（一个普通的java类）交给spring容器管理
+				<bean id="myInterceptor" class="全限定名"/>
+			<> 第三步：使用aop标签配置
+				<aop:config>
+					<aop:aspect id="myaop1" ref="myInterceptor">
+						<aop:pointcut id="mycut" expression="切入点表达式"/>
+						<aop:before pointcut-ref="mycut" method="前置增强方法名"/>
+						<aop:after-returing pointcut-ref="mycut" method="后置增强方法名"/>
+						<aop:after-throwing pointcut-ref="mycut" method="异常增强方法名"/>
+						<aop:after pointcut-ref="mycut" method="最终增强方法名"/>
+						<aop:around pointcut-ref="mycut" method="环绕增强方法名"/>
+					</aop:aspect>
+					<aop:aspect id="myaop2" ref="myInterceptor222">
+					</aop:aspect>
+				</aop:config>
+		> 基于注解
+		
+		> 步骤：
+			<> 第一步：导包
+				cglib,aspectjweaver,aspectjrt(版本要1.6以上，不然和高版本JDK不兼容)
+			<> 第二步：引入命名空间
+				xmlns:aop="http://www.springframework.org/schema/aop"
+				xsi:schemaLocation="
+				http://www.springframework.org/schema/aop
+        		http://www.springframework.org/schema/aop/spring-aop-4.0.xsd"
+        	<> 第三步：注册aop相关的注解解析器
+        		<aop:aspectj-autoproxy></aop:aspectj-autoproxy>
+        		
+        	<> 第四步：创建一个类MyInterceptor，并注解为切面。
+        	
+        	<> 第五步：在切面里面声明切入点和增强。(两个方法都别带参数)
+        		@Pointcut("execution(* spring.demo11.service.impl.PersonServiceBean.*(..))")
+        		@Before(value = "anyMethod()")
+        		注意:
+    				1.aspectjtr.jar和aspectweaver.jar版本都要高一点（1.6X以上，选1.7就可以了），不然会和JDK
+    					不兼容。error at ::0 can't find referenced pointcut
+    				2.切面被@Pointcut,@BeforeAdvice等注解的方法如果直接带参数会报错。error at 0 formal unbound in pointcut
+    				3.增强带参数的情况:这里的参数就是目标方法的参数。
+    					@Before(value = "anyMethod() && args(userName,id)")
+    					public void doAccessCheck(String userName, Integer id)
+					4. 如果目标方法的参数和增强的参数不匹配，那么有无参增强就执行无参增强。如果目标方法的参数和增强的参数匹配，
+						那么先执行有参数的增强再执行无参数的增强（假设这2个增强都是同一种增强）。
+					5. @AfterReturning(pointcut="切入点",return="目标方法的返回" ).这个方法的参数为返回结果
+        					例如：@AfterReturning(pointcut="anyMethod()", returning="result")
+							public void doAfterReturning(String result){}
+							这个方法会根据后置增强的参数类型和目标方法的返回类型进行匹配，执行相同才会被拦截到。
+    		<> 注解：
+    			-> 切面：@Aspect
+    			-> 切入点：@Pointcut("切入点表达式")
+    			-> 前置增强：@Before("切入点 && args(增强方法声明的参数名)")
+        		-> 后置增强：@AfterReturning(pointcut="切入点",return="目标方法的返回" ).这个方法的参数为返回结果
+        					例如：@AfterReturning(pointcut="anyMethod()", returning="result")
+							public void doAfterReturning(String result){
+        		-> 最终增强：@After
+        		-> 异常增强：@AfterThrowing(pointcut="切入点", throwing="ex").这里的ex是异常增强的参数(用来指定异常类型)
+        		-> 环绕增强：@Around，可以同时做到前面4个增强。
+        		
+        	<> 增强的执行顺序：???							视频中顺序
+        		1. 环绕增强的开始  @Around					1.前置增强
+        		2. 带参数的前置增强 @Before					2.环绕增强开始
+        		3. 不带参数的前置增强 @Before					3.目标方法
+        		4. 目标方法								4.后置增强
+        		5. 环绕增强的结束 @Around						5.最终增强
+        		6. 最终增强 @After							6.环绕增强结束
+        		7. 后置增强@AfterReturning
+        		
+        > 切入点表达式
+        	execution(* spring.demo11.service.impl..*.*(..))
+        	拦截返回类型为任意类型，spring.demo11.service.impl包下的所有类的任意(所有)方法。表达式上的3个*代表三个所有。
+        	<> 要求拦截返回类型为String的方法
+        		execution(java.lang.String spring.demo11.service.impl.PersonServiceBean.*.*(..))
+        	<> 要求拦截有1~n个参数，且第一个参数为String类型的方法
+        		execution(* spring.demo11.service.impl.PersonServiceBean.*.*(java.lang.String,..))
+        	<> 拦截所有返回类型非void的方法
+        		execution(!void spring.demo11.service.impl.PersonServiceBean.*.*(..))
+        	<> 对spring.demo11.service包下的所有类，包括子包的类都拦截
+        		execution(* spring.demo11.service..*.*(..))
+        		
+        > spring实现动态代理方法：
+        	<> 如果被代理的对象实现了接口，采用jdk的动态代理创建代理对象
+        	<> 如果被代理的对象没有实现接口，采用cglib的动态代理创建代理对象
+        	
+12.spring与jdbc整合开发
+	* 步骤：
+		> 第零步：导入数据库驱动包，导入数据源相关包(c3p0),不需要c3p0的配置文件
+		> 第一步：配置数据源(数据库连接池)
+	        <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+	    		<property name="jdbcUrl" value="jdbc:mysql://localhost:3306/springjdbc"></property>
+				<property name="driverClass" value="com.mysql.jdbc.Driver"></property>
+				<property name="user" value="root"></property>
+				<property name="password" value="123"></property>
+				<property name="acquireIncrement" value="5"></property>
+				<property name="initialPoolSize" value="10"></property>
+				<property name="minPoolSize" value="2"></property>
+				<property name="maxPoolSize" value="20"></property>
+	        </bean>
+		> 第二步：配置事务（基于注解和基于xml）
+		> 第三步：因为要使用注解，所以要启动@Transaction的解析器。在这之前先声明命名空间。然后注册事务注解的解析器，并在其属性
+			transaction-manager指定事务管理器。
+			<tx:annotation-driven transaction-manager="txManager"/>
+		> 第四步：使用spring提供的jdbcTemplate，用它来操作数据库
+			 <bean id="jdbcTemplate"  
+		        class="org.springframework.jdbc.core.JdbcTemplate">  
+		        <property name="dataSource" ref="dataSource" />  
+		    </bean>
+		> 第五步：personDaoBean声明jdbcTemplate成员变量，并提供setter
+		> 第六步：使用jdbcTemplate进行数据库的增删改查
+			<> 增删改。jdbcTemplate.update(sql模板,模板参数数组,参数的数据库类型数组)
+			<> 查，单个：jdbcTemplate.queryForObject(sql模板,模板参数数组,
+				new BeanPropertyRowMapper<T>(T.class))
+			<> 查，列表： jdbcTemplate.query(sql,模板参数数组，参数赌赢数据库类型，
+				new BeanPropertyRowMapper<T>(T.class))
+		> 第七步：在PersonDaoBean类上添加@Transactional注解，这样这个类的所有方法调用前会打开事务，
+				方法调用完会提交事务，有异常会回滚事务。
+			<> 注意。要用接口类型引用实例化bean，不然会报类型转换错误，默认只用jdk方式创建代理对象，不用cglib方式创建代理对象。
+				
+	* 使用占位符配置数据源。
+		之前数据源的参数都是写死在<bean>里面的，现在要把这些参数移交到properties文件中，使用占位符来读取。
+		>  指定使用哪个文件下的属性
+			<context:property-placeholder location="classpath:jdbc-c3p0.properties"/>
+		> 使用类似EL表达式的格式
+			<property name="jdbcUrl" value="${jdbcUrl}"></property>
+			
+	* 事务的提交和回滚
+		spring管理事务之后，什么时候提交，什么时候回滚呢?
+		> 如果碰到RuntimeException，事务会回滚(子类有类型转换异常，空指针异常，下标越界异常)
+		> 如果碰到CheckedException，事务不会回滚(除了RuntimeException和他的子类，其他都是CheckedException，
+			例如用户自定义的异常。Exception属于CheckedException)
+		> 可以在方法是使用@Transactional注解修改使CheckedException异常也回滚
+			@Transactional(rollbackFor=Exception.class)
+			同理还有noRollbackFor属性，指定不回滚的异常。
+			
+	* 事务传播属性
+		> 取消事务
+			查询的时候是不需要事务的，使用事务会影响性能。所以要取消事务。
+			<> @Transactional(propagation=Propagation.NOT_SUPPORTED)表示不支持事务
+		> REQUIRED：当前方法必须在一个事务中，如果已经在一个事务中，就会加入这个事务里面，如果不在事务中就会创建一个新事务。
+			默认的事务传播属性就是REQUIRED,开发中基本也是用这个属性。
+		> NOT_SUPPROTED：声明方法不开启事务。如果这个方法在一个事务中被调用，事务会挂起(暂停)，然后执行声明不开事务的方法，
+			执行完后再回复之前的事务。
+		> REQUIRES_NEW：无论当前是否存在事务，都开启一个新的事务。如果已经在一个事务里面，那么那个事务会被挂起，然后开一个新事务，
+			执行这个事务(REQUIRES_NEW),等这个事务执行完后再回复之前的事务。
+		> MANDATORY：指定的方法要求必须在一个已有的事务中执行，如果没有在已有的事务执行，则抛出异常。
+		> NEVER：指定的方法必须不能在事务里面执行，如果在事务里面执行则抛出异常。
+		> NESTED：如果指定方法在一个活动的事务中，则嵌套的开启一个事务。如果没有活动事务则按照REQUIRED属性执行。
+			内部的事务回滚不会对外部的事务造成影响。这个属性只对DataSourceTransactionManager事务管理器有用。
+			***如果外部事务回滚，那么内部事务也会回滚。如果内部事务回滚，那么外部事务不会回滚。
+	
+	* @Transactional的其他属性
+		> timeout：设置超时时间，默认是30秒
+		> readOnly：设置为只读
+		> isolation：事务的隔离级别(读未提交，读已提交(Oracle默认)，可重复读(MySQL默认，使用的是快照技术)，序列化)
+	
+	* 配置文件实现事务管理，不用@Transactional
+		> 配置文件不需要<tx:annotation-driven transaction-manager="txManager"/>
+		<aop:config>
+		  	<aop:pointcut id="transactionPointcut" expression="execution(* spring.demo12.dao.impl..*.*(..))"/>
+		  	<aop:advisor advice-ref="txAdvice" pointcut-ref="transactionPointcut"/>
+		</aop:config> 
+		<tx:advice id="txAdvice" transaction-manager="txManager"><!--事务管理器TxManager前面已经交给spring管理了-->
+			  <tx:attributes>
+			    <tx:method name="get*" read-only="true" propagation="NOT_SUPPORTED"/><!--使用通配符-->
+			    <tx:method name="*"/><!--代表其他方法-->
+			  </tx:attributes>
+		</tx:advice>
+		
+13.Spring与Hibernate整合
+	> SpringHibernate项目的笔记
+		* 懒加载异常：session被关闭后才加载。在web.xml下配置spring提供的过滤器,解决懒加载异常问题。
+			<filter>
+				<filter-name>OpenSessionInViewFilter</filter-name>
+				<filter-class>org.spring.orm.hibernate5.support.OpenSessionInViewFilter</filter-class>
+			<filter>
+			<filter-mapping>
+				<filter-name>OpenSessionInViewFilter</filter-name>
+				<url-pattern>/*</url-pattern>
+			</filter-mapping>
+
+14.Spring与JPA整合
+	> SpringJPA项目笔记
+	JPA:一种规范，hibernate是它的一个实现。
+	* 导包：使用hibernate的那些就可以了。
+15.Spring与struts2整合
+	> SpringStruts2项目笔记
+	
+16.SSH2整合
+	> 先整合Spring和Hibernate，测试通过再整合Spring和Struts2

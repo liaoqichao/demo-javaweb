@@ -1,0 +1,31 @@
+@CHARSET "UTF-8";
+.layer-0{
+    background: #ffffff;
+    height: 600px;
+    width: 900px;
+    border: 1px solid;
+    float: left;
+}
+
+.layer-1{
+    height: 150px;
+    width: 700px;
+    border: 1px solid;
+    background: #ffffff;
+    margin-left: 20px;
+    margin-top: 10px;
+    position: relative;
+    top: 10px;
+    left: 20px;
+}
+.layer-2{
+    height: 80px;
+    width: 120px;
+    border: 1px solid;
+    background: #ffffff;
+    margin-left: 10px;
+    margin-top: 5px;
+    position: relative;
+    top: 10px;
+    left: 5px;
+}

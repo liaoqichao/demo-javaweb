@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script type="text/javascript" src="../js/jquery.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	
+	// 得到焦点事件
+	$('#username').focus(function(){
+		/*
+			1.当触发焦点事件时，如果当前值等于默认值则把当前的值设置为空字符串
+			2.如果当前值不等于默认值，不做操作
+		*/
+		$curVal = $(this).val(); // 当前值
+		if($curVal == this.defaultValue){  // 如果当前值等于默认值，把value设置为空字符串
+			$(this).val("");
+		} else{
+		}
+	});
+	
+	// 失去焦点事件
+	$('#username').blur(function(){
+		/*
+			1. 如果当前值等于空字符串，则设置当前值为"用户邮箱/手机号/用户名"
+			2. 如果当前值不等于空字符串，则不做操作
+		*/
+		$curVal = $(this).val(); // 获取当前值
+		if($curVal == ""){
+			$(this).val(this.defaultValue);
+		} else{
+		}
+	});
+	
+	$('#btn-1').click(function(){
+		$('#div-2').children().each(function(){
+			alert($(this).text());
+		});
+	});
+	$('#btn-2').click(function(){
+		
+		// 后去下一个
+// 		var $next = $('#div-2').next();
+// 		alert($next.text());
+
+		// 获取后面所有
+		var $next = $('#div-2').nextAll();
+		$next.each(function(){
+			alert($(this).text()); 
+		});
+	});
+	$('#btn-3').click(function(){
+		var $prevs = $('#div-2').prev();
+		$prevs.each(function(){
+			alert($(this).text());
+		});
+	});
+	$('#btn-4').click(function(){
+		var $next = $('#div-2').nextAll().eq(1);
+		alert($next.text());
+	});
+	$('#btn-5').click(function(){
+		var $siblings = $('#div-2').siblings();
+		$siblings.each(function(){
+			alert($(this).text());
+		});
+	});
+	
+});
+</script>
+</head>
+<body>
+	<h1>jQuery元素属性的操作</h1>
+	<form>
+		用户名：<input id="username" name="username" value="用户邮箱/手机号/用户名"/>	<br/><br/>
+		密&nbsp;&nbsp;码：<input id="psw" name="psw"/> <br/><br/>
+		<input id="submit" type="submit" value="提交"/> <br/><br/>
+	</form>
+	<BR/>
+	--------------------------------------------------------
+	<BR/>
+	<div id="div-1" class="layer-0">我是div-1</div>
+	<div id="div-2" class="layer-0">
+		我是div-2
+		<div id="div-2-1" class="layer-1">我是div-2-1</div>
+		<div id="div-2-2" class="layer-1">我是div-2-2</div>
+		<div id="div-2-3" class="layer-1">我是div-2-3</div>
+	</div>
+	<div class="div-3" class="layer-0">我是div-3
+		<div id="div-3-1" class="layer-1">我是div-3-1</div>
+		<div id="div-3-2" class="layer-1">我是div-3-2</div>
+	</div>
+	<div class="div-4" class="layer-0">我是div-4</div>
+	<button id="btn-1">查询div-2的子元素(不用选择器，使用查找方法)</button>
+	<button id="btn-2">查询div-2的后面所有同辈元素(不用选择器，使用查找方法)</button>
+	<button id="btn-3">查询div-2的前面所有同辈元素(不用选择器，使用查找方法)</button>
+	<button id="btn-4">查询div-2的后面第2个同辈元素(不用选择器，使用查找方法)</button>
+	<button id="btn-5">查询div-2的所有同辈元素</button>
+
+
+</body>
+</html>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+ <hibernate-mapping package="hibernate.demo23.domain">
+	<class name="Employee" table="demo23_employee">
+		<id name="id">
+			<generator class="native"/>
+		</id>
+    	<property name="name"/>
+    	<property name="gender"/>
+    	<property name="birthday" type="date"/>
+    	<!-- 关键字冲突，需要改列名 -->
+    	<property name="desc" column="desc_"/>
+    	
+    	<!-- userAccount属性，表示与UserAccount的一对一关系，
+    		采用基于外键的方式，这里是无外键方。 
+    	-->
+    	<one-to-one name="userAccount" class="UserAccount" property-ref="employee"></one-to-one>
+    	
+    	
+    	<!-- department属性，表示与Department的多对一关系 -->
+    	<many-to-one name="department" class="Department" column="departmentId"></many-to-one>
+     </class>
+ </hibernate-mapping>

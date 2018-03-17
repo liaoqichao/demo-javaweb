@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script type="text/javascript" src="../js/jquery.js"></script>
+<style type="text/css">
+	     .one{
+		    width: 140px;
+		    height: 140px;
+		    margin: 20px;
+		    background: #9999CC;
+		    border: #000 1px solid;
+			float:left;
+		    font-size: 17px;
+		    font-family:Roman;
+		}
+ </style>
+</head>
+<body>
+	<h1>jQuery中的DOM操作-增删改查元素的指定属性</h1>
+	<div id="first">This is the first div</div>
+	<div id="second">This is the second div</div>
+	<button id="btn-1">获取属性和设置属性都可以用attr()方法来完成（给id为first添加.one样式）</button>
+	<button id="btn-2">给first追加one样式</button>
+	<button id="btn-3">删除first的one样式</button>
+	<button id="btn-4">切换first的样式</button>
+	<button id="btn-5">判断first是否含有样式</button>
+<script type="text/javascript">
+// 给first添加class属性，值为one。然后css根据类选择器的方式，匹配到first元素，所以first的样式就改变
+
+$('#btn-1').click(function(){
+	$('#first').attr("class","one"); 	// 这里不是.one（因为是设置属性值，而不是jQuery的选择器）
+});
+
+$('#btn-2').click(function(){
+	$('#first').addClass("one");
+});
+$('#btn-3').click(function(){
+	$('#first').removeClass("one");
+});
+$('#btn-4').click(function(){
+	// 第奇数次触发添加one样式，第偶数次触发删除one样式
+	// 通过局部变量
+	/*
+	function(改变的元素集合,样式){
+		var count = 0;
+		if(count%==1)	$('改变的元素集合').addClass("样式");
+		else $('改变的元素集合').removeClass("样式");
+		count++;
+	}
+	*/
+	$('#first').toggleClass("one");
+});
+$('#btn-5').click(function(){
+	alert($('#first').hasClass("one"));
+});
+</script>
+</body>
+</html>

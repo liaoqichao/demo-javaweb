@@ -1,0 +1,81 @@
+Demo37~Demo41
+一、监听器：
+1.JavaWeb三大组件：Servlet，Listener，Filter
+
+2.哪里出现过监听器？	AWT、SAX(基于事件驱动的XML解析方式)
+
+3.监听器特点：
+	> 它是一个接口，内容由我们实现
+	> 它需要注册。例如注册到button
+	> 监听器中的方法会在特定事件发生时被调用。
+	
+4.观察者模式
+	> 事件源：按钮
+		* 小偷
+	> 事件: 点击按钮
+		* 偷东西
+	> 监听器：监听器要注册在事件源身上。	
+		* 警察。
+		* 监听器中的方法：抓捕
+
+二、JavaWeb中的监听器
+	0.八大监听器
+		> ServletContextListener
+		> ServletContextAttributeListener
+		> HttpSessionListener
+		> HttpSessionAttributeListener
+		> ServletRequestListener
+		> ServletRequestAttributeListener
+		> HttpSessionBindingListener
+		> HttpSessionActivationListener
+	1. 事件源：三大域！
+		> ServletContext application
+			* 生命周期监听：	ServletContextListener。2个方法，一个出生时调用，一个死亡时调用
+			* 属性监听：	ServletContextAttributeListener。3个方法，1个在添加属性调用，1个在替换属性调用，1个在移除属性调用。
+		> HttpSession session
+			* 生命周期监听：	HttpSessionListener。2个方法，一个出生时调用，一个死亡时调用
+			* 属性监听：	HttpSessionAttributeListener。3个方法，1个在添加属性调用，1个在替换属性调用，1个在移除属性调用。
+		> ServletRequest request
+			* 生命周期监听：	ServletRequestListener。2个方法，一个出生时调用，一个死亡时调用
+			* 属性监听：	ServletRequestAttributeListener。3个方法，1个在添加属性调用，1个在替换属性调用，1个在移除属性调用。
+	
+	2.JavaWeb中完成编写监听器
+		> 写一个监听器类，必须实现某个监听器接口
+		> 注册，在web.xml中配置来完成注册。
+	
+	3.事件对象
+		> ServletContextEvent 方法：ServletContext getServletContext();
+		> HttpSession 方法：HttpSession getHttpSession()
+		> ServletRequest 方法：   1.	ServletContext getServletContext();
+							  2.	ServletRequest getServletRequest();	
+							  
+	4.剩下2个监听器——感知监听(都与HttpSession相关)
+		> 用来添加到JavaBean身上，而不是三大域。
+		> 都不需要web.xml中注册	
+		> HttpSessionBindingListener： JavaBean实现HttpSessionBindingListener接口。
+			这样JavaBean就知道自己是否在Session中。
+		> HttpSessionActivationListener : 活化监听器。
+			a. 序列化：session的序列化。服务器关闭时会出现CATALINAHOME/work/Catalina/localhost/项目名/sessions.ser
+				这个文件。服务器重启时，会读取这个文件，然后删除这个文件。保存在sessions.ser的session域中的信息又"复活了"。重启服务器
+				后依然可以获取session域中的信息，而不是session域中没有信息了。
+				例如：淘宝要更新服务器，重启服务器只是一瞬间的事。通过序列化，用户可以继续浏览网页，而不是一重启服务器就要提前通知客户离开网页。
+			b. 反序列化：如何废除序列化：CATALINAHOMT/config/context.xml中添加
+					<Manager pathname=""/>即可。 context.xml中已经注释了<Manager pathname=""/>
+			c. 钝化：如果session很多，为了节省内存，把session写在硬盘上，然后remove掉，从而节省内存。
+				配置：(CATALINAHOMT/config/context.xml所有项目都生效，如果要单个项目生效就在该项目下context.xml中配置
+				CATALINAHOMT/config/context.xml中添加
+					<Manager className="org.apache.catalina.session.PersistentManager" maxIdleSwap="1">
+						<Store className="org.apache.catalina.session.FileStore" directory="mysession"/>
+					</Manager>
+				其中maxIdleSwap是最大空闲时间，单位是分钟，只能整数，不能小数。
+				1分钟后会出现SESSIONID.session文件。1个session对应一个session文件，就算session活化这个文件也不会消失
+			d. 活化：当要使用session的时候就从硬盘里获取到内存，这样用户就感觉不到自己掉线了。
+			
+			* 序列化、反序列化和钝化、活化的区别：序列化、反序列化是服务器关闭时候把session保存到硬盘，而钝化、活化是服务器一直开启
+				时，为了节省内存，把session域中的信息保存到硬盘，然后删掉内存中的session。JavaBean要实现Serializable接口才可以
+				保存到硬盘。
+			* 序列化、反序列化和钝化、活化的共同点：都是为了session的持久化(保存到硬盘)。
+			
+	5.国际化
+		> 中国人 用户名，密码的登录窗口。美国人 username，password的登录窗口。这就是国际化。
+		> 用处：不大，因为语言改变会引起排版问题，不如重新写个网站。

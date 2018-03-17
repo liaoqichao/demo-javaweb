@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+ <!-- 
+ namespace命名空间的作用是对sql的分类化管理。namespace作用都是限定！！英语的定语
+ 注意:如果使用mapper代理开发，namespace就有特殊重要的作用：namespace等于mapper接口的地址(全限定名)
+  -->
+<mapper namespace="mapper.Demo4_UserMapper">
+<!-- 在映射文件中配置很多sql语句 -->
+<!-- 
+	查询使用select标签
+		- id属性：用于标识映射文件中的sql，称为statement的id，将来sql语句将封装到mappedStatement对象中
+		- 标签文本写sql语句。sql语句中的#{}:表示占位符。#{id}。其中id表示接收输入的参数，参数名就是id
+			>  #{id}：表示接收输入参数，参数名是id。如果输入参数类型为简单类型，那么#{}中参数名可以任意（可以是value或其他名称）。
+		- parameterMap属性:早期版本，现在不用
+		- parameterType属性：指定输入参数的类型(java类型)
+		- resultType属性：指定sql输出结果锁映射的java类型。select指定resultType表示将单挑记录映射成的java对象(pojo)
+	增使用insert标签
+	删使用delete标签
+	改使用update标签
+ -->
+
+<!-- 根据主键查询用户信息。单条记录 -->
+<select id="findUserById" parameterType="int" resultType="user">
+	SELECT * FROM `user` WHERE id=#{id};
+</select>
+
+<!-- 根据姓名模糊查询用户信息  -->
+<!-- 
+	resultType:指定实体类的类型，不管是单条记录还是多条记录
+	输入类型String也是简单类型,#{}里面可以随便写
+	${}:表示拼接sql字符串，将接收到的参数内容不加任何修饰的拼接到sql语句中。
+		例如'%${value}%',selectList第二个参数直接是"小明"就可以，sql语句就变成'%小明%'。而不需要在参数多加两个%%
+		- 使用${}可能会引起sql注入，因为是直接拼接。
+	${value}:接收输入参数的内容，可以是简单类型也可以是pojo。如果是简单类型，${}中只能使用value，不能使用其他。
+ -->
+<select id="findUsersByName" parameterType="java.lang.String" resultType="user">
+<!-- 	SELECT * FROM `user` WHERE username LIKE #{value} -->
+	SELECT * FROM `user` WHERE username LIKE '%${value}%'
+</select>
+
+<!-- 
+添加用户 
+parameterType:指定输入类型是pojo(包括用户信息)
+#{}中指定对应pojo的属性，接收pojo对象的属性值。mybatis也是通过OGNL来获取对象的属性
+-->
+<insert id="insertUser" parameterType="user">
+	<!-- 返回刚插入记录的主键到user对象中 （主键生成方式自增长）
+		SELECT LAST_INSERT_ID():得到刚insert进去记录的主键值，只适用与自增主键
+		keyProperty:将查询到主键值设置到parameterType指定对象的哪个属性
+		order：指的是在insert语句前或者后，执行selectKey指定的SQL语句。
+		resultType:指的是SELECT LAST_INSERT_ID()的结果类型
+	-->
+	<selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+		SELECT LAST_INSERT_ID()
+	</selectKey>
+	INSERT INTO `user`(username,birthday,sex,address) VALUE(#{username},#{birthday},#{sex},#{address})
+	
+	<!-- 返回刚插入记录的主键到user对象中 （主键生成方式uuid） 
+		执行顺序：先执行uuid()，将uuid设置到该记录的主键，再执行插入语句。执行插入语句后获取user对象的id
+	-->
+<!-- 	<selectKey keyProperty="id" order="AFTER" resultType="java.lang.String"> -->
+<!-- 		SELECT uuid() -->
+<!-- 	</selectKey> -->
+<!-- 	INSERT INTO `user`(id,username,birthday,sex,address) VALUE(#{id},#{username},#{birthday},#{sex},#{address}) -->
+</insert>
+
+<!--  根据id删除用户删除用户 -->
+<delete id="deleteUserById" parameterType="java.lang.Integer">
+	DELETE FROM `user` WHERE id=#{id}
+</delete>
+
+<!-- 更新用户
+	parameterType指定实体类，其中id必须存在
+	当输入参数是实体类时，#{}里面的就是实体类的属性
+ -->
+<update id="updateUser" parameterType="user">
+	UPDATE `user` SET username=#{username},birthday=#{birthday},seX=#{sex},address=#{address} WHERE id=#{id}
+</update>
+</mapper>

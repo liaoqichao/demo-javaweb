@@ -1,0 +1,65 @@
+1.准备jar包
+	导入spring、hibernate、数据库驱动包。
+2.准备beans.xml
+3.配置hibernate的sessionFactory
+	除了.LocalSessionFactoryBean还有.annotation.AnnotationSessionFactoryBean
+	 <bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+	        <property name="dataSource" ref="dataSource" /><!-- 引用数据源 -->
+	        <!-- 
+	        	4个指定.hbm.xml文件的属性mappingResources、mappingLocations、
+	        	mappingDirectoryLocations与mappingJarLocations 
+	         -->
+	        <property name="mappingLocations">
+	            <list>
+	            	<!-- 指定.hbm.xml文件 -->
+	                <value>classpath:com/cn/nos/services/pojo/</value><!-- 加载hibernate的映射文件*.hbm.xml -->
+	            </list>
+	        </property>
+	        <!-- 这里对应的是hibernate.cfg.xml的配置 -->
+	        <property name="hibernateProperties">
+	            <props>
+	            	<!--
+	            		这里的配置对应的是hibernate.cfg.xml中的<property>的配置 
+	            		配置数据库方言。 
+	            	-->
+	                <prop key="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</prop>
+	                <prop key="hibernate.show_sql">true</prop>
+	                <prop key="hibernate.format_sql">false</prop>
+	                <!-- 自动建表 -->
+	                <prop key="hibernate.hbm2ddl.auto">update</prop>
+	                
+	            </props>
+	        </property>
+    	</bean>
+    	
+4.配置事务管理器
+	 	<bean id="txManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+        	<property name="sessionFactory" ref="sessionFactory"></property>
+        </bean>
+        <!-- 开启和事务相关的注解 -->
+        <tx:annotation-driven transaction-manager="txManager"/>
+
+5.spring整合hibernate有两张方式：
+	* 第一种，不需要hibernate.cfg.xml，即hibernate.cfg.xml的内容，作为<bean id="sessionFactory"></bean>
+		的<property>，就是上面演示那种。
+	* 第二种，需要hibernate.cfg.xml。sessionFactory只读取hibernate.cfg.xml的配置信息，不把hibernate主配置文件的
+		配置移到id=sessionFactory的property标签中
+		<bean id="sessionFactory" class="...">
+			<property name="configLocation">
+				<value>hibernate.cfg.xml</value>
+			</property>
+		</bean>
+	* 推荐使用第一种。
+	
+6.配置二级缓存EHCache
+	* 在/src下放置ehcache.xml
+	* 在beans.xml的sessionFactory的 <property name="hibernateProperties">的<props>的<prop>中添加
+		<!--  打开二级缓存 -->
+        <prop key="hibernate.cache.use_second_level_cache">true</prop>
+		<!--  这里选择提供商，记得要导包 -->
+		<prop key="hibernate.cache.region.factory_class">org.hibernate.cache.ehcache.EhCacheRegionFactory</prop>  
+		<!--  开启查询缓存，如果查询的命中率不高，可以设置为false -->
+		<prop key="hibernate.cache.use_query_cache">false</prop>
+	* 在映射文件中配置<cache>，表示这个实体类使用二级缓存
+		<cache usage="read-write" region="sh.domain.Person"/>
+		

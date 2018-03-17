@@ -1,0 +1,43 @@
+1.导包
+	* struts2的9个包
+	* spring的20个包+其他包
+	* 两边都有commons-logging.jar不要重复导
+	* 导入struts2的struts2-spring-plugin-2.3.24.1.jar
+	
+2.配置文件
+	* web.xml
+		> struts的拦截器，即
+		 <filter>
+		     <filter-name>struts2</filter-name>
+		     <filter-class>org.apache.struts2.dispatcher.ng.filter.StrutsPrepareAndExecuteFilter</filter-class>
+		 </filter>
+		
+		 <filter-mapping>
+		     <filter-name>struts2</filter-name>
+		     <url-pattern>/*</url-pattern>
+		 </filter-mapping>
+		 
+		 > 指定spring读取的配置文件和实例化spring容器
+			<!-- 实例化spring容器 -->
+		    <listener>
+		       <listener-class>
+		           org.springframework.web.context.ContextLoaderListener
+		       </listener-class>
+			</listener>
+			<!-- 指定beans.xml -->  
+			 <context-param>
+			 	<param-name>contextConfigLocation</param-name>
+			 	<param-value>classpath:beans.xml</param-value>
+			 </context-param>
+	* beans.xml
+		> 添加action给spring容器管理
+			<bean id="userAction" class="ss.web.action.UserAction"></bean>
+	* struts.xml
+		> 把action创建的工作从struts转移到spring
+			 <constant name="struts.objectFactory" value="spring"></constant>
+		> 配置action，其中action标签的class不再写类名，而是写交给spring管理的action的bean的id
+			<package name="user" namespace="/user" extends="struts-default">
+				<action name="action_*" class="userAction" method="{1}">
+					<result name="msg">/jsps/msg.jsp</result>
+				</action>
+			</package>

@@ -1,0 +1,77 @@
+客户关系管理系统
+一、项目的架构搭建
+	1.导入原型(只有页面，没有功能的项目,功能都是直接跳转)
+	2.功能分析：
+		> 添加客户
+		> 查询所有客户
+		> 编辑客户
+			* 加载这个客户到表单中显示
+			* 修改客户
+		> 删除客户
+		> 多条件组合查询
+	3.创建数据模型
+	4.创建包 	公司名.项目名.分层
+		> company.crm.domain: Customer,与表单和t_customer对应
+		> company.crm.dao: CustomerDao
+		> company.crm.service：CustomerService	因为简单，所以没业务，但是必须存在。
+		> company.crm.web.servlet：CustomerServlet
+	5.导包
+		> mysql驱动
+		> c3p0(2个jar包,一个配置文件)
+		> dbutils
+		> 自己的工具：LQCUtils.db(包括JDBCUtils和TxQueryRunner)	
+		> 依赖的jar包：beanutils、logging
+	ex:把三层提及结构扩展为五层体系：表示层、控制/中介层、领域层、数据持久层、数据源层
+	
+二、
+	1.添加客户
+		add.jsp -> CustomerServlet#add() -> 显示添加成功
+	2.查询所有客户
+		top.jsp(查询客户) -> CustomerServlet#findAll() -> list.jsp（循环显示）
+	3.编辑客户
+		list.jsp（编辑链接） -> CustomerServlet#beforeEdit() -> edit.jsp（把查询出的结果显示到表单中）
+		edit.jsp（表单页面） -> CustomerServlet#edit() -> msg.jsp（显示成功信息）
+	4.删除客户
+		list.jsp(删除连接) -> CustomerServlet#delete() -> msg.jsp（显示成功信息）
+	5.多条件组合查询
+			query.jsp -> CustomerServlet#query() -> list.jsp
+
+三、分页
+ 例子：	第N页/共M页 首页 1 2 3 4 5 下一页 尾页  囗 go
+	1.好处：只查询一页，不查询所有页。一次只查询一部分数据，加快查询速度。一次20条数据和一次200W条数据。
+	2.分页数据
+ 		> 页面数据都是由Servlet传递的
+ 		> Servlet需要：
+ 			* 当前页：pageCode,pc; 如果页面没有传递当前页码，那么Servlet默认是第一页,或者按页面传递为准
+			* 总页数：totalPages,tp; 总记录数/每页记录数
+			* 总记录数：totalRecord,tr; 通过dao获取  select count(*) from t_customer;
+			* 每页记录数：pageSize,ps;业务数据或叫系统数据。
+			* 当前页数据：beanList;
+			* url：
+	3.数据的传递
+		这些分页数据总是要在各层之间来回传递。把这些分页数据封装到一个JavaBean中，叫分页Bean。例如：PageBean。这样这些分页数据
+		就是以一个对象的形式来传递，而不是分散的分页数据。
+	4.分页在各层中的处理
+		> 页面：给出分页相关的链接	"第N页/共M页 首页 1 2 3 4 5 下一页 尾页  囗 go"
+			* 需要给Servlet传递什么？有可能传递pc
+		> Servlet:创建pageBean对象，给pageBean所有属性赋值，然后传递给页面，放到request域中，然后转发。
+			* Servlet需要给dao传递pc、ps
+		> Service：略，没事做。
+		> Dao：
+			* 查询tr。COUNT(*) FROM t_customer
+			* 查询beanList：SELECT * FROM t_customer limit x,y  从x行开始查，查询y行记录。下标从0开始
+	5.显示分页的页码列表。
+		"第N页/共M页 首页 1 2 3 4 5 下一页 尾页  囗 go" 中的1,2,3,4,5
+		> 最多显示多少个页码? 定为10;
+		> 当前页在页码列表的最大的位置。定位6。
+		只需要当前页就可以定出来页码列表：
+			* begin：开始页码。当前页码-最大的位置+1。15-6+1 = 10	前提 当前页 > 页码列表最大位置 - 1
+			* end：结束页码。当前页码+最多显示页码-最大位置。15+10-6 = 19     前提 开始页码 < 总页码数  + 1	
+		> 计算公式：
+			* 如果总页数 <= 列表长度 , 那么 begin = 1 ， end = 总页数
+			* 使用公式： begin = pc-5(pc>6)， end = pc + 4(pc+4<=tp)；
+			* 头溢出：begin<1时，让begin=1
+			* 尾溢出：end>tp时，让end=tp
+	6.在超链接中保留参数
+		为什么？因为高级搜索的时候第一页是有条件的，点下一页，下一页的记录也应该满足那个条件。所以每个分页的超链接都应该保存条件 
+		条件以字符串的的形式保存到pageBean的url中。这个任务由Servlet完成。

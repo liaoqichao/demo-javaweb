@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script type="text/javascript" src="../js/jquery.js"></script>
+</head>
+
+
+<body>
+	<h1>jQuery选择器</h1>
+	<div id="div-1" class="class-1">这里是div-1!</div>
+	<div id="div-2" class="class-1">这里是div-2!</div>
+	<span id="span-1" class="class-1">这里是span-1</span>
+	<span id="span-2" class="class-2">这里是span-2</span>
+	<br/>
+	<input type="button" id="btn-1" value="点击改变div-1背景色"/>
+	<input type="button" id="btn-2" value="点击改变背class-1景色"/>
+	<button id="btn-3">改变所有input标签的背景色</button>
+	<button id="btn-4">改变所有元素的背景色</button>
+	<button id="btn-5">改变所有span标签和id为div-2的元素的背景色</button>
+	<button id="btn-6">改变标签span并且class为class-2的元素的背景色</button>
+	<br/>
+	
+</body>
+
+<script type="text/javascript">
+// DOM 方法
+// function test1(){
+// // 	document.getElementById("div-1").style.backgroundColor = "#FFCC80";
+// }
+
+// jQuery 方法
+// $('#btn-1') --- 选中指定标签。
+// .click(fn) --- 指定这个标签的click事件，参数fn表示触发click事件会执行的方法。
+// 要求，要把jQuery代码放到<body></body>后面，不然没反应
+	$('#btn-1').click(
+	function(){
+	    $('#div-1').css("background","#FFCC80");
+	}
+	);
+	
+	$('#btn-2').click(function(){
+		$('.class-1').css("background","#FF0033"); //全部class-1全部都改变。如果用DOM要遍历集合
+	});
+	
+	$('#btn-3').click(function (){
+		$('input').css("background","#00ffff");
+	});
+	
+	$('#btn-4').click(function (){
+		$('*').css("background","#FF0033");
+	});
+	
+	$('#btn-5').click(function(){
+		$('span,#div-2').css("background","#3399FF");
+	});
+	
+	$('#btn-6').click(function(){
+		$('span.class-2').css("background","#233233");
+		
+	});
+	
+</script>
+</html>

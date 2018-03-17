@@ -1,0 +1,4 @@
+Web项目：获取手机号码归属地
+1.根据wsdl地址用wsdl2java命令生成本地代码http://ws.webxml.com.cn/WebServices/MobileCodeWS.asmx?wsdl
+	- 其中SOAP1.1和SOAP1.2协议生成的port接口是一样的，所以wsdl4个port只生成三个接口
+2.CXF和Spring整合，准备cxf-servlet.xml配置文件和web.xml配置

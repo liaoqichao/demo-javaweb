@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE validators PUBLIC
+        "-//Apache Struts//XWork Validator 1.0.3//EN"
+        "http://struts.apache.org/dtds/xwork-validator-1.0.3.dtd">
+<!-- 用1.0.3不要用1.0.2 -->
+<validators>
+    <field name="username"><!-- 指定action中要检验的表单属性 -->
+        <!-- 指定校验器，这个校验器是由系统提供的。requiredstring字面意思就是必填。 -->
+        <field-validator type="requiredstring">
+        	<!-- 作用是去掉字符串的前后空格，为Requiredstring类的trim属性注入值（true），默认是true，可以省略不写 -->
+        	<param name="trim">true</param>
+<!--             <message key="requiredstring"/> -->
+			<message>用户名不能为空</message><!-- 当校验失败就输出这里的信息。 -->
+        </field-validator>
+    </field>
+    <field name="mobile"><!-- 这个字段需要两个校验器 -->
+        <field-validator type="requiredstring">
+<!--             <message key="requiredstring"/> -->
+			<message>手机号不能为空！</message>
+        </field-validator>
+        <field-validator type="regex">
+        	<!-- 这里的<![CDATA[]]>是为了防止里面的内容会XML限制的（xsd、dtd限制XML文件格式），为了不让XML报错，
+        		就用<![CDATA[内容]]>，让内容变成普通文本处理。
+        	 -->
+        	<param name="regex"><![CDATA[^1[358]\d{9}$]]></param><!-- 就版本属性名是expression，现在是regex -->
+        	<message>手机号格式不正确</message>
+        </field-validator>
+    </field>
+</validators>

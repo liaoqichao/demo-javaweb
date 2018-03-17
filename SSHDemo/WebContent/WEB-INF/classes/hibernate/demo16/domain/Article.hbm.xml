@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+ <hibernate-mapping package="hibernate.demo16.domain">
+	<class name="Article" table="demo16_article">
+		<id name="id" type="int" column="id">
+			<generator class="native"/><!-- 主键自增长 -->
+		</id>
+		<!-- 用于鉴别是什么类型的列,但是不知道每个类代表什么类型，所以还需要在每个类的class标签上
+			添加discriminator-value属性，这个属性的值就是class_列可能出现的值。这个属性不写也可以
+			，默认为类的全名。
+		 -->
+			
+    	<property name="title"/>
+    	<property name="content" type="text" length="10000"/><!-- 内容最多1W字 -->
+    	<property name="postTime" type="timestamp"></property>
+    	
+    	<!-- 以上是父类的属性，以下是子类的属性 -->
+    	
+    	<!-- 每个类一张表，所以需要table属性，指定对应的表 -->
+    	<joined-subclass name="Topic" table="demo16_topic">
+    		<!-- 引用父类的主键作为外键，要声明这个外键在自己表中的列名.同时父类的主键也是
+				子类的主键，所以主键和外键是同一个键。基于主键的一对一关联。    		
+    		 -->
+    		<key column="id"></key>
+    		<property name="type"></property><!-- 子类自己的属性 -->
+    	</joined-subclass>
+    	<joined-subclass name="Reply" table="demo16_reply" >
+    		<key column="id"></key><!-- 引用父类的主键作为外键，要声明这个外键在自己表中的列名 -->
+    		<property name="floor"></property><!-- 子类自己的属性 -->
+    	</joined-subclass>
+     </class>
+ </hibernate-mapping>

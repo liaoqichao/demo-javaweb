@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script type="text/javascript" src="../js/jquery.js"></script>
+</head>
+<body>
+	<h1 align="center">表单过滤选择器，表单对象属性过滤选择器</h1>
+	<h2>表单对象属性过滤器</h2>
+	<form>
+		<input type="text" value="篮球"/>
+		<input type="text" value="足球" disabled="disabled"/><br/>
+		<input type="checkbox"/>爱好1<input type="checkbox"/>爱好2<input type="checkbox"/>爱好3<br/>
+		<input type="radio"/><br/>
+		<input type="image"/><br/>
+		<input type="file"/><br/>
+		<input type="submit"/><br/>
+		<input type="reset"/><br/>
+		<input type="password"/><br/>
+		<input type="button" value="input标签的button"/><br/>
+	  <select name="job" size=5 multiple="multiple">
+		   	      <option value="选项1">选项1^^</option>
+			      <option value="选项2">选项2^^</option>
+				  <option value="选项3">选项3^^</option>
+				  <option value="选项4">选项4^^</option>
+	   </select>
+		<select>
+			<option>option1</option>
+			<option>option2</option>
+		</select>
+		<br/>
+		<textarea rows="3" cols="10"></textarea><br/>
+		<button>button</button>
+	</form>
+	<button id="btn-1">改变可用文本框的值</button>
+	<button id="btn-2">改变不可用文本框的值</button>
+	<button id="btn-3">利用jQuery的length属性获取多选框中选中的个数</button>
+	<button id="btn-4">利用jQuery的text()方法获取下拉菜单中的内容（不是value）</button>
+<script type="text/javascript">
+ 
+ //选择所有button。
+//  var $buttons = $(':button');	// 表单选择器
+//  alert($buttons.length); // 2 input的button和button标签
+//  alert($('input[type="button"]').length); // 1 只有input标签的button
+
+// 表单对象属性过滤选择器
+$('#btn-1').click(function(){
+	$('input[type="text"]:enabled').val("浪里个浪");
+});
+$('#btn-2').click(function(){
+	$('input[type="text"]:disabled').val("喵了个咪");
+});
+$('#btn-3').click(function(){
+	// 方案一
+	alert($(':checkbox:checked').length);
+	
+	// 方案二
+	alert($('input[type="checkbox"]:checked').length);
+});
+$('#btn-4').click(function(){
+	// val()返回的是元素集合的第一个元素的值
+	// text()返回的是元素集合的全部值
+	// 选中的是select下的option元素，不是select元素。
+	
+	var $selects = $("select option:selected");
+	alert("text:"+$selects.text());
+	$selects.each(function(i,n){
+		alert("value:"+$(n).val());
+	});
+});
+</script>
+</body>
+</html>

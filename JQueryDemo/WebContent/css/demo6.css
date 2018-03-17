@@ -1,0 +1,25 @@
+@CHARSET "UTF-8";
+/*
+ 适用：demo6，demo7
+ * */
+.layer-0{
+    background: #ffffff;
+    height: 150px;
+    width: 200px;
+    border: 1px solid;
+    float: left;
+}
+
+.layer-1{
+    height: 50px;
+    width: 150px;
+    border: 1px solid;
+    background: #ffffff;
+    margin-left: 20px;
+    margin-top: 10px;
+    position: relative;
+    top: 10px;
+    left: 20px;
+}
+
+

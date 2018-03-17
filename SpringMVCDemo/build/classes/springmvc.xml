@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans-4.2.xsd 
+		http://www.springframework.org/schema/mvc 
+		http://www.springframework.org/schema/mvc/spring-mvc-4.2.xsd 
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context-4.2.xsd 
+		http://www.springframework.org/schema/aop 
+		http://www.springframework.org/schema/aop/spring-aop-4.2.xsd 
+		http://www.springframework.org/schema/tx 
+		http://www.springframework.org/schema/tx/spring-tx-4.2.xsd ">
+		
+		<!-- 使用mvc注解驱动可以代替下面两个配置。
+			mvc:annotation-driven还支持很多参数的绑定方法。比如默认加载了json转换的解析器。
+			实际开发使用这个方式
+		 -->
+		<mvc:annotation-driven/>
+		
+		<!--注解适配器 -->
+		<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter"/>
+		<!--注解映射器 -->
+		<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping"/>
+		
+		
+		
+		<!-- 配置处理器映射器 
+			将Bean的name作为url进行查找，查找Handler。Bean也是Handler。所以在配置Handler时需要指定beanname(url)
+		-->
+		<bean class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping" />
+		
+		<!-- 简单url映射映射器 -->
+		<bean class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+			<property name="mappings">
+				<props>
+					<!-- 指定Handler的bean的id,同一个Bean可以有多个url -->
+					<prop key="/queryItems1.action">itemsController1</prop>
+					<prop key="/queryItems2.action">itemsController1</prop>
+					<prop key="/demo2/queryItems.action">itemsController2</prop>
+<!-- 					<prop key="/items2.action">controller的bean id</prop> -->
+				</props>
+			</property>
+		</bean>
+		
+		
+		<!-- 配置处理器适配器
+			所有的HandlerAdapter都实现了HandlerAdapter接口
+		 -->
+		<bean class="org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter"/>
+		<!-- 另一个非注解的HandlerAdapter -->
+		<bean class="org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter"/> 
+		
+		<!-- 配置视图解析器 
+			解析jsp视图，默认使用jstl标签。需要导入jstl包
+		-->
+		<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+			<!-- 指定前缀和后缀，modelAndView.setViewName指定的url就可以省去前缀和后缀的内容 -->
+			<property name="prefix" value="/jsps/"/>
+			<property name="suffix" value=".jsp"/>
+		</bean>
+		
+		<!-- 
+			配置Handler，将编写的Handler在Spring容器中加载
+		 -->
+		 <!-- demo1-->
+		 <bean id="itemsController1" name="/demo1/queryItems.action" class="springmvcDemo.controller.demo1.ItemsController1"/>
+		 <!-- demo2 -->
+		 <bean id="itemsController2" class="springmvcDemo.controller.demo2.ItemsController"/>
+		 <!-- demo3 注解开发Handler，但实际开发中建议使用组件扫描 -->
+<!-- 		 <bean class="springmvcDemo.controller.demo3.ItemsController"></bean> -->
+		 
+		 <!-- 使用组件扫描，可以扫描controller、service、repository组件
+		 	这里扫描controller、指定Controller的包
+		  -->
+		 <context:component-scan base-package="springmvcDemo.controller"></context:component-scan>
+</beans>

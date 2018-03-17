@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<!-- 加载属性文件 -->
+	<properties resource="db.properties">
+		<!-- 这里还可以配置一些属性名和属性值,如果这里配置了，后面也可以用${属性名} -->
+<!-- 		<property name="" value=""/> -->
+	</properties>
+	
+	<!-- settings全局配置参数 -->
+	<settings>
+		<!-- 打开延迟加载,默认为false -->
+		<setting name="lazyLoadingEnabled" value="true"/>
+		<!-- 设置为消极加载，默认为true。默认为积极加载，还没调用关联对象的方法或者获取关联对象就直接发出sql加载完毕 -->
+		<setting name="aggressiveLazyLoading" value="false"/>
+		
+		<!-- 开启二级缓存,默认是值是true，开启状态 -->
+		<setting name="cacheEnabled" value="true"/>
+	</settings>
+	<!-- 别名定义，别名是映射输入参数类型和结果类型的全限定名的简化，例如把mybatis.po.User别名定义为User -->
+	<typeAliases>
+		<!-- 针对单个别名定义 -->
+<!-- 		<typeAlias type="mybatis.po.User" alias="user"/> -->
+		<!-- 
+			批量别名的定义。例如po包或者domain包后面会有很多类，如果每个都定义很很麻烦 
+			指定包名，mybat会自动扫描包中的po类，自动定义别名，别名就是类名，首字母大写或小写都可以！
+		-->
+		<package name="mybatis.po"/>
+	</typeAliases>
+	
+	<!-- 和spring整合后 environments配置将废除-->
+	<environments default="development">
+		<environment id="development">
+		<!-- 使用jdbc事务管理，事务控制由mybatis-->
+			<transactionManager type="JDBC" />
+		<!-- 数据库连接池，由mybatis管理-->
+			<dataSource type="POOLED">
+				<property name="driver" value="${jdbc.driver}" />
+				<property name="url" value="${jdbc.url}" />
+				<property name="username" value="${jdbc.username}" />
+				<property name="password" value="${jdbc.password}" />
+			</dataSource>
+		</environment>
+	</environments>
+	
+	<!-- 加载映射文件 -->
+	<mappers>
+		<!-- 根路径不是src而是config? -->
+		<!-- 通过resource方法，一次加载一个映射文件  -->
+		<mapper resource="sqlmap/User.xml"/>
+<!-- 		<mapper resource="mapper/UserMapper.xml"/> -->
+		<!-- 通过url一次加载一个映射文件 -->
+<!-- 		<mapper url="file:///E:a\b\c\UserMapper.xml"/> -->
+		<!-- 
+			通过mapper接口加载映射文件 
+			遵循一些规范：需要将mapper接口类名和mapper.xml映射文件的名称保持一致,且在一个目录
+			上面规范的前提是使用mapper代理的方法
+		-->
+<!-- 		<mapper class="mapper.Demo4_UserMapper"/> -->
+
+		<!-- 
+			批量加载mapper
+			指定mapper接口的包名，mybatis自动扫描改包名下的所有mapper接口。
+			遵循规范：和使用mapper接口加载映射文件一样。
+		 -->
+		<package name="mapper"/>
+	</mappers>
+</configuration>

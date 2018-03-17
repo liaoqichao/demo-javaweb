@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+ <hibernate-mapping package="hibernate.demo10.domain">
+	<class name="Teacher" table="demo10_teacher">
+		<id name="id" type="long" column="id">
+			<generator class="native"></generator>
+		</id>
+    	<property name="name" type="string" column="name" length="20"/>
+    	<!-- studentSet属性，与Student为多对多关系 -->
+    	<set name="studentSet" table="demo10_teacher_student" inverse="false">
+    		<!-- 多对多，2个table必须一致，不然会有2个中间表，有2个多对多的关系。 -->
+    		<key column="teacherId"></key>
+    		<many-to-many class="Student" column="studentId"></many-to-many>
+    	</set>
+     </class>
+ </hibernate-mapping>

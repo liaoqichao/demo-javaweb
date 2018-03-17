@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+ <!-- 
+ namespace命名空间的作用是对sql的分类化管理。namespace作用都是限定！！英语的定语
+ 注意:如果使用mapper代理开发，namespace就有特殊重要的作用：namespace等于mapper接口的地址(全限定名)
+  -->
+<mapper namespace="mapper.Demo8_UserMapper">
+<!-- 定义sql片段 
+	id:sql片段的唯一标识
+	经验：定义sql片段是基于单表定义，这个sql片段的可重用性高。
+	在sql片段中不要包括WHERE,因为一个sql语句可能要多个片段，如果每个片段都有where就会报错。
+-->
+<sql id="query_user_where">
+		<if test="userCustom != null">
+			<if test="userCustom.sex != null and userCustom.username != ''">
+				AND user.sex=${userCustom.sex}
+			</if>
+			<if test="userCustom.username!=null and userCustom.username!=''">
+				AND user.username LIKE '%${userCustom.username}%'
+			</if>
+		</if>
+</sql>
+<!-- 用户信息综合查询 -->
+<select id="findUserList" parameterType="userQueryVo" resultType="userCustom">
+	SELECT * FROM USER
+	<!-- 当只有一个条件满足的时候， AND关键字的拼接就会出错，
+		解决办法1: WHERE 1=1 后面的全部条件都可以带AND
+		解决办法2： 使用where标签，可以自动去掉where条件中的第一个AND 
+	-->
+	<where>
+		<!-- 引用sql片段的id。如果指定的id不在本mapper文件中，需要加namespace前缀 -->
+		<include refid="query_user_where"></include>
+<!-- 		<if test="userCustom != null"> -->
+<!-- 			<if test="userCustom.sex != null and userCustom.username != ''"> -->
+<!-- 				AND user.sex=${userCustom.sex} -->
+<!-- 			</if> -->
+<!-- 			<if test="userCustom.username!=null and userCustom.username!=''"> -->
+<!-- 				AND user.username LIKE '%${userCustom.username}%' -->
+<!-- 			</if> -->
+<!-- 		</if> -->
+	</where>
+</select>
+
+<!-- 用户信息综合查询总数 
+	
+-->
+<select id="findUserCount" parameterType="userQueryVo" resultType="int">
+	SELECT COUNT(*) FROM USER 
+	<where>
+		<include refid="query_user_where"></include>
+<!-- 		<if test="userCustom != null"> -->
+<!-- 			<if test="userCustom.sex!=null and userCustom.sex!=''"> -->
+<!-- 				AND user.sex=#{userCustom.sex}  -->
+<!-- 			</if> -->
+<!-- 			<if test="userCustom.username != null and userCustom.username!=''"> -->
+<!-- 				AND user.username LIKE '%${userCustom.username}%' -->
+<!-- 			</if> -->
+<!-- 		</if> -->
+	</where>
+</select>
+</mapper>

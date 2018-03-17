@@ -1,0 +1,59 @@
+JavaMail
+	
+是java提供的一组API，用来收发邮件。这里只做客户端发邮件。
+
+1.邮件协议
+	> SMTP:简单邮件传输协议。客户端 -> 邮件服务器。163服务器 -> 126服务器。用来发邮件的协议，只学这个。 
+	> POP3:邮局协议第三版。邮件服务器 -> 客户端。用来收邮件的协议
+	> IMAP:因特网消息访问协议。可以收发邮件的协议。
+	
+2.邮件服务器的命名
+	smtp服务器端口号为25，服务器名称为smtp.xxx.xxx
+	pop3服务器端口号为110，服务器名称为pop3.xxx.xxx
+	例如： 
+	163: smtp.163.com 和 pop3.163.com
+	qq : smtp.qq.com 和 pop3.qq.com
+	
+3.telnet发邮件
+ 	> Xshell软件
+ 	> 输入telnet smtp.163.com 25
+ 	> 返回220表示连上
+ 	> 输入ehlo 你的名字(XXX)
+ 	> 返回一堆250-开头的信息表示成功
+ 	> 输入auth login表示请求登录
+ 	> 返回334 +一串BASE64加密过的字符串，翻译过来就是用户名
+ 	> 输入邮箱名(BASE64编码后的)
+ 	> 返回334 + 密码(BASE编码后的)
+ 	> 输入邮箱密码(BASE64编码后的)
+ 	> 返回 235 Authentication successful
+ 	> 输入谁来发送邮件。mail from:<itcast_cxf@163.com>		<真实的发件人>
+ 	> 返回Ok Mail 250
+ 	> 输入把邮件发给谁。 rcpt to:<itcast_cxf@126.com>			<真实的收件人>
+ 	> 返回Ok Mail 250
+ 	> 输入data
+ 	> 返回 354 End data with <CR><LF>.<CR><LF>
+ 	> 开始输入数据。数据包含from，to，subject，以及邮件内，如果输入结束后，以一个"."为一行表示输入结束
+ 	> from:<itcast_cxf@163.com>		<邮件显示的发件人和收件人，不是一定就是真实的发件人和收件人>
+ 	  to:<itcast_cxf@126.com>
+ 	  subject:啦啦啦
+ 						<这个空行之后是主体。>							  	
+ 	  	内容内容啦啦
+ 	  	
+ 	  	啦啦
+ 	  	.				<单行点表示结束>
+ 	 > 返回250表示成功
+ 	 > quit
+ 	  	
+ 	
+4.使用sun.misc.BASE64Encoder;
+	sun包是底层的包，java包和javax包都依赖它，一般不给调用，默认是禁止的。
+	Windows->Preference->java->Compiler->errors/warning->XXXAPI -> forbidden把error给成ignore
+	
+5.使用JavaMail
+	> 导包：mail.jar、activation.jar
+	> 核心类:
+		* Session。如果得到它表示已经和服务器连接上，与connection作用相似。这个不是HttpSession
+			得到session需要Session.getInstance(Properties props, Authenticator authenticator);
+		* MimeMessage。表示一个邮件对象，可以调用setFrom等设置发件人，设置收件人，设置标题，设置正文。
+		* Transport。只有一个功能——发邮件。
+		

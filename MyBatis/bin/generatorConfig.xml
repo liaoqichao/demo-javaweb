@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+  PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+  "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+
+<generatorConfiguration>
+<!--   <classPathEntry location="/Program Files/IBM/SQLLIB/java/db2java.zip" /> -->
+
+<!-- 配置jdbc4大参数 -->
+  <context id="DB2Tables" targetRuntime="MyBatis3">
+	 <commentGenerator>
+	    <!-- 是否去除自动生成的注释 true：是 ： false:否 -->
+		<property name="suppressAllComments" value="true" />
+	</commentGenerator>
+  
+    <jdbcConnection driverClass="com.mysql.jdbc.Driver"
+        connectionURL="jdbc:mysql://localhost:3306/mybatis"
+        userId="root"
+        password="123">
+    </jdbcConnection>
+
+<!-- value为false表示数据库的DECIMAL和NUMBERIC类型对应Integer类型，
+	true表示数据库的DECIMAL和NUMBERIC类型对应java.math.BigDecimal -->
+    <javaTypeResolver >
+      <property name="forceBigDecimals" value="false" />
+    </javaTypeResolver>
+
+<!-- targetPackage指定生成po类的位置，例如为mybatis.po
+	targetProject指定在哪个项目的源文件夹下
+-->
+    <javaModelGenerator targetPackage="generator.po" targetProject=".\src">
+      <property name="enableSubPackages" value="true" />
+      <property name="trimStrings" value="true" />
+    </javaModelGenerator>
+
+<!-- 指定mapper映射文件的生成位置 -->
+    <sqlMapGenerator targetPackage="generator.mapper"  targetProject=".\src">
+      <property name="enableSubPackages" value="true" />
+    </sqlMapGenerator>
+<!-- 指定mapper接口的生成位置-->
+    <javaClientGenerator type="XMLMAPPER" targetPackage="generator.mapper"  targetProject=".\src">
+      <property name="enableSubPackages" value="true" />
+    </javaClientGenerator>
+<!-- 指定数据库表，只指定tableName就可以，前提po类名要和tableName一样，属性名和字段名一样 
+	 columnOverRide 的colume和javaType属性可以指定某些表的指定Java类型
+-->
+<table tableName="items"></table>
+<table tableName="orderdetail"></table>
+<table tableName="orders"></table>
+<table tableName="user"></table>
+<!--     <table schema="DB2ADMIN" tableName="ALLTYPES" domainObjectName="Customer" > -->
+<!--       <property name="useActualColumnNames" value="true"/> -->
+<!--       <generatedKey column="ID" sqlStatement="DB2" identity="true" /> -->
+<!--       <columnOverride column="DATE_FIELD" property="startDate" /> -->
+<!--       <ignoreColumn column="FRED" /> -->
+<!--       <columnOverride column="LONG_VARCHAR_FIELD" jdbcType="VARCHAR" /> -->
+<!--     </table> -->
+
+  </context>
+</generatorConfiguration>

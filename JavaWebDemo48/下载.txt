@@ -1,0 +1,18 @@
+下载
+1. 下载就是向客户端响应字节数据，之前响应的都是html的字符数据。
+	> 把文件变成字节数组，使用response.getOutputStream()来响应浏览器
+	
+2. 下载的要求
+	> 两个头一个流
+		* Content-Type: 你传递给客户端的文件是什么MINE类型，例如：image/pjpeg
+			String contentType = this.getServletContext().getMimeType("文件路径");
+		* Content-Disposition:它的默认值是inline，表示在浏览器窗口中打开，有些打不开的就弹框，打得开的就直接显示。
+			值为：attachment;filename=xxx。这样会弹出下载框。attachment：附件。下载显示的文件名称就是xxx
+		* 流：要下载文件的数据。
+			new一个输入流。通过IOUtils.copy(in,out);把输入流的数据复制到response.getOutputStream();
+
+3.下载中文件的名字如果是中文会出现乱码。文件名字是Content-Disposition：attachment;filename=xxx中的xxx
+	> FireFox:Base64编码。(无法肉眼识别的编码)
+	> 其他大部分浏览器都使用：URL编码	
+	
+	通用方案：filename = new String(filename.getBytes("GBK"),"ISO-8859-1");

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script type="text/javascript" src="../js/jquery.js"></script>
+</head>
+<body>
+	<h1 class="title">过滤选择器练习</h1>
+	<h2>第一个表格</h2>
+	<table id="table-1" align="center">
+		<tr>
+			<td>姓名</td>
+			<td>年龄</td>
+		</tr>
+		<tr>
+			<td>张三</td>
+			<td>15</td>
+		</tr>
+		<tr>
+			<td>李四</td>
+			<td>20</td>
+		</tr>
+		<tr>
+			<td>王五</td>
+			<td>18</td>
+		</tr>
+		<tr>
+			<td>赵六</td>
+			<td>18</td>
+		</tr>
+	</table>
+	<h2>第二个表格</h2>
+	<table id="table-1" align="center">
+		<tr>
+			<td>姓名</td>
+			<td>年龄</td>
+		</tr>
+		<tr>
+			<td>张三</td>
+			<td>15</td>
+		</tr>
+		<tr>
+			<td>李四</td>
+			<td>20</td>
+		</tr>
+		<tr>
+			<td>王五</td>
+			<td>18</td>
+		</tr>
+		<tr>
+			<td>赵六</td>
+			<td>18</td>
+		</tr>
+	</table>
+<script type="text/javascript">
+
+$('td').css({"border":"solid 1px","width":"200px","height":"30px","text-align":"center"});
+$('table').css({"border":"solid 1px","border-collapse":"collapse"});
+
+// 单双行颜色间隔，第一行白色.空格表示组合关系
+// $('#table-1 tr:even').css("background","#00ffff");
+// $('#table-1 tr:odd').css("background","#ffff00");
+// $('#table-1 tr:first').css("background","#ffffff"); // 层叠
+
+$('table:eq(0) tr:even').css("background","#00ffff");
+$('table:eq(0) tr:odd').css("background","#ffff00");
+$('table:eq(0) tr:first').css("background","#ffffff"); // 层叠
+
+$('table:eq(1) tr:even').css("background","#6a7b33");
+$('table:eq(1) tr:odd').css("background","#f988ac");
+$('table:eq(1) tr:first').css("background","#ffffff"); // 层叠
+</script>
+</body>
+</html>

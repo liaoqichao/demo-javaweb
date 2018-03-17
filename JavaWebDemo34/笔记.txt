@@ -1,0 +1,145 @@
+Demo34
+-------------------
+完成网页的注册和登录，数据库用XML
+功能：
+	1.注册
+	2.登录
+---------------
+JSP：
+	1.login.jsp-->登录表单
+	2.regist.jsp-->注册表单
+	3.index.jsp-->登录成功才能看到
+	
+Servlet:
+	1.LoginServlet
+	2.RegistServlet
+	
+Service:
+	1.UserService -->与用户相关的业务类
+
+Dao：
+	UserDao	--> 与用户相关的数据类
+	
+Domain(beans、entity、bo、vo、po)：
+	User	(对应数据库,还要对应所有表单)
+	> username
+	> password
+	> verifyCode
+----------------------------
+数据库设计
+	users.xml
+	<users>
+		<user username="xxx" password="XXX"/>
+		<user username="xxx" password="XXX"/>
+	</users>
+---------------------------
+步骤：
+1.创建空项目
+2.导包：
+	> verifyCode.jar
+	> CommonUtils.jar(前面自己写的)
+	> commons-beanutils.jar
+	> commons-logging.jar
+	> dom4j(解析XML)
+		* dom4j-1.6.1.jar
+		* jaxen-1.1-beta-6.jar
+3.建包
+	> 公司URL.项目名称.domain
+		> User
+	> 公司URL.项目名称.dao
+		> UserDao
+	> 公司URL.项目名称.service	
+		> UserService
+	> 公司URL.项目名称.web.servlet
+		> LoginServlet
+		> RegistServlet
+4.jsp
+	> login.jsp
+	> regist.jsp
+	> index.jsp
+5.在E盘创建一个users.xml文件。	
+	1.<?xml version="1.0" encoding="UTF-8"?>
+	2.添加根元素
+	3.保证文件为utf-8编码(新建->另存为->编码)
+-----------------------
+注册：
+regist.jsp
+	> 完成页面的基本功能：
+RegistServlet
+	> 封装表单数据到User对象中。
+	> 调用UserService的regist()方法
+		* 如果这个方法没有出问题,输出"注册成功"
+		* 如果这个方法抛出异常,会处理掉,把错误信息保存到request域转发到regist.jsp(显示错误信息)。
+UserService#regist()
+	> 没有返回值，如果注册失败抛出一个自定义异常！可以在异常中添加异常信息(字符串)(自定义异常类)
+	> 校验用户名是否已经被注册(通过用户名查询用户)，如果被注册抛出异常,异常信息("已被注册")
+	> 添加用户(如果没查询到)
+UserDao
+	通过业务分析得到结果：需要提供2个方法。
+	> 按用户名查询用户对象:User findByUsername(String username);
+	> 插入一个用户到数据库中:void add(User user);
+	
+工作：	通常代码从dao开始写
+1.dao:(不外乎就是数据库的增删改查)
+	* User findByUsername(String username);
+	* void add(User user);
+2.service
+	2.1- 在service层添加一个UserException(自定义异常)
+	2.2- void regist() throws UserException
+3.servlet
+	> 封装表单数据到JavaBean
+	> 使用service的regist方法
+		> 如果得到Exception,保存异常信息到request域中并转发到regist.jsp
+		> 输出"注册成功"
+---------------------------
+给注册添加验证码
+1.VerifyCode
+	* BufferedImage getImage();
+	* String getText();
+	* void output(BufferedImage,OutputStream)	把图片写到指定的输出流中
+2.VerifyCodeServlet
+	* 获取随机验证码图片BufferedImage getImage();
+	* 把验证码的图片保存到session域中(为什么？有多少个请求？因为进入网页时获取图片是一个请求,点击提交是另外一个请求,所以不能放在request中)
+	* 把图片响应到request.outputstream中
+3.regis.jsp
+	* <img src"${pageContext.request.contextPath }"+"/VerifyCodeServlet"/>
+	* 提供输出文本区域输入验证码
+	* 超链接"看不清，换一张" <a href="${pageContext.request.contextPath }"+"/VerifyCodeServlet"/>AAA</a>
+		如果浏览器有缓存，判断都是同一个Servlet就用上一次的图片怎么办？拿时间做参数。参数： .jsp?time=...
+4.修改RegistServlet
+	校验验证码：
+	错误：保存表单信息到request域，保存错误信息到request域。转发到regist.jsp。回显表单信息。
+	正确：什么都不错,向下执行。
+--------------------------
+服务器端的表单校验：
+在获取表单数据之后，验证码校验之前。
+1.使用Map来装错误信息。
+	Key：表单项名称 username,password,verifyCode
+	Value:
+		> 非空：用户名不能为空
+		> 长度：密码不能为空
+2.在检验失败时，向map添加错误信息，哪个字段出错，就给哪个字段加错误信息。
+3.判断map是否为空（长度为0），如果不空说明有错，保存map到request中，保存form到request域(为了回显)，转发会regist.jsp
+4.在regist页面中显示map中的错误信息。${map.username}
+
+================================================
+登陆
+页面：
+	> login.jsp --> 登陆表单
+	> LoginServlet
+		1.获取表单数据,封装到User  Servlet第一件事都是封装表单或者封装超链接参数。
+		2.调用service的login方法，传form过去。
+		3.如果login方法没有抛出异常，返回一个user对象。(因为要把user对象返回到session中)
+			4.有异常：获取异常信息，保存到request域中，保存form到request域中，并转发到login.jsp
+			5.没异常：保存返回的user对象(数据库查出来的)到session中。
+			为什么这么返回的是user而不是form？因为登录的时候只需要账号密码，而不需要填兴趣爱好才可以登录。从数据库返回的对象的数据才完整。
+		6.重定向到welcome.jsp(显示当前用户信息!信息从session中获取)
+	> UserService#login()
+		public User login(User form);
+		1.使用用户名查询数据库，得到返回的user
+			> 返回为null，抛出异常，异常信息为用户名不存在。(但是这样不会猜出用户名？)
+			> 返回不为null，获取查询出来的user的password和form的password进行比较。
+				> 如果不同：抛出异常(密码错误);
+				> 如果相同：返回查询结果。
+	> UserDao
+		1.通过用户名查询用户，已经存在，不用在写。

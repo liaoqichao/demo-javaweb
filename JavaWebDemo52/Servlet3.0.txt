@@ -1,0 +1,127 @@
+Servlet3.0
+
+一、要求
+1. MyEclipse10.0或以上版本！
+2. 发布到Tomcat7.0或以上版本！
+
+二、步骤
+1. 创建JavaEE6.0应用！
+
+-----------------------------
+
+三、概述
+* 注解代替web.xml配置文件
+* 异步处理
+* 对上传的支持
+
+　　Servlet3.0在市场上没有应用！
+
+-----------------------------
+
+四、注解代替配置文件
+
+1. 删除web.xml
+2. 在Servlet类上添加@WebServlet(urlPatterns={"/AServlet"})
+
+总结：
+  * 注解好处：配置信息少！
+  * 注解缺点：不方便修改！
+
+3. 在Filter类上添加@WebFilter(urlPatterns="/AFilter")
+
+4. 在Listener类上添加@WebListener
+
+
+-----------------------------
+
+五、异步处理
+  1. 什么是异步处理
+    原来，在服务器没有结束响应之前，浏览器是看不到响应内容的！只有响应结束时，浏览器才能显示结果！
+    现在异步处理的作用：在服务器开始响应后，浏览器就可以看到响应内容，不用等待服务器响应结束！
+
+  2. 实现异步的步骤
+
+  * 得到AsyncContext，它异步上下文对象
+    AsyncContext ac = request.startAsync(request,response);
+  * 给上下文一个Runnable对象，启动它！（给上下文一个任务，让它完成！）
+    ac.start(new Runnable() {
+      public void run() {
+        ...
+      }
+    });
+
+  * @WebServlet(urlPatterns="/AServlet", asyncSupported=true)
+  * resp.setContentType("text/html;charset=utf-8");
+  * IE如果不能正常输出，这说明响应体大小不足512B，那你需要多输出点废话！
+  * AsyncContext#complete()：通知Tomcat我们异步线程已经执行结束了！这让Tomcat才会及时的断开与浏览器的连接！
+				
+-----------------------------
+
+六、上传支持
+
+1. 上传
+
+　　* 上传对表单的要求：
+　　　　> method="post"
+　　　　> enctype="multipart/form-data"，它的默认值是：application/x-www-form-urlencoded
+　　　　> <input type="file" name="必须给"/>
+
+　　* 上传Servlet的使用：
+　　　　> request.getParameter()不能再用
+　　　　> request.getInputStream()使用它来获取整个表单的数据！
+
+　　* commons-fileupload
+　　　　> 创建工厂
+　　　　> 解析器
+　　　　> 使用解析器来解析request对象，得到List<FileItem>
+
+　　==============
+
+　　Servlet3.0对上传提供了支持：
+　　* 表单不变
+　　* 在Servlet中不需要再使用commons-fileupload，而是使用Servlet3.0提供的上传组件接口！
+
+　　==============
+
+　　上传的步骤：
+　　* 使用request.getPart("字段名")，得到Part实例，
+　　* Part：
+　　　> String getContentType()：获取上传文件的MIME类型
+　　　> String getName()：获取表单项的名称，不是文件名称
+　　　> String getHeader(String header)：获取指定头的值
+　　　> long getSize()：获取上传文件的大小
+　　　> InputStream getInputStream()：获取上传文件的内容
+　　　> void write(String fileName)：把上传文件保存到指定路径下
+    * 默认Servlet是不支持使用上传组件：需要给Servlet添加一个注解: @MultipartConfig
+
+    它没有提供获取上传文件名称的方法：
+    * 这需要我们自己从Content-Disposition头中截取！
+
+-----------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

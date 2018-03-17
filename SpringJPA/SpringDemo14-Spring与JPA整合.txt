@@ -1,0 +1,28 @@
+1.JPA
+	JPA:一种规范，hibernate是它的一个实现。
+	* 导包：使用hibernate的那些就可以了。
+	JPA规范：JAVA EE的一部分。
+2.导包：
+	导入 Spring和Hibernate的jar包。
+	还要导入hibernate-entitymanager-5.0.5.Final.jar在hibernate的option的jpa里面
+3.准备配置文件：
+	> beans.xml
+	> /src/META-INF/persistence.xml
+4.注意
+	* persistence.xml要提供provider
+	* 用获取方法的时候出现懒加载异常
+		需要在web.xml添加过滤器才可以解决。
+		添加过滤器的前提：添加spring的监听器?
+	* 过滤器配置
+		<filter>
+			<filter-name>OpenSessionInViewFilter</filter-name>
+			<filter-class>org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter</filter-class>
+		</filter>
+		<filter-mapping>
+			<filter-name>OpenSessionInViewFilter</filter-name>
+			<url-pattern>/*</url-pattern>
+		</filter-mapping>
+	* spring在web.xml配置的前提，在web.xml中配置监听器,实例化spring容器
+		<listener>
+			<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+		</listener>

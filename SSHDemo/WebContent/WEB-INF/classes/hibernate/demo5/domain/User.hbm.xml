@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+ <hibernate-mapping package="hibernate.demo5.domain">
+	<class name="User" table="demo5_user">
+<!-- 		<id name="id" type="int" column="id"> -->
+		<!-- 使用uuid主键生成策略 -->
+		<id name="id" type="int" column="id">
+			<generator class="native"/>
+		</id>
+    	<property name="name" type="string" column="name" length="20"/>
+    	<!-- addressSet属性，Set集合 -->
+    	<!-- 指定一个集合（一张新的表）,不设置懒加载为false会报错 -->
+    	<set name="addressSet" table="demo5_user_addressSet" lazy="false">
+    		<key column="userId"></key><!-- 指定外键，列名为userId，自动的对应class中的id（user表的主键） -->
+    		<element type="string" column="address"></element><!-- 指定address列 -->
+    	</set>
+     </class>
+ </hibernate-mapping>

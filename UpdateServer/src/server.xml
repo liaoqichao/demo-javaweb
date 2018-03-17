@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<server port="10086">
+	<clientbean id="96" clientname="lg01" ip="127.0.0.1" version="v1.0"/>
+	<clientbean id="97" clientname="ns01" ip="127.0.0.1" version="v1.0"/>
+	<clientbean id="111" clientname="yt233" ip="127.0.0.1" version="v1.0"/>
+	<clientbean id="237" clientname="ft01" ip="127.0.0.1" version="v1.0"/>
+	<clientbean id="297" clientname="ft02" ip="127.0.0.1" version="v1.3"/>
+</server>

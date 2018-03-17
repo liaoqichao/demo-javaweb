@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+ <hibernate-mapping package="hibernate.demo21.domain">
+	<class name="Department" table="demo21_department">
+		<id name="id" type="int" column="id">
+			<generator class="native"/>
+		</id>
+    	<property name="name" type="string" column="name" length="20"/>
+    	<!-- employeeSet属性、set集合，本类与Employee是一对多的关系 -->
+    	
+    	<set name="employeeSet" >
+    		<key column="departmentId"></key>
+    		<one-to-many class="Employee"/>
+    	</set>
+    	
+     </class>
+ </hibernate-mapping>

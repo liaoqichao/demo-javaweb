@@ -1,0 +1,492 @@
+1. 什么是WebService？
+	* WebService是一种可以接收从Internet或者Intranet上的其它系统中传递过来的请求,轻量级的独立的通讯技术。
+	      简单地说，就是程序（系统）之间的远程调用。这个调用是夸语言的调用。
+	* 夸语言的调用，需要不同语言都认识的东西作为“翻译”，不同语言都认识（都能解析）的东西就是XML。
+	      简单地说就是通过HTTP协议传输XML来实现不同语言、不同程序（系统）之间的调用。
+	* 前提：要能上网！！！
+	* 特点：
+		> WebService 通过HTTP POST方式接收客户请求
+		> WebService与客户端之间一般使用SOAP协议传输XML数据
+		> 它本身是为了跨平台或跨语言而设计的
+	      
+2. 应用例子
+	* 某网站上的查看的天气预报，这是调用气象局的服务。
+	* 某网站查看某电视台的节目清单，这是调用了该电视台系统的服务。
+	* 某网站输入手机号，返回该手机号的地域（北京、上海）和运营商（移动、联通、电信）。
+	* 云计算
+	* 云查杀
+	
+3. 面向服务系统架构(SOA)
+	* SOA可以看作是B/S模型、XML（标准通用标记语言的子集）/Web Service技术之后的自然延伸。
+	
+4.学习WerService前先了解的概念。
+	* XML 扩展性标记语言
+		> namespace - 命名空间
+			- xmlns="http://..." 使用默认命名空间
+			- xmlns:itcast="http://..." 使用指定名称的命名空间
+	* WSDL(WebService Description Language) Web服务描述语言
+		> 它是一个XML格式的文档！！是服务的提供者提供的文档，告诉调用者如何调用服务。有了它就不用向服务提供者的公司，问他们怎么调用服务。
+		> 通过XML的方式说明服务在什么地方——地址。
+		> 通过XML的方式说明服务提供什么样的方法——如何调用。
+	* SOAP(Simple Object Access Protocol) 简单对象访问协议
+		> SOAP = HTTP + XML
+		> SOAP组成：
+			- Envelope（根元素） ： 必须部分，以XML元素的形式出现
+			- Headers ： 可选
+			- body（根元素的子元素） ： 必须。body部分包含执行的服务器的方法和发送到服务器的数据。
+		> SOAP格式：(所有WebService都是POST请求)
+			POST 控制器（/namespace/aaction.do） HTTP/1.1
+			Content-Type:text/xml;charset=utf8
+			其他请求头
+			[空行]
+			<Envelope>
+				<body>
+					...
+				</body>
+			</Envelope>
+			
+5. 发布WebService
+	* 步骤：
+		> 新建java项目
+		> 新建一个类（带main函数）
+		> 在类上添加@WebService注解
+			- @WebService注解：将java类标记为实现WebService或者把java接口定义为WebService接口。更多情况注解在接口上。
+			- @WebService注解在类或接口上，将此类或接口发布成一个WebService
+		> 使用Endpoint抽象类(javax.xml.ws.Endpoint)
+			- Endpoint 端点服务类，它的publish方法用于将一个被@WebService注解的类或接口绑定到一个地址的端口上。
+			- Endpoint.publish(address, implementor)
+			- address最好写本机地址，因为不知道别的地址有没有装jdk，有没有implementor所指定的类
+			- 调用Endpoint.publish(address,implementor)方法会启用一个新线程来监听客户端的请求。
+		> 写一个/一些非final，非静态的方法。类里面全部方法都会对外公布。必须至少有一个可以对外公布的方法，否则Web服务发布失败
+		> 如果不想这个类的指定方法对外公布，在这个方法上添加@WebMetho(exclude=true)。该方法则不会对外公布
+	* 注意：
+		> 静态方法和被final修饰的方法不能发布为Web服务，例如主函数main
+	* 查看WSDL：
+		> 复制Endpoint.publish(address, implementor)的address
+		> 在浏览器地址输入address?wsdl例如：http://127.0.0.1:6789/hello?wsdl
+		> wsdl主要内容：
+			- 服务地址：<soap:address location="http://127.0.0.1:6789/hello?wsdl"/>  
+				就是Endpoint的address参数
+			- 服务名称：<service name="HelloServiceService">
+				类/接口简单名称+Service
+			- 方法：<operation name="sayHello">
+				对应WebService注解的类或接口的提供服务方法
+		> 当输入address?wsdl后查看到发布的方法和@WebService注解的类或接口的方法一样，说明WebService发布成功
+		
+6. 调用已发布的WebService
+	* 前提：服务已发布
+	* 建议用第一种方式！
+	* 方法一：通过wsimport生成客户端代码调用Web服务
+		> 打开cmd,输入wsimport (wsimport是jdk提供的命令，javac,java,jar命令也是)
+		> 输入wsimport -s . http://127.0.0.1:6789/hello?wsdl 其中-s表示生成源代码，.表示生成的源代码存放到当前目录
+		> 然后当前目录就会生成一些.java文件和对应的.class文件
+			- 生成的.java代码的包结构和服务提供者一样的。如果客户端的包结构和服务提供者的不一样会报错！
+			- 如果不想一样，可以加一个-p参数:
+				wsimport -s . -p demo2.client http://127.0.0.1:6789/hello?wsdl
+		> 复制所有.java文件到新建Client项目(客户端) .java文件的包名可能不匹配，修改一下（import的错误）
+		> 在客户端项目中调用！
+			 * 看http://127.0.0.1:6789/hello?wsdl调用
+			 * 1.<service name="HelloServiceService">
+			 * 		HelloServiceService hss = new HelloServiceService();
+			 * 2.第一步中元素的子元素<port name="HelloServicePort" binding="tns:HelloServicePortBinding">
+			 * 		HelloService hs = hhs.getHelloServicePort();
+			 * 	其中返回类型根据binding属性所引用的tns:HelloServicePortBinding来找。找标签名为binding其name属性的值
+			 *  为binding所引用的值的标签，这个标签的type属性的值就是该返回类型。
+			 *  <binding name="HelloServicePortBinding" type="tns:HelloService">
+			 * 3.通过hs调用已发布的方法，对应WSDL的operation标签。hs是代理对象
+			 * 		hs.sayHello("张三");
+			 * 	<operation name="sayHello">
+			 * 4.关闭服务再次运行Client，报错！
+			 
+	* 方法二：通过ajax调用WebService
+		> 详细看demo3。报错：
+			二月 27, 2016 12:00:53 下午 com.sun.xml.internal.ws.transport.http.server.WSHttpHandler handleExchange
+			警告: 无法处理 HTTP 方法: OPTIONS
+	* 方法三：通过UrlConnection调用WebService
+		> 通过字符串地址得到URL对象
+			URL wsUrl = new URL("http://127.0.0.1:6789/hello");
+		> 通过URL对象得到URLConnection对象，并强转为HttpURLConnection
+			HttpURLConnection conn = (HttpURLConnection) wsUrl.openConnection();
+		> 设置有请求输入（request），有请求输出（response），设置请求方法（post），设置request属性（Content-Type请求头）
+			conn.setDoInput(true); // 有输入
+			conn.setDoOutput(true); // 有输出
+			conn.setRequestMethod("POST"); // 设置请求方式
+			conn.setRequestProperty("Content-Type", "text/xml;charset=UTF-8"); // 设置请求头
+		> 得到输出流
+			OutputStream out = conn.getOutputStream();
+			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out));
+		> 通过输出流发送请求体
+			String soap = "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:q0=\"http://ws.demo2/\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">"
+			+"<soapenv:Body><q0:sayHello><arg0>aaa</arg0></q0:sayHello></soapenv:Body></soapenv:Envelope>";
+			bw.write(soap); // 发送数据
+			bw.flush();  // 不flush就报错！
+		> 通过输入流接收响应数据
+			InputStream in = conn.getInputStream(); // 接收数据
+			BufferedReader br = new BufferedReader(new InputStreamReader(in));
+			String str  = "";
+			String line = "";
+			while((line = br.readLine())!= null){
+				str = str+line;
+			}
+			System.out.println(str);
+		> domj4+XPath解析返回的XML格式字符串
+			// saxReader.read(br);报错。所以用这种方式
+			Document document = DocumentHelper.parseText(str);
+			// 怎么解析带有命名空间的标签？ 
+			Node retNode = document.selectSingleNode("//*[local-name()='sayHelloResponse' and namespace-uri()='http://ws.demo2/']/return");
+			String ret = retNode.getText();
+			System.out.println(ret);
+		> 关闭资源
+			bw.close();
+			br.close();
+			conn.disconnect(); // 关闭连接
+	* 方法四：通过客户端编程方式调用WebService
+		> 使用wsimport生成.java文件
+		> 通过Service s = Service.create(wsdlUrl, serviceName);得到服务，在这里就是WSDL的HelloServiceService
+			- 第一个参数URL类型，服务的wsdl地址
+			- 第二个参数QName类型。new QName(namespace,local-name)
+				-> 第一个参数，命名空间。definitions标签的targetNamespace="http://ws.demo2/"
+				-> 第二个参数，本地名称，service的name属性，即HelloServiceService
+		> 通过s.getPort(portName, serviceEndpointInterface)得到服务接口。这个服务接口就是对应服务提供者被
+			@WebService注解的类，在这里就是HelloService。
+			HelloService helloService = s.getPort(new QName("http://ws.demo2/","HelloServicePort"), HelloService.class);
+			- 第一个参数：QName类型，用于指定HelloServicePort。
+				-> QName第一个参数还是targetNamespace的值
+				-> 第二个参数，port标签（local-name）对应的name值，即HelloServicePort
+			- 第二个参数：
+				-> 第一个参数QName所指定的标签的binding属性引用的标签的type属性的值对应的类型。tns:HelloService
+					即HelloService.class(通过wsimport命令得到)
+					这个值就是被@WebService注解的类生成对应的接口。
+				-> 这个参数的类型就是就是这个方法的返回值的类型
+			- 返回值：第二个参数的类型。即HelloService
+		> 直接调用HelloService的服务。
+	* 总结：
+		获取方式总是得到HelloServiceService hss，然后通过hss得到port（对应被WebService注解的类生成的类），
+		然后得到的port里面就有WebService提供的方法。
+		如果使用第一种方法：
+		XXService -(getPort)-> XX  -> xX.method(...);
+		如果使用第四种方法：
+		Service.create -> XXService -(getPort)-> XX -> xX.method(...);
+		第一种方法和第四种方法其实是同一种，只是第四种方法XXService是通过Service.create是在客户端创建，不是自己生成
+7. SOAP协议
+	* ContentType
+		> HTTP的post请求：application/-x-www-form-urlencoded
+		> SOAP1.1协议：text/xml
+		> SAOP1.2协议：application/soap+xml
+	* SOAP1.1和SOAP1.2的区别：
+		> 命名空间不同
+			- SOAP1.1的命名空间：xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+			- SOAP1.2的命名空间：xmlns:soap="http://www.w3c.org/2003/05/soap-envelope"
+		> SOAP1.1有SOAPAction请求头，而SOAP1.2没有。
+		> SOAP1.1生成的WSDL和SOAP1.2生成的WSDL不同
+			- SOAP1.1是以 soap:address定义
+			- SOAP1.2是以 soap12:address定义。jdk1.6不支持SOAP1.2
+		> 在CXF中两种协议的请求方式不同
+			- SOAP1.1为content-Type:text/xml;charset=UTF-8
+			- SOAP1.2为content-Type:application/soap+xml;charset=UTF-8
+		> 新版本协议服务端可以接受老版本协议请求，老版本协议服务端不能接收新版本协议请求（向下兼容）
+	* SOAP协议请求分析
+		> 第一步：客户端使用get方式获取wsdl文件，称为握手。（发送get请求，返回wsdl文件）
+			- 对于jdk1.6生成的ws服务，由于内部有两个配置文件，所以会发出两次get请求。
+			- 其他一般为一次
+		> 第二部：客户端发出POST请求
+		> 第三步：WS服务所在的服务器响应
+8. WebService和Web服务器的区别
+	* WebService可以看做是Web服务器上的应用。Web服务器是WebService运行时必须的容器。
+	
+9. 练习：调用WebService服务获得天气预报
+	* 天气预报的服务地址
+		http://webservice.webxml.com.cn/WebServices/WeatherWS.asmx
+	* 在cmd输入wsimport -s . -p demo6  http://webservice.webxml.com.cn/WebServices/WeatherWS.asmx?wsdl
+	* 如果不报错，则直接生成.java。如果报错内容为：
+		[WARNING] src-resolve.4.2: 解析组件 ‘s:schema’ 时出错。在该组件中检测到 ‘s:schem 
+		a’ 位于名称空间 ‘http://www.w3.org/2001/XMLSchema’ 中, 但无法从方案文档 ‘http:// 
+		webservice.webxml.com.cn/WebServices/WeatherWS.asmx?wsdl#types?schema1’ 引用此名 
+		称空间的组件。如果这是不正确的名称空间, 则很可能需要更改 ‘s:schema’ 的前缀。如果 
+		这是正确的名称空间, 则应将适当的 ‘import’ 标记添加到 ‘http://webservice.webxml.c 
+		om.cn/WebServices/WeatherWS.asmx?wsdl#types?schema1’。 
+		line 15 of http://webservice.webxml.com.cn/WebServices/WeatherWS.asmx?wsdl#typ 
+		es?schema1 
+		[WARNING] src-resolve: 无法将名称 ‘s:schema’ 解析为 ‘element declaration’ 组件。
+	        则下载（复制或另存为）wsdl文件到本地。把wsdl文件所有的<s:element ref="s:schema" /><s:any />
+	        替换成<s:any minOccurs="2" maxOccurs="2"/>。这次练习一共替换了3处。
+	* 重新在cmd输入 wsimport -s . -p demo6 E:\Eclipse\WebService\WeatherWS.wsdl 解析生成.java文件
+	* 查看WSDL文件。一般是service标签->service标签的子标签port->port的binding引用的标签->被应用的binding标签的
+	  type类型。
+	      在这里就是：
+		> service标签 :
+			WeatherWS ws = new WeatherWS();
+		> service标签的子标签port和port标签（调用的getter）binding属性所引用的标签的type属性（返回类型）：
+			WeatherWSSOAP soap = ws.getWeatherWSSOAP();
+		> 通过operation标签找到想调用的方法（这里是getWeather）,在通过其input/output子标签的message属性的值，找到
+		  对应的message标签。
+		  	<wsdl:message name="getWeatherSoapIn">
+		  		<wsdl:part name="parameters" element="tns:getWeather"/>
+			</wsdl:message>
+			<wsdl:message name="getWeatherSoapOut">
+				<wsdl:part name="parameters" element="tns:getWeatherResponse"/>
+			</wsdl:message>
+			然后再找到对应的element标签。这个element标签最里面的标签的type类型就是参数类型或者返回类型。
+			<s:element name="getWeather">
+				<s:complexType>
+					<s:sequence>
+						<s:element minOccurs="0" maxOccurs="1" name="theCityCode" type="s:string"/>
+						<s:element minOccurs="0" maxOccurs="1" name="theUserID" type="s:string"/>
+					</s:sequence>
+				</s:complexType>
+			</s:element>
+			<s:element name="getWeatherResponse">
+				<s:complexType>
+					<s:sequence>
+						<s:element minOccurs="0" maxOccurs="1" name="getWeatherResult" type="tns:ArrayOfString"/>
+					</s:sequence>
+				</s:complexType>
+			</s:element>
+			对应代码：ArrayOfString weather = soap.getWeater("深圳",null);
+		> 得到的ArrayOfString weather就是天气信息。
+			List<String> details = weather.string;
+			for(String str : details){
+				System.out.println(str);
+			}
+
+10. 修改wsdl文件的内容
+	* 问题：service的name属性总是以Service结尾，例如HelloServiceService。
+		但是觉得不好看，想改变为HelloService怎么办？
+	* 解决：通过注解修改。@WebService(serviceName="HelloService")默认的serviceName是简单类名+Service
+	* 注意：
+		> 修改了注解，那么生成的.java文件也会改变
+		> 服务器端修改了这些属性的值，那么原先的客户端代码就不能调用ws服务。要重新wsimport生成.java文件
+	* WebService注解包括：
+		> @WebService注解：类上的注解
+			- serviceName : 对应service标签的name属性
+			- targetNamespace : 修改definitions 标签的targetNamespace属性的值。默认值是倒置的包结构
+			- portName : service标签的子标签port的name属性和对应binding标签名
+		> @WebMethod注解：方法上的注解
+			- exclude : true/false是否发布该方法
+			- operationName ： 对应wsdl文件上operation的name属性值也对应生成的.java文件的服务方法名
+		> @WebResult： 方法上的注解
+			- name : 修改返回值的名字.对应修改schemaLocation="http://127.0.0.1:6789/hello?xsd=1"
+				上的方法名+Response的最里面的标签的name元素，默认为return
+		> @WebParam： 参数上的注解
+
+11. Apache CXF
+	* 前面的调用WebService都是在main函数里面调用的，如果在web项目呢？
+	* 什么是CXF?
+		> Celtix + Xfire
+	* CXF支持的协议
+		> SOAP1.1,SOAP1.2
+		> XML/HTTP
+		> CORBA(Common Object Request Broker Architecture ,公共对象请求代理体系结构,早期语言使用的WS。
+			C,C++,C#)
+		> 可以与spring进行快速无缝整合
+		> 灵活的部署：可以运行在Tomcat,Jboss,Jetty(内置),IBMWS,BeaWL上面。
+	* 安装CXF的其他支持项目：
+		> Ant
+		> Tomcat
+		> 并设置环境变量：
+			- JAVA_HOME
+			- CXF_HOME
+			- ANT_HOME
+			- CATALINA_HOME
+			- Path = %JAVA_HOME%\bin;%CXF_HOME%\bin;%CATALINA_HOME%\bin;%ANT_HOME%\bin
+			- CLASSPATH=.;%CXF_HOME%\lib\cxf-manifest.jar;.\build\classes
+	* 用Ant构造第一个CXF实例
+		> 打开cmd
+		> 到E:\Java\JAR\apache-cxf-2.4.2\samples\java_first_pojo目录下
+		> 输入ant server(ant是命令，server不是命令，取决于build.xml里面的配置)。
+		> 如果报和版本相关的错误，修改在E:\Java\JAR\apache-cxf-2.4.2\samples\common_build.xml
+			<condition property="is.java.version.15">
+        		<or>标签下的jdk版本，添加当前版本的字符串，cxf2.4.2只有1.5和1.6。通过添加标签可以支持其他
+		> 输入ant server没有报错后，当前文件夹会生成一个build的文件夹，里面有编译出来的.class文件。这是WebService
+		     服务已经成功发布。（代码里设置了线程睡眠5分钟，然后关闭程序）
+		> 打开另外一个cmd命令，到E:\Java\JAR\apache-cxf-2.4.2\samples\java_first_pojo目录下
+		> 输入ant client。则调用build.xml对应的<target name="client"/>标签的类，调用前面发布的服务。
+		> 在E:\Java\JAR\apache-cxf-2.4.2\samples\java_first_pojo目录下输入ant clean删除build文件夹
+		      直接到删除也可以！
+	* Ant打包成war文件
+		> 到E:\Java\JAR\apache-cxf-2.4.2\samples\java_first_pojo目录下输入ant war
+		     会在当前目录生成build文件夹，这个build文件夹里面多了一个war文件夹，文件夹里就有war文件。
+	* 发布到Tomcat服务器上
+		> 方法一：把war文件复制到Tomcat的webapps目录下，运行Tomcat，这个项目就会在Tomcat服务器上运行。
+		> 方法二：在cmd输入ant deploy -Dtomcat=true，就可以将项目发布到Tomcat服务器上，启动Tomcat服务器后在
+			浏览器输入对应的wsdl地址就可以访问对应wsdl文件。
+	* 卸载发布的应用
+		> 关闭Tomcat浏览器后，在E:\Java\JAR\apache-cxf-2.4.2\samples\java_first_pojo目录下输入：ant undeploy -Dtomcat=true
+	* 清空项目
+		> 在E:\Java\JAR\apache-cxf-2.4.2\samples\java_first_pojo目录下输入ant clean
+		
+12. 使用CXF开发WebService应用
+	* 导jar包
+	* CFX发布服务的类
+		> ServerFactoryBean
+			- 1. 实例化ServerFactoryBean
+				ServerFactoryBean sfb = new ServerFactoryBean();
+			- 2. 设置服务发布地址，提供服务的类的类型，提供服务的服务的实例
+				sfb.setAddress("http://127.0.0.1:6789/hello");
+				sfb.setServiceClass(HelloService.class);
+				sfb.setServiceBean(new HelloService());
+			- 3. 设置服务方法，在提供服务的类里面添加方法（public）
+				public String sayHello(String name){return "hello "+name;} 
+			- 4. 发布服务
+				sfb.create();
+		> JaxWsServerFactoryBean(建议使用此类，是上面类的子类)
+			- 1. 实例化JaxWsServerFactoryBean
+				JaxWsServerFactoryBean jwsfb = new JaxWsServerFactoryBean();
+			- 2. 设置服务发布地址，提供服务的类的类型，提供服务的服务的实例
+				jwsfb.setAddress("http://127.0.0.1:7788/hi");
+				jwsfb.setServiceClass(HiService.class);
+				jwsfb.setServiceBean(new HiService());
+			- 3. 设置服务方法，在提供服务的类里面添加方法（public）
+				public String sayHi(String name){return "hi "+name;} 
+			- 4. 在提供服务的类上加上@WebService注解
+				如果不加上注解，服务可以发布，但是没有方法（wsdl的operation）
+			- 5. 发布服务
+				jwsfb.create();
+	* ServerFactoryBean 和 JaxWsServerFactoryBean的区别
+		> 生成的wsdl文件的命名规则不一样。例如使用sfb的service标签的name属性的值默认是类名，而jwsfb是类名+Service（即
+			和Endpoint.publish()方法发布服务的命名规则一样）
+		> 使用jwsfb提供服务的类必须加上@WebService注解，不然它里面的全部服务方法都不会暴露出去（wsdl没有改operation），
+			而sfb不需要注解，默认全部public，非final，非static方法都发布
+	* 服务与客户端类的调用原则：
+		> 使用ServerFactoryBean发布服务要用ClientProxyFactoryBean方法调用服务
+		> 使用JaxWsServerFactoryBean发布的服务要用JaxWsClientProxyFactoryBean方法调用服务
+		> 但是一般情况下都不用上面2个方法，都是用wsimport解析wsdl文件得到.java文件然后调用（老方法），因为用
+			上面2个方法要导入cxf包。
+	* 规范化代码发布WebService注意:
+		> 使用JaxWsServerFactoryBean时@WebService注解在接口上，实现类不需要注解
+	* 使用cxf的wsdl2java命令生成客户端代码
+		> 检查wsdl2java是否存在和版本号。cmd输入wsdl2java -v
+		> 切换目录到存放生成客户端代码的目录。
+			cmd输入wsdl2java -d . -p demo8.client http://127.0.0.1:7788/hello?wsdl
+			-d指定目录，.表示当前目录，-p表示生成代码的包结构。（和wsimport一样）
+		> 把代码复制到客户端，然后代码可能会出错（XXService的所有方法的super(a,b,c)3个参数去掉但三个参数）
+	* 添加消息拦截器	
+		> 在jwsfb.create()发布服务之前，添加请求消息拦截器和响应消息拦截器。LoggingIn表示请求，LoggingOut表示响应	
+			jwsfb.getInInterceptors().add(new LoggingInInterceptor());
+			jwsfb.getOutInterceptors().add(new LoggingOutInterceptor());
+		> 客户端调用服务后，控制台会输出Http协议。第一个是GET请求（获取wsdl文件），第二个是post请求（请求服务），第三个
+		  	是响应。但是不是所有调用方式都是2次请求1次响应。
+		  	- ajax调用和WebService Explorer方式调用服务都是没有GET请求。
+		  	
+13. 使用SOAP1.2协议访问WebService服务
+	* 在服务接口上添加@BindingType(value=SOAPBinding.SOAP12HTTP_BINDING)注解即可。
+		生成的wsdl文件service标签下面的address的前缀就变为soap12
+	* Eclipse的WebService Explorer不支持SOAP1.2协议，所以点方法的时候Actions视图没有东西(没有Action头?)
+
+14. 基于Web的CXF发布WebService
+	* 到CXF的jar包
+	* 在web.xml中配置cxf的核心Servlet，CXFServlet。
+		  <servlet>
+		  	<servlet-name>cxf</servlet-name>
+		  	<servlet-class>org.apache.cxf.transport.servlet.CXFServlet</servlet-class>
+		  </servlet>
+		  <servlet-mapping>
+		  	<servlet-name>cxf</servlet-name>
+		  	<url-pattern>/cxf/*</url-pattern>
+		  </servlet-mapping>
+	* 在WEB-INF下创建配置文件cxf-servlet.xml（最好是复制模板）.这是一个spring的配置文件。
+	* 在web项目生成的类只需要在cxf-servlet.xml文件中配置就可以变成服务发布出去。
+		> 配置：
+			- 服务（@WebService）是类：
+				<jaxws:endpoint id="sayHi" implementor="demo10.service.impl.SayHi" address="/sayHi"></jaxws:endpoint>
+			- 服务（@WebService）是接口：
+				<!-- serviceClass 指的是被@WebService注解的服务接口 -->
+				<jaxws:server id="helloService" serviceClass="demo10.service.HelloService" address="/hello">
+					<!-- 指定实现类 -->
+					<jaxws:serviceBean>
+						<bean class="demo10.service.impl.HelloServiceImpl"></bean>
+					</jaxws:serviceBean>
+				</jaxws:server>
+		>  访问服务：http://ip:port/项目名/cxfServlet请求路径/address
+	* 在配置文件添加消息拦截器
+		> 请求消息拦截器:在<jaxws:endpoint/>或<jaxws:server/>内添加
+			<jaxws:inInterceptors>
+				<bean class="org.apache.cxf.interceptor.LoggingInInterceptor"></bean>
+			</jaxws:inInterceptors>
+		> 响应消息拦截器：在<jaxws:endpoint/>或<jaxws:server/>内添加
+			<jaxws:outInterceptors>
+				<bean class="org.apache.cxf.interceptor.LoggingOutInterceptor"></bean>
+			</jaxws:outInterceptors>
+	* 通过初始化参数指定配置文件cxf-servlet.xml的位置
+		> 默认读取/WEB-INF/cxf-serlvet.xml配置文件
+			- 可以通过初始化参数来读取配置文件的位置。在web.xml的指定CXFServlet的
+				Servlet标签下添加：
+			  	<init-param>
+			  		<param-name>config-location</param-name>
+			  		<param-value>classpath:cxf-servlet.xml</param-value>
+			  	</init-param>
+		> 这个配置文件是由org.apache.cxf.transport.servlet.CXFServlet读取的
+		> 修改读取配置文件的时间为服务器开启的时间。
+			- 默认服务器启动时不读取这个配置文件，第一次访问CXFServlet时候才读取这个配置文件。在web.xml添加如下配置
+			  可以在服务器开启时就读取配置文件
+			  <context-param>
+			  	<param-name>contextConfigLocation</param-name>
+			  	<param-value>classpath:cxf-servlet.xml</param-value>
+			  </context-param>
+			  <listener>
+			  	<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+			  </listener>
+			  在CXFServlet不需要配置初始化参数:
+	  	 	<init-param>
+		  		<param-name>config-location</param-name>
+		  		<param-value>classpath:cxf-servlet.xml</param-value>
+		  	</init-param>
+	*  客户端使用Spring调用发布的服务（前提：客户端代码要有Spring环境。）
+		> 优点：
+			1.适合已经集成Spring的JavaWeb项目，并希望通过CXF配置调用Web服务
+			2.可以将外部的Web服务通过配置文件注入到Action类中
+		> 缺点：需要导入CXF的大量jar包
+		> 步骤：
+			1.到CXF包
+			2.使用命令生成接口文件（wsdl的port），接口文件会报错，把注解上的ObjectFactory删掉就可以
+			3.提供ClientBeans.xml配置文件(名字无所谓)
+			4.在ClientBeans.xml配置文件中配置：
+				<jaxws:client id="helloService" 
+					address="http://localhost:8080/WebServiceDemo10/cxf/hello" 
+					serviceClass="demo10.client1.HelloService">
+				</jaxws:client>
+				其中serviceClass是生成服务接口的文件，address是wsdl中的location
+			5.通过ApplicationContext获取到服务接口，然后直接调用
+				ApplicationContext ctx = new ClassPathXmlApplicationContext("ClientBeans.xml");
+				HelloService service = (HelloService) ctx.getBean("helloService");
+				String str = service.sayHello("李四");
+		> 通过spring调用服务方式，没有发送GET请求
+	* 关于Web项目配置的几点说明：
+		> CXFServlet默认读取的是/WEB-INF/cxf-servlet.xml，可以通过在web.xml中添加初始化参数来修改
+		> cxf-servlet.xml默认是第一次访问CXFServlet加载，可以通过在web.xml中添加Spring监听器，即
+			context-param和listener标签。
+		> 如果在web项目要使用spring方式调用服务，一定要在web.xml中添加context-param和listener来配置spring监听器
+		> 如果配置了Spring监听器，在服务器开启时读取配置文件，那么在CXFServlet设置初始化参数读取cxf-servlet.xml配置文件
+		      的配置要去掉。
+		> cxf-servlet.xml的三句配置建议保留：
+			<import resource="classpath:META-INF/cxf/cxf.xml" />
+			<import resource="classpath:META-INF/cxf/cxf-extension-soap.xml" />
+			<import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
+			如果是通过CXFServlet方式读取配置文件，这3句可以去掉，如果是通过listener方式读取则必须要这3句
+			这3个文件在cxf-2.4.2.jar包里面。
+			
+15. 通过jQuery的ajax方式调用WebService
+	* 	$.ajax({
+		url:'http://localhost:8080/WebServiceDemo10/cxf/hello',
+		type:'POST',
+		dataType:'XML',
+		contentType:'text/xml;charset=utf-8',
+		data:'<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Body><ns2:sayHello xmlns:ns2="http://service.demo10/"><arg0>'+$('#name').val()+'</arg0></ns2:sayHello></soap:Body></soap:Envelope>',			success:function(data,status,xmlHttpRequest){
+			alert($(data).find('return').eq(0).text());
+		},
+		error:function(){
+			alert('error');
+		}
+	* ajax跨域访问问题：
+		项目发布到Tomcat后，访问http://localhost:8080/WebServiceDemo11/jQuery_ws.html调用
+		WebService服务成功。
+		但是调用本地文件file:///E:/Eclipse/workspace/WebServiceDemo11/WebContent/jQuery_ws.html
+		调用WebService服务失败。
+		> 同域访问：WebServiceDemo10和WebServiceDemo11都发布到Tomcat里，demo11调用demo10，叫同域访问，
+		  		都在Tomcat域里。
+		> 跨域访问：E盘下的html文件jQuery_ws.html，访问Tomcat里面的项目发布的服务叫跨域访问。ajax禁止跨域访问
+		> ajax禁止跨域访问。一般ajax的请求url都是本项目的，如果访问别的项目（例如百度）就会出问题。
+		
+16. WebService传输实体对象
+	* 当调用WebService服务，传输回来的是自定义类型。WebService发布方法不变，WebService调用方法不变，就是生成的代码
+		多了实体类。

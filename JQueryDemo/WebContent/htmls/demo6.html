@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script type="text/javascript" src="../js/jquery.js"></script>
+<link rel="stylesheet" type="text/css" href="../css/demo6.css"/>
+</head>
+<body>
+	<h1 class="title">层次选择器</h1>
+	<div id="div-1" class="layer-0">这里是div-1</div>
+	<div id="div-2" class="layer-0">
+		<div id="div-2-1" class="layer-1">这里是div-2里面的div-2-1</div>
+		<div id="div-2-2" class="layer-1">这里是div-2里面的div-2-2</div>
+	</div>
+	<div id="div-3" class="layer-0">
+		<div id="div-3-1" class="layer-1">这里是div-3里面的div-3-1</div>
+	</div>
+	<br/>
+	<span id="span-1" class="layer-0">这里是span-1</span>
+	<span id="span-2" class="layer-0">这里是span-2</span>
+	<br/>
+	<input type="button" id="btn-1" value="改变body内所有的div的背景色为#0000FF(祖宗后代关系)"/>
+	<input type="button" id="btn-2" value="改变body下所有的div的边的颜色为red(父子关系，直接子元素)"/>
+	<input type="button" id="btn-3" value="改变id为div-1下一个元素的的背景色为#0000ff(父子关系，直接子元素)"/>
+	<input type="button" id="btn-4" value="改变id为div-2元素后面的所有兄弟的背景色#0000ff"/>
+	<input type="button" id="btn-5" value="改变id为div-2元素所有兄弟的背景色#0000ff"/>
+	
+	
+<script type="text/javascript">
+$('.title').css("text-align","center");
+$('body').css(
+	{
+		"padding-left": "100px",
+		"padding-right": "100px",
+		"padding-top": "25px",
+		"padding-bottom": "25px"
+	}
+);
+
+$('#btn-1').click(function(){
+	$('div').css("background","#0000ff");
+});
+
+$('#btn-2').click(function(){
+	$('body > div').css("border","1px solid red");
+});
+
+$('#btn-3').click(function(){
+	$('#div-1 + div').css("background","#0000ff");
+});
+
+$('#btn-4').click(function(){
+	$('#div-2 ~ *').css("background","#0000ff");
+});
+
+$('#btn-5').click(function(){
+	$('#div-2').siblings("*").css("background","#0000ff");
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+ <!-- 
+ namespace命名空间的作用是对sql的分类化管理。namespace作用都是限定！！英语的定语
+ 注意:如果使用mapper代理开发，namespace就有特殊重要的作用：namespace等于mapper接口的地址(全限定名)
+  -->
+<mapper namespace="mapper.Demo9_UserMapper">
+<!-- 定义sql片段 
+	id:sql片段的唯一标识
+	经验：定义sql片段是基于单表定义，这个sql片段的可重用性高。
+	在sql片段中不要包括WHERE,因为一个sql语句可能要多个片段，如果每个片段都有where就会报错。
+-->
+<sql id="query_user_where_or">
+		<if test="idList != null">
+			<!-- 使用foreach遍历传入的idList 
+				collection:指定输出参数中的集合属性
+				item：每次遍历的对象名。
+				open:开始遍历时需要拼接的sql串 
+				close:结束遍历时需要拼接的sql串
+				separator：遍历两个对象中间所需要拼接的sql串
+			-->
+			<!-- 
+				实现下面的sql拼接：
+				AND (id=1 OR id=10 OR id=24) AND...中的AND (id=1 OR id=10 OR id=24) 
+			 -->
+			<foreach collection="idList" item="item_id" open="AND (" close=")" separator="OR">
+				<!-- 每次遍历所需要拼接的字符串
+					#{}里面的内容就是item
+				 -->
+				id=#{item_id}
+				<!-- 拼接出来：AND (id=1ORid=10ORid24)每次遍历的会自动加空格？？ 会！ -->
+			</foreach>
+		</if>
+</sql>
+
+<sql id="query_user_where_in">
+	<if test="idList != null" >
+	<!-- 为什么open 要加AND。
+		为了提高重用性，因为
+			如果这个sql片段是第一个条件，where标签可以自动删除WHERE后面紧接着的AND，
+			如果这个sql片段是在第二个条件的话前面就要加AND
+	 -->
+		<foreach collection="idList" item="item_id" open="AND id IN(" close=")" separator=",">
+			<!-- id IN(1,10,24) -->
+			#{item_id}
+		</foreach>	
+	</if>
+	
+</sql>
+<!-- 
+	查询多个id的对应的用户信息列表
+-->
+<select id="findUserList" parameterType="userQueryVo" resultType="userCustom">
+	SELECT * FROM USER 
+	<where>
+<!-- 		<include refid="query_user_where_or"></include> -->
+		<include refid="query_user_where_in"></include>
+	</where>
+</select>
+</mapper>

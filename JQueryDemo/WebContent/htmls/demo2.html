@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<script src="../js/jquery.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript" charset="utf-8">
+function test1(){
+    
+    // 使用DOM获取id=text的输入框
+    var textObj1 = document.getElementById("text");
+    alert("DOM:"+textObj1.value);
+    
+    // 使用jQuery获取id=text的输入框,约定俗成：jQuery对象用$开头
+    var $textObj2 = $('#text');
+//     alert("jQuery:"+textObj2.value); 不能使用这个方法
+	alert("jQuery:"+$textObj2.val());
+    
+    
+}
+</script>
+<body>
+    <h1>测试DOM与jQuery的区别</h1>
+    <input type="text" id="text"/><br/>
+    <input type="button" onclick="javaScript:test1()" value="点击"/>
+</body>
+</html>

@@ -1,0 +1,33 @@
+# 客户端要向服务器端发送的信息
+
+# 客户端名称
+clientname = lg01
+# 客户端的主系统版本号
+version = v1.2
+
+# 服务器记录本客户端的版本号，也是本客户端最终更新到的版本
+serverVersion = v1.2
+
+# 服务器ip
+serverip = 127.0.0.1
+
+# 服务器端口
+serverport = 10086
+
+# 主系统进程名，关闭主程序的时候用
+main = SQLyog.exe
+
+# 主系统程主序名路径，开启主程序的时候用。注意斜杠的方向
+mainProgram = E:/MySQL/SQLyog-8.32(sn)/SQLyog.exe
+
+# 主系统根目录,要以"/"结尾
+rootPath = E:/Eclipse/Update/
+
+# 客户端主函数线程休息时间。单位：毫秒
+mainSleepTime=60000
+
+# 客户端发送数据给服务器的线程的休息时间（每隔XX毫秒向服务器发送数据）。单位：毫秒
+sendSleepTime=30000
+
+# 判断客户端是否正在更新，false表示没有更新，true表示正在更新
+updating = false

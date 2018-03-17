@@ -1,0 +1,64 @@
+1.准备jar包
+	> mysql驱动
+	> c3p0连接池
+	> ehcache
+	> entitymanager（实体类上的注解，不用hbm.xml）
+	> hibernate必须jar包
+	> spring必须jar包
+	> spring依赖的jar包
+	> struts2的必须jar包
+	> commons-logging
+	> spring整合struts所需要的jar包
+	> jstl标签库
+	> 自己的工具包
+2.准备配置文件
+	> web.xml
+		<> struts的拦截器
+		<> 实例化spring容器
+		<> 指定spring读取beans.xml的路径
+		<> 解决懒加载异常问题
+	> beans.xml
+		<> 注册使用注解依赖注入的注解解析器
+		<> 启用组件自动扫描，不用组件的注解可以不用。
+		<> 使用AOP，支持aspect注解。这里可以不用。
+		<> 配置数据源
+			-> 指定读取的文件
+			-> 数据源bean标签里面的jdbc参数和池参数使用读取文件+占位符的方式。
+		<> 配置sessionFactory
+			-> 引用数据源
+			-> 加载映射文件
+			-> 配置其他属性
+				[] 自动建表，控制台打印SQL语句，打开查询缓存等
+				[] 启用二级缓存
+		<> 配置事务管理
+			-> 引用sessionFactory
+		<> 开启和事务相关的注解
+		<> 配置交给spirng管理的action,serviceBean,daoBean。如果使用自动扫描+组件注解方式可以不用。
+	> hibernate.cfg.xml(不需要了，全写在beans里面)
+	> struts.xml
+		<> 配置action
+	> ehcache.xml
+		<> 指定要使用缓存的实体类，name属性对应.hbm.xml中的<cache region="xxx">，建议使用类全限定名
+	> jdbc-c3p0.properties(beans.xml中使用占位符读取这个文件的值)
+3.先整合spring和hibernate
+4.再整合spring和struts2
+
+5.注意：
+	* beans.xml中的beanFactory的映射文件的属性
+		使用mappingResources，而不是mappingLocations，不然不能映射到hbm.xml
+		> hibernate加载映射文件的方式
+			<> mappingResources
+				指定classpath下具体的文件名
+			<> mappingLocations
+				可以指定任何文件路径，并且指定前缀classpath、file等
+			<> mappingDirectoryLocations
+				指出映射文件所在的文件夹，可以使用通配符。*表示指定一个文件路径名，**表示指定多个文件路径名
+			<> mappingJarLocations 
+				指定映射文件所在的jar文件
+	* action的方法执行的方法不能带参数，参数都是成员变量，而且封装好了。 
+	
+	* struts2和hibernate的javassist.jar包重复
+	
+	* 如果使用懒加载，页面打印实体类的属性时会出现ognl.NoConversionPossible 
+	
+	* action里面，如果使用form标签，那么action的get方法和getList方法，同时都会被/action_get所检测到然后执行。

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script type="text/javascript" src="../js/jquery.js"></script>
+<link rel="stylesheet" type="text/css" href="../css/demo6.css"/>
+</head>
+<body>
+	<h1 class="title">过滤选择器</h1>
+	<div id="div-1" class="layer-0">我是div-1</div><br/>
+	<div id="div-2" class="layer-0">我是div-2
+		<div id="div-2-1" class="layer-1">我是div-2-1</div>
+		<div id="div-2-2" class="layer-1">我是div-2-2</div>
+	</div><br/>
+	<div id="div-3" class="layer-0">我是div-3
+		<div id="div-3-1" class="layer-1">我是div-3-1</div>
+	</div><br/>
+	<span class="layer-0" id="span-1">这里是span-1</span>
+	<span class="layer-0" id="span-2">这里是span-2</span>
+	<button id="btn-1">改变第一个div的背景色</button>
+	<button id="btn-2">改变最后一个div的背景色</button>
+	<button id="btn-3">改变class不为layer-0的所有div的背景色</button>
+	<button id="btn-4">改变索引值为偶数的所有div的背景色</button>
+	<button id="btn-5">改变索引值大于2所有div的背景色</button>
+	<button id="btn-6">改变所有标题(h1,h2,...h6标签)的颜色的背景色</button>
+	<button id="btn-7">改变当前正在执行动画的所有元素的背景色</button>
+<script type="text/javascript">
+
+function ca(){
+	$('#div-2-2').slideToggle("slow",ca);
+}
+ca();
+
+$('.title').css("text-align","center");
+
+$('#btn-1').click(function(){
+	$('div:first').css("background","#00ffff");
+});
+
+$('#btn-2').click(function(){
+	$('div:last').css("background","#00ffff");
+});
+
+$('#btn-3').click(function(){
+	$('div:not(.layer-0)').css("background","#00ffff");
+});
+
+$('#btn-4').click(function(){
+	$('div:even').css("background","#00ffff");
+});
+
+$('#btn-5').click(function(){
+	// 大于gt() 小于lt() 等于eq()。 
+	// 大于等于ge 小于等于le 不等于ne 这3个没有
+	$('div:gt(2)').css("background","#00ffff");
+});
+
+$('#btn-6').click(function(){
+	$(":header").css("background","#00ffff");
+});
+
+$('#btn-7').click(function(){
+	$(':animated').css("background","#00ffff");
+});
+</script>
+</body>
+</html>

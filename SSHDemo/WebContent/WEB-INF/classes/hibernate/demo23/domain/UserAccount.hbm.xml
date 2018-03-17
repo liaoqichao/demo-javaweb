@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+ <hibernate-mapping package="hibernate.demo23.domain">
+	<class name="UserAccount" table="demo23_userAccount">
+		<id name="id">
+			<generator class="native"/>
+		</id>
+    	<property name="loginName"/>
+    	<property name="password"/>
+    	
+    	<!-- employee属性，表示与Employee的一对一关系，
+    		采用基于外键的方式，这里是有外键方 
+    	-->
+    	<many-to-one name="employee" class="Employee" column="employeeId" unique="true" ></many-to-one>
+    	
+    	<!-- privilegeSet属性，表示与Privilege的多对多关系 -->
+    	<set name="privilegeSet" table="demo23_userAccount_privilege">
+    		<key column="userAccountId"></key>
+    		<many-to-many class="Privilege" column="privilegeId"></many-to-many>
+    	</set>
+     </class>
+ </hibernate-mapping>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+ <hibernate-mapping package="hibernate.demo9.domain">
+	<class name="Department" table="demo9_department">
+		<!-- 使用uuid主键生成策略 -->
+		<id name="id" type="int" column="id">
+			<generator class="native"/>
+		</id>
+    	<property name="name" type="string" column="name" length="20"/>
+    	<!-- employeeSet属性、set集合，本类与Employee是一对多的关系 -->
+    	<set name="employeeSet" cascade="save-update">
+    	
+    		<!-- table对方的表名，这里不要写，因为通过one-to-many找到实体类就能找到对应的表，写了也会被忽略掉。
+    			 inverse="true"表示当前表不维护关联关系，那么就只剩有外键的那一方维护关联关系了。这样就可以较少
+    			 SQL语句的生成。另外一方只有一个many-to-one标签，是没有inverse属性的，所以不用怕有外键的那一方
+    			 不维护。
+    		-->
+    		<key column="departmentId"/><!-- 这里必须和另一边指定的的外键一样列名。 -->
+    		<one-to-many class="hibernate.demo9.domain.Employee"/><!-- 关联的对方是什么类型 -->
+    	</set>
+     </class>
+ </hibernate-mapping>

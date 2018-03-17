@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-4.0.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
+        
+        <!-- 使用注解。注册解析注解的处理器 -->
+        <context:annotation-config></context:annotation-config>
+        <!-- 让spring自动扫描和bean.base-package表示要扫描哪个包下的类（包括子包）
+        	这个的注解处理器有很多，包括了上面的，所以上面的可以去掉。
+         -->
+        <context:component-scan base-package="mybatisspring"></context:component-scan>
+        
+        <!-- 使用aop，支持aspect注解 -->
+        <aop:aspectj-autoproxy></aop:aspectj-autoproxy>
+        
+        
+<!-- 加载数据库配置文件  -->
+<context:property-placeholder location="classpath:db.properties"/>
+
+<!-- 使用数据源。c3p0。
+	destroy-method="close" 表示bean要销毁先要执行的方法为close
+ -->
+<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+   		<property name="jdbcUrl" value="${jdbc.url}"></property>
+		<property name="driverClass" value="${jdbc.driver}"></property>
+		<property name="user" value="${jdbc.username}"></property>
+		<property name="password" value="${jdbc.password}"></property>
+		<property name="acquireIncrement" value="${c3p0.acquireIncrement}"></property>
+		<property name="initialPoolSize" value="${c3p0.initialPoolSize}"></property>
+		<property name="minPoolSize" value="${c3p0.minPoolSize}"></property>
+		<property name="maxPoolSize" value="${c3p0.maxPoolSize}"></property>
+</bean>
+
+<!--     // ... (controller bean definitions) ... -->
+
+<!-- 配置sqlSessionFactory. sqlSessionFactory在mybatis-spring整合包下 -->
+<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+	<!-- 加载mybatis的配置文件，点sqlSessionFactoryBean进去看，需要什么 
+		相当于代码的. sqlSessionFactoryBuild.build(Resources.getSourceAsStream("SqlMapConfig.xml"));
+	-->
+	<property name="configLocation" value="mybatis/SqlMapConfig.xml"></property>
+	
+	<!-- 配置数据源 -->
+	<property name="dataSource" ref="dataSource"></property>
+</bean>
+
+<!-- 原始dao接口 -->
+<bean id="userDao" class="springmybatis.dao.impl.UserDaoImpl">
+	<!-- 使用配置注入，另外一种方式是使用@Resource注解注入 -->
+	<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+</bean>
+
+<!-- mapper配置 
+	MapperFactoryBean 根据Mapper接口生成代理对象
+	MapperFactoryBean继承了SqlSessionDaoSupport
+	这种方法有问题：有n个mapper就需要配置n个bean，麻烦
+	
+	mapperInterface:配置mapper接口
+	sqlSessionFactory：配置sqlSessionFactory
+-->
+<!-- <bean id="demo17_UserMapper" class="org.mybatis.spring.mapper.MapperFactoryBean"> -->
+<!-- 	<property name="mapperInterface" value="springmybatis.mapper.Demo17_UserMapper"></property> -->
+<!-- 	<property name="sqlSessionFactory" ref="sqlSessionFactory"></property> -->
+<!-- </bean> -->
+
+<!-- mapper的批量扫描,从mapper的包中扫描mapper的接口，自动的创建代理对象，并且在spring容器中注入 
+	因为是扫描，所以没有id.
+	扫描是org.mybatis.spring.mapper.MapperScannerConfigurer类起作用。
+	
+	这个扫描是为了自动创建mapper代理对象。
+	SqlMapConfig.xml的扫描是加载映射文件。
+	但是使用了自动创建mapper代理对象，可以去掉SqlMapConfig.xml中的自动扫描加载映射文件配置。
+	
+	没有bean的id，代码上怎getBean?
+	自动扫描出来的mapper的bean的id为mapper类名(首字母小写)
+	
+	如果扫描多个包，不能使用通配符，只能使用逗号
+-->
+<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+	<!-- 指定扫描的包名 -->
+	<property name="basePackage" value="springmybatis.mapper"></property>
+	
+	<!-- 如果使用sqlSessionFactoryBean，那么扫描加载db.properties的配置会不起作用，
+		原因是：使用sqlSessionFactoryBean的话，会先执行sqlSessionFactoryBean，后执行扫描加载
+		db.properties和创建数据源。  
+	 -->
+	<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property>
+</bean>
+</beans>

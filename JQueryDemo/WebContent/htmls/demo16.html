@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script type="text/javascript" src="../js/jquery.js" ></script>
+</head>
+<body>
+	<h1>jQuery创建元素和插入元素</h1>
+	<ul id="city">
+		<li id="bj">北京</li>
+		<li id="sh">上海</li>
+		<li id="jl">吉林</li>
+		<li id="my">绵阳</li>
+	</ul>
+	<button id="btn-1">添加重庆li到上海后（内部插入）</button><br/>
+	<button id="btn-2">添加成都li到北京前（内部插入）</button><br/>
+	<button id="btn-3">添加广州li到北京后（外部插入）</button><br/>
+	<button id="btn-4">添加天津li到吉林前（外部插入）</button>
+	
+<script type="text/javascript">
+$('#btn-1').click(function(){
+	// jQuery
+	// 创建元素：方法一
+	$myli = $('<li id="cq">重庆</li>');
+	// 内部插入（在这里是在ul里面插入li）
+	// 表示在$('#city')对象内部的添加一个$myli元素到最后面。$myli是$('#city')最后一个子元素
+	
+// 	$('#city').append($myli); 
+	$myli.appendTo($('#city')); //效果和上面的一样
+});
+
+$('#btn-2').click(function(){
+	// 创建元素：方法二
+	$myli = $('<li></li>'); // 等价于 $('<li/>');
+	$myli.text("成都"); // 添加标签内文本内容
+	$myli.attr("id","cd");
+	// 内部插入
+	$('#city').prepend($myli);
+// 	$myli.prependTo($('#city')); //效果和上面的一样
+});
+
+$('#btn-3').click(function(){
+	// 创建元素
+	$myli = $('<li id="gz">广州</li>');
+// 	$('#bj').after($myli);
+	$myli.insertAfter($('#bj')); // 效果和上面一样
+});
+
+$('#btn-4').click(function(){
+	// 创建元素
+	$myli = $('<li id="tj">天津</li>');
+// 	$('#jl').before($myli);
+	$('<li id="tj">天津</li>').insertBefore($('#jl'));
+});
+</script>
+</body>
+</html>

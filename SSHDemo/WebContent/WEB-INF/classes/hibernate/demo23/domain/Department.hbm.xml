@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+ <hibernate-mapping package="hibernate.demo23.domain">
+	<class name="Department" table="demo23_department">
+		<id name="id">
+			<generator class="native"/>
+		</id>
+    	<property name="name"/>
+    	
+    	<!-- employeeSet属性,表示与Employee的一对多关系  -->
+    	<set name="employeeSet">
+    		<key column="departmentId"></key>
+    		<one-to-many class="Employee"/>
+    	</set>
+    	
+    	<!-- parent属性，表示与上级部门Department的多对一关系 -->
+    	
+    	<many-to-one name="parent" class="Department" column="parentId"/>
+    	
+    	<!-- children属性，表示与下级部门Department的一对多关系 -->
+    	
+    	<set name="children">
+    		<key column="parentId"></key><!-- 这里填对方表的多对一标签的列名 -->
+    		<one-to-many class="Department"/>
+    	</set>
+     </class>
+ </hibernate-mapping>

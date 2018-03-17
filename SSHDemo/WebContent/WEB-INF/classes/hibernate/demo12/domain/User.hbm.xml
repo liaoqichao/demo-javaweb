@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+ <hibernate-mapping package="hibernate.demo12.domain">
+ 	<!-- 映射类到表 -->
+	<class name="User" table="demo12_user">
+	<!-- 映射属性名，类型到列名（主键） -->
+		<id name="id" type="int" column="id">
+			<generator class="native"/><!-- 主键自增长 -->
+		</id>
+		<!-- 映射属性名，类型到列名（非主键） -->
+    	<property name="name" type="string" column="name"/>
+     </class>
+ </hibernate-mapping>

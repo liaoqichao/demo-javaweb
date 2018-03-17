@@ -1,0 +1,96 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<script language="JavaScript" src="../js/jquery.js"></script>
+		<title>添加用户</title>
+	</head>
+	<body>
+		<center>
+			<br><br>
+			添加用户:<br><br>
+			姓名: <input type="text" name="name" id="name" />&nbsp;&nbsp;
+			email: <input type="text" name="email" id="email" />&nbsp;&nbsp;
+			电话: <input type="text" name="tel" id="tel" /><br><br>
+			<button id="addUser">提交</button>
+			<br><br>
+			<hr>
+			<br><br>
+			<form action="" method="post">
+				<table id="usertable" border="1" cellpadding="5" cellspacing=0>
+					<tbody>
+						<tr>
+							<th>姓名</th>
+							<th>email</th>
+							<th>电话</th>
+							<th>&nbsp;</th>
+						</tr>
+						<tr>
+							<td>Tom</td>
+							<td>tom@tom.com</td>
+							<td>5000</td>
+							<td><a href="deleteEmp?id=Tom">Delete</a></td>
+						</tr>
+						<tr>
+							<td>Jerry</td>
+							<td>jerry@sohu.com</td>
+							<td>8000</td>
+							<td><a href="deleteEmp?id=Jerry">Delete</a></td>
+						</tr>
+					</tbody>
+				</table>
+				<br/>
+				<input type="submit" value="提交"/><br/>
+			</form>
+		</center>
+	</body>
+	<script language="JavaScript">
+		$(document).ready(function(){
+			$('#addUser').click(function(){  //提交按钮
+				/*
+					1.获取用户输入的信息
+				*/
+				var input_username = $('#name').val();
+				var input_email = $('#email').val();
+				var input_tel = $('#tel').val();
+				/*
+					2.添加到表格
+						1) 获取表格标签
+						2) 获取tbody标签
+						3) 创建需要的元素
+						4) 插入元素（内部插入）
+						5) 给超链接绑定事件
+				*/
+				// 1，2
+				var $tbody = $('#usertable tbody');
+				// 3
+				var $tr = $('<tr></tr>');
+				var $td_username = $('<td>'+input_username+'</td>');
+				var $td_email = $('<td>'+input_email+'</td>');
+				var $td_tel = $('<td>'+input_tel+'</td>');
+				var $td_del = $('<td></td>');
+				var $a_del = $('<a href="">delete</a>');
+				// 4
+				$td_del.append($a_del);
+				$tr.append($td_username);
+				$tr.append($td_email);
+				$tr.append($td_tel);
+				$tr.append($td_del);
+				
+				$tbody.append($tr);
+				
+				$a_del.click(function(){
+					// 显示用户名字，并且让用户选择时候真的删除用户
+					// confirm 确认框
+					var b = confirm("是否删除\""+$(this).parent().parent().children().eq(0).text()+"\"?");
+					if(b){
+						$(this).parent().parent().remove();
+						return false; // js 无刷新页面
+					} else{
+						return false;
+					}
+				});
+			});
+		});
+	</script>
+</html>

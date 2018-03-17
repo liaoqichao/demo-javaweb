@@ -1,0 +1,62 @@
+一、过滤器
+	它会在一组资源(jsp、servlet、.css、.html等)的前面执行。它可以让请求达到目标资源，也可以不让请求达到资源。简单的说过滤器就是有拦截
+	请求的能力。
+	1.编写过滤器
+		> 写一个类实现filter接口
+		> 在web.xml中进行配置(有@WebFilter("/Demo41_Filter")可以省略？)
+	2.Filter接口的生命周期
+		> init(FilterConfig fConfig)	Filter对象创建之后马上执行。Filter对象会在服务器启动时就创建
+		> doFilter(ServletRequest request, ServletResponse response, FilterChain chain) 每次过滤时都会执行。
+		> destory()	在Filter销毁前执行，Filter在服务器关闭时销毁
+		
+		***Filter和Servlet都是单例
+	3.在web.xml中的配置.和Servlet的配置一样。就是servlet换成filter
+		<filter>
+			<filter-name>xxx</filter-name>
+			<filter-class>web.filter</filter-class>
+		</filter>
+		<filter-mapping>
+		    <filter-name>xxx</filter-name>
+		    <url-pattern>/*</url-pattern><!--通常都是/*，如果是/ASertvlet就只过滤一个资源-->
+		</filter-mapping>
+	4.生命周期方法的参数：
+		FilterConfig fConfig，与ServletConfig功能相似(获取Servlet参数，参数名，Servlet名，ServletContext)。
+			FilterConfig 方法：
+				getFilterName(),getInitParameter(String name),getInitParameterNames(),
+				getServletContext();
+		FilterChain chain
+			方法：doFilter(ServletRequest,ServletResponse); 功能：放行，可以达到目标资源
+	5.多过滤器执行顺序
+		FilterChain#doFilter()方法：执行目标资源，或者执行下一个过滤器
+		A_start
+		B_start
+		demo42..演示过滤器的Servlet
+		B_end
+		A_end
+	6.四种拦截方式
+		> 拦截请求：DISPATCHER。拦截的是直接请求，不拦截转发过来的
+		> 拦截转发：FORWARD。
+		> 拦截包含：INCLUDE。
+		> 拦截错误：ERROE。错误指的是错误的时候跳到的错误页面
+		<error-page><error-code>500</error-code><location>500.jsp</location></errpr-page>
+			* 	在 <filter-mapping>中配置。
+				<dispatcher>REQUEST</dispatcher>
+				<dispatcher>FORWARD</dispatcher>
+			*	注解：dispatcherTypes = { DispatcherType.REQUEST} 一共有5个值，
+				。可以任意搭配，dispatcherTypes是DispatcherType[]类型
+			* 	如果没有给值默认拦截的是request			
+	7.控制多个过滤器的执行顺序。
+		web.xml:<filter-mapping>的配置顺序决定了过滤器的执行顺序。(没说是<filter>的配置顺序)
+		注解：没有解决方法，只有改变Filter的文件名来控制顺序Filter01_xxx.java Filter02_xxx.java。
+			注意：字符串的比较"f12" < "f5"
+	8.过滤器的应用场景
+		> 执行目标资源之前预处理工作。例如过个Servlet都需要做相同的事，可以把这些事抽取到过滤器来做。
+			例如：request.setCharacterEncoding("text/html; charset=UTF-8");
+		> 通过判断是否放行。例如禁用IP
+		> 在目标资源执行后做后续处理工作(回程拦截)。例如把目标资源输出的数据进行处理。
+	9.案例
+		> 分IP统计访问次数。
+			统计工作需要在所有资源之前执行，那么久可以放到Filter中，这个过滤器不需要做拦截操作。
+			a. 用什么装载统计数据? Map<String,Integer>(ip,count)。整个网站只需要一个Map即可。
+			b. Map什么时候创建?服务器开启时候创建(过滤器的init方法创建?不好！
+			应该在SerlvetContextListener#contextInitialized方法中创建),保存到application

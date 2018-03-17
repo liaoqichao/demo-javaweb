@@ -1,0 +1,756 @@
+1.为什么用hibernate。
+	* dao层出现的问题：
+		> 用的数据库不一样，每个数据库都有一些方言。
+		> 关联关系（外键）封装成bean麻烦。ORM的问题。
+	
+2.学习路线
+	* API
+	* 配置
+	* 新特性
+
+3.搭建环境
+	* 准备jar包
+		\hibernate-release-3.6.0.Final\lib\required有必须jar包
+		\hibernate-release-3.6.0.Final\hibernate3.jar
+		\hibernate-release-3.6.0.Final\lib\jpa\的jar包
+		\mysql驱动包
+		\log4j.jar
+		
+	* 准备配置文件hibernate.cfg.xml
+		\hibernate-release-3.6.0.Final\project\etc下有配置文件模板
+		> 配置JDBC四大参数
+		> 配置方言
+			<> <property name="dialect">hibernate.dialect org.hibernate.dialect.MySQLDialect</property>
+				其中值在\etc\hibernate.properties.template文件有
+				
+	* 修改配置文件
+		> 对象与表，属性与列的对应关系。
+			怎么知道哪个对哪个！需要在配置文件中写。但是实体太多，那么配置文件就太臃肿。所以在每个实体的包下创建
+			SimpleClassName.hbm.xml文件。
+
+4.HelloWord
+	* 建好数据库和javabean和dao
+	
+	* 主配置文件引入.hbm.xml文件（导入映射配置文件）
+		<mapping resource="hibernate/demo1/domain/User.hbm.xml"/>
+		
+	* 在javabean的包下新建SimpleClassName.hbm.xml文件(映射配置文件)。根节点为hibernate-mapping
+		 <hibernate-mapping package="hibernate.demo1.domain">根节点属性指定javabean所在的包
+		 <class>class指定类与对应的表的映射关系。class有下面2个子标签
+		 <id>指定javabean属性与表主键的映射关系，它有一个子标签<generator class="native"/><!-- 主键自增长 -->
+		 <property>指定属性与表字段（非主键）的映射关系
+		 
+	* dao代码：
+		1.创建Configuration类
+		2.调用cfg.configure("hibernate.cfg.xml");//读取主配置文件
+		3.sessionFactory = cfg.buildSessionFactory();//根据配置生成session工厂
+		4.通过sessionFactory得到session.sessionFactory.openSession
+		5.开启事务Transaction tx = session.beginTransaction
+		6.数据库增删改查的代码session.save(user),session.get(User.class,主键)等
+		7.提交事务，如果抛出异常则回滚事务
+		8.释放session资源。session.close()
+
+5.增删改查
+	* 增：session.save(user)
+		 session.saveOrUpdate(user),不存在则保存，存在则更新。
+		 
+	* 删：session.delete(id).删除之前需要通过id查询
+	
+	* 改：session.update(user)
+	
+	* 查：
+		> 按id查:session.get(User.class,id)。hibernate双向映射类和表。所以这里不需要填表名，而是填类的类型
+		> 查询所有：userList = session.createQuery("FROM User").list();
+			<> "FROM User"是HQL语句，后面会讲，其中User对应User类
+		> 分页查询：
+			<> 全部查询，只显示一点。（数据量不大，例如查询附近所有的饭店。）没有演示
+			<> 只显示一点，只查询一点。（通常用这种）
+				userList = session.createQuery(
+				"FROM User")
+				.setFirstResult(firstResult)
+				.setMaxResults(maxResults)
+				.list();
+				其中firstResult为该页第一条记录在总记录的下标，maxResults为每页最大记录数
+				
+6.API简介
+	* Configuration	配置
+		> configure()读取默认配置文件
+		> configure(String resoure)读取指定配置文件
+		> buildSessionFactory()创建session工厂
+		> addResource("hibernate/demo2/domain/User.hbm.xml");相当于主配置文件的<mapping resoure=""/>
+		> addClass(User.class)等于addResource。去User类所在包中查找名为User，后缀为.hbm.xml的文件。（这个和上面的方法
+			在测试时经常用）
+			
+	* SessionFactory	session工厂
+		> openSession
+		> getCurrentSession
+		> close 释放资源
+		
+	* Session(操作持久化对象Persist Object)		会话，很重要的一个对象
+		> 增：save(obj) 			- 把对象从临时状态转为持久化状态
+			saveOrUpdare(obj)	- 把对象从临时状态或游离状态状态转为持久化状态
+		> 删：delete(obj) 		- 把对象从持久化状态或游离状态状态转为删除状态
+		> 改：update(obj) 		- 把对象从游离状态转为持久化状态
+		> 查：Query createQuery(String)、Criteria createCriteria(Class)
+			get()				- 获取数据，得到的是持久化对象。
+			load() 				- 获取数据，是持久化状态
+		> 事务：Transaction beginTransaction()
+			  Transaction getTransaction();获取与当前session关联的tx对象
+		> 其他方法：管理缓存等。
+		
+		> hibernate中java对象的状态
+			<> 临时状态
+				--> 这个状态的对象叫临时对象(transient object)
+				--> 一般是刚new出来的对象，和数据库没有对应关系。跟session没有关联。
+			<> 持久化状态
+				--> 这个状态的对象叫持久化对象或者叫"托管"(persist object)
+				--> 对象在session的管理之中，最终会有对应的数据库记录。
+				--> 特点：1.有OID(对应数据库中的主键)
+						2.对对象的修改会同步到数据库中。
+					例如:Teacher t = session.get(Teacher.class,3L);
+						t.setName("test");
+						虽然没有执行session.update(obj),但是数据库中的的t还是会改变，因为这个对象在session管理中。
+					什么时候在session管理中?
+					从session = sessionFactory.openSession();开始
+					到session.close();为止
+				--> session.save(obj)就是把对象临时状态变成持久化状态
+			<> 游离状态
+				--> 这个状态的对象叫做游离对象或者叫"脱管"(Detached)
+				--> 数据库中有对应记录，但对象不在session管理之中，修改对象时数据库不会发生改变。
+				--> session.update把游离状态变成持久化状态
+			<> 删除状态
+				--> 这个状态的对象叫做删除对象(Removed)
+				--> 调用session.delete(obj)后的obj
+				
+		> 操作实体对象的方法：
+			save(),update(),saveOrUpdate(),delete().
+			除了save()和get()是立刻执行SQL语句，其他都是在session.flush()的时候执行SQL语句。
+			因为save()会得到主键值，而其他操作可能都需要主键。tx.commit()会执行session.flush()方法。
+			
+		> 操作缓存的方法：
+			clear(),evict(),flush()
+			
+		> 查询实体对象的方法：
+			<> get(),load(),createQuery(),createCriteria()
+			<> save()和get()会立刻执行SQL语句，其他都是session.flush()的时候执行SQL语句。
+			
+			<> load和get的区别是get是立刻执行SQL语句，load是要用查询得到的对象的时候才执行。
+			<> get查询不到结果会返回null，load查询不到结果会抛出异常。
+			<> 如果知道查询结果一定不为空用load，如果可能为空用get。
+			<> load返回的是代理对象，get返回的是真实的对象。代理对象是实体类的子类，如果把实体类加上final关键字，
+				就不能有子类，但是load不会报错，只是懒加载失效。
+				
+		> refresh(obj);
+			<> 刷新缓存中对象的状态。session查询数据库后，如果有查询结果，会把对象存到缓存中，下次再查询它（根据主键判断是不是要查同一
+			条记录），直接从缓存拿，而不执行SQL语句。但是如果缓存中有数据，而数据库记录更新了，获取到的还是缓存中的旧数据。可以通过
+			refresh(obj)刷新对象的状态，使缓存中对象的数据和数据库表中的记录一致（再调用SELECT语句）。
+			
+			<> 但是只是这样调用refresh后不能得到最新状态的数据。这和事务隔离级别有关。因为有2个事务，第一个事务是调用refresh，
+			然后查询数据库的事务，第二个事务是修改数据库信息的事务。MySQL默认的事务隔离级别是"可重复读"，需要改到"读已提交"
+			或者“读为提交"才可以读到数据。
+			
+			<> 修改事务隔离级别
+				--> 修改my.ini中的[mysqld]中的事务隔离级别
+				--> 在hibernate.cfg.xml中修改事务隔离级别
+			
+	* Transaction	事务
+		> commit
+		> rollback
+		> boolean wasCommitted
+		> boolean wasRollback
+		
+	* Query+HQL		查询（重点）
+		> 通过session.createQuery(HQL)生成。
+		> list得到一个集合的结果（查询结果为多条记录）
+		> uniqueResult得到唯一的结果(查询结果为一条记录)，如果没有结果返回null。如果结果有多个就抛出异常。
+		> 和特性相关的方法...
+		
+	* Criteria		查询（了解，不推荐用这个）
+
+7.配置
+	* 主配置文件：hibernate.cfg.xml除了有配置JDBC4大参数和方言，映射<mapping>标签,还有就是其他配置。这里只讲其他配置。
+		<property name="show_sql">true</property>	显示SQL语句，但是SELECT * 他不会用*，而是全部列标上。
+		<property name="format_sql">true</property>	格式化SQL语句，看的更方便，每个字段单独一行显示。
+		
+		> property中name属性的值可以hibernate.show_sql ,也可以省略hibernate
+		
+		> 生成表结构（DDL语言创建表）的两种方式：
+			<> 主配置文件中<property name="hibernate.hbm2ddl.auto">update</property>，其中有4个值。分别是
+				update,create,create-drop,validate。具体意思主配置文件有注释。
+				
+			<> 使用SchemaExport类 
+			
+	* 映射文件：
+		> 一般一个对象对应一个XX.hbm.xml
+		
+		> 根节点：<hibernate-mapping package="bean所在的包"/>
+		
+		> class标签：name="简单类名" table="数据库表名"。如果hibernate-mapping没有指定包的话就要写全名。
+			table如果不写默认为类的简单名称。但是必须要写。
+			
+		> 普通属性：数据库中的表的字段
+			<> name：这个是必须的，其他可以没有。
+			
+			<> type：这个是java的类型，或者hibernate定义的类型。不是数据库的类型。
+				date，datastamp，string（不是varchar），int等。如果不写通过反射检测类型。
+				类型为string的时候不能写varchar或者String。要写string(hibernate类型)或者java.lang.String
+				text：大字符类型。binary：大字节类型，这2个都需要制定长度（字符个数，字节B）。
+				
+			<> column:对应表中的字段名
+			
+			<> length:不是所有类型都有这个属性。varchar有（默认为255），int没有
+			
+			<> not-null:为true则非空，默认为false
+			
+		> 主键:在关系数据库中叫做主键，在对象术语中叫做对象标识（Object identitier-OID）
+			<> 如果主键是数字，建议使用包装类型（Integer），因为int的默认值的0，Integer的默认值是null。数据库中有可能是主键
+				是0，但不意味着没有这条属性，而主键非空，Integer为空就说明这条记录在表中不存在。但是自增长也是从1开始，所以用int
+				不是特殊情况也没关系。
+				
+			<> 子元素generator用于指定主键的生成策略。（起码记住native和uuid）
+				<generator class="native"/>
+				native：数据库中的主键自增长。根据数据库的能力选择identity、sequence、hilo的其中一个。
+				assigned：手工指定
+				foreign:关联关系用到，用于指定外键，现在不讲，后面学。
+				guid:不学。GUID（Global unique identifier）全局唯一标识符，它是由网卡上的标识数字(每个网卡都有唯一的标识号)
+					以及 CPU 时钟的唯一数字生成的的一个 16 字节的二进制值。
+					格式为：xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+					例如：76895313-839E-4E89-BAFC-B253BFF3173F
+				hilo:HighLow高地位算法。这个不依赖数据库的特性。(一直报空指针异常)。所有数据库都支持
+				identity:用数据库自己的策略。MySQL就是自增长。不是所有数据库都支持，
+						    例如Oracle就不支持，Oracle用的是sequence。支持MySQL、DB2、SQLServer、Sybase。
+						    返回的标识符是long、short或者int类型。采用这些策略时，就算手动设置也会忽略掉。
+				increment:先查询主键的最大值，然后插入的新记录为最大值加1。如果一次有2个插入记录只查询最大ID一次，第一条插入记录ID+1，
+						      第二条插入记录ID+2。但是只要有1个线程修改时会有问题（另外一个线程读2遍，结果不一样）。这个是Hibernate自
+						      己的自动增长。
+				select:不学
+				seqhilo:不学
+				sequence:DB2、Oracle、postgreSQL、SAP DB、McKoi中使用，返回的标识符是long、short或者int类型。
+				uuid:主键必须是varcahr类型，bean里面是string类型
+				
+		> 集合属性
+			<> Set集合
+				--> 在.hbm.xml中的配置
+			    	<set name="addressSet" table="demo5_user_addressSet" lazy="false"><!--不取消懒加载会报错-->
+	    				<key column="userId"></key><!-- 指定外键，列名为userId，自动的对应class中的id（user表的主键） -->
+	    				<element type="string" column="address"></element><!-- 指定address列 -->
+	    			</set>
+	    			其中set对应set集合，name为bean中set集合的属性，table为对应的表（主配置文件设置为自动创建表）
+	    			<key>的column为这张表的外键。默认引用当前class(User)的主键(id)。
+	    			<element>为<set>标签对应表的其他属性。
+	    			
+    			--> 集合表没有主键。
+    			
+    		<> List集合
+    			--> List集合是有序的，除了在<set>里面引用外键和存储内容，还需要一个列来存储List元素的索引（肯定是数字类型）。
+    			
+    			--> 在.hbm.xml中的配置
+    				<list name="addressList" table="demo6_user_address" lazy="false">
+			    		<key column="userId"></key><!-- 集合外键的列名。 -->
+			    		<list-index ></list-index><!--默认列名为addressList_ORDER-->
+			    		<element column="address" type="string"></element><!-- 存放集合元素的列 -->
+			    	</list>
+			    	
+			    --> 其中表中的userId和addressList_ORDER为联合主键。userId为外键。
+			<> 数组
+				--> 和List集合一样，都需要提供表，外键，内容，索引。唯一不一样就是标签为<arrary>而不是<list>
+				
+				--> bean里面要把List<String>改为String[]
+				
+				--> <list-index>还是叫list-index
+				
+			<> Map
+				--> 需要提供表（map标签，name、table属性），外键（key标签），map的键（map-key标签，name、type属性），
+					map的值（element标签，name、type属性）
+					
+			<> Bag 
+				--> java没有这个集合，Hibernate有。
+				
+				--> 特点：无序，可重复。用List来引用
+				
+				--> baen中：List<String> addressBag = new ArrayList<String>();
+				
+				--> .hbm.xml中：配置和set一样，只是标签从<set>改成<bag>
+				
+			<> 上面集合属性的保存类型ArrayList,HashMap,HashSet,一执行session.save(user)的时候，他们的类型就发生
+				了变化。变成了org.hibernate.collection.PersistentSet,PersistentList,PersistentMap。
+				所以集合属性的引用类型必须是List、Map、Set接口，不能是ArrayList等实现类。不然会出现类型转换异常。
+				
+			<> 排序用的Sort属性--Set集合的排序
+				--> 要求bean类型的set要实现SortedSet接口，例如TreeSet
+				
+				--> <set sort="...">
+				
+				--> sort属性的值：
+					unsorted：不排序
+					natural：自然排序。javabean需要实现Comparable接口。String类本身就实现了Comparable接口。
+					comparatorClass：指定比较器类的全名
+					
+				--> 同理，实现SortedMap的接口也可以排序
+				
+				--> 这里的排序都是在内存中排序的，效率低。只有数据库实现不了排序的时候才这样用。
+				
+			<> 排序用的order-by属性
+				--> <set order-by="...">不用sort属性
+				
+				--> 需要把lazy="false"，不然会报错。
+				
+			<> 值类型的集合。集合里面存的是Integer，String等普通属性。
+			
+			<> 实体类型的集合。集合存储的是javabean。
+			
+		> 关联关系
+			<> 一对多/多对一：建立联系，获取对象，维护联系(修改外键的值)，删除有关联关系的对象
+				--> 双向关联
+					一对多的那一方有实体类型的集合属性，例如Set<Employee>.多对一的那一方有实体属性Department
+					
+				--> 配置文件：
+					[] 一对多一方：用集合标签set,list,map等,其中table属性不用写,有一个one-to-many的子标签，这个标签
+							的class属性指定关联的另一方的类，有类也能找到对应的表。key标签指定对方表中的外键列，必须和另一方
+							关联对象中的many-to-one标签中的column属性的值一样。
+							
+					[] inverse属性：
+							集合标签的inverse属性默认为false，设置为true时，表示由对方维护关联关系(表示当前不维护关联关系)。
+							这样只有有外键的那个表维护关联关系，可以减少SQL语句。但是这样要注意：被依赖的(一对多那一方要先save)，
+							不然有外键那一方(多对一)以开始没有被依赖的属性(一对多的主键，本表的外键)，后面要自己维护，又多了
+							update语句。设置inverse属性只是一对多那一方不能修改多对一那方的外键列，不影响获取的问题。
+							inverse属性：为true，这个表不能修改另外一张表的外键属性。不能修改外键属性就会影响到：删除有关联
+							关系的对象、维护关联关系(双方维护还是一方维护)。
+							
+				    	<set name="employeeSet" inverse="true">
+				    		<!-- table对方的表名，这里不要写，因为通过one-to-many找到实体类就能找到对应的表，写了也会被忽略掉 -->
+				    		<key column="departmentId"/><!-- 这里必须和另一边指定的的外键一样列名。 -->
+				    		<one-to-many class="hibernate.demo9.domain.Employee"/><!-- 关联的对方是什么类型 -->
+    					</set>
+    					
+    				[] 多对一一方：只需要添加many-to-one标签，指定关联另一方的类，和指定外键的列名，必须和另一方关联对象中的集合标签中
+    						的key标签的column属性一样。
+    					<many-to-one name="department" class="hibernate.demo9.domain.Department" column="departmentId">
+    						<!-- name指定的是属性名。class写全限定名,colume（指定外键的列）不写的话，默认为many-to-one的name -->
+    					</many-to-one>
+    					
+    			--> 解除关联关系
+    				[] 就是改变外键的值或者设置为null，改变外键就是维护关联属性，inverse属性也能影响是否能自动改变外键的值。
+    				
+    			--> cascade属性（一对一，多对多都有，是集合属性标签的属性）.cascade：串联，倾泻，小瀑布
+    				cascade="delete"如果删除一个部门，那么和这个部门有关联关系的全部员工都删除。这个和inverse属性没有关系。
+    				级联是对当前对象操作时，对关联对象也做相同操作。
+    				cascade的属性默认为none，代表不级联。
+    				可以设置为delete，表示删除当前对象时，对关联的对象也做删除
+    				可以设置为save-update（保存），当department保存是，内存中的employee1和employee2都引用了这个
+    					department对象，所以也把emplooye1和employee2保存到数据库中。
+    				可以设置为all，所有风格都要：级联保存+级联删除，也可以cascade="save-update,delete"，用逗号隔开。
+    				
+    				级联使用情况：一般是一对多和一对一使用级联，多对多和多对一不使用级联。
+				--> 注意：bean复写toString的时候不要都带上另外一方，不然就无限循环，栈溢出异常。
+				
+			<> 多对多
+				--> 要说明的信息(配置文件要写的信息)：
+					1.集合表(中间表)
+					2.集合外键(引用自己的那个)
+					3.引用关联对象的那个外键
+					4.关联的实体类型
+				--> 一对多中的维护关联关系是指修改外键的值。
+					多对多中的维护关联关系是值增加或删除中间表中的记录。
+					也是用inverse属性。
+				--> 一对多删除有关联的关联对象，如果inverse=false，那么先把外键设置为空（解除关联关系），再删除对象
+					对对多删除有关联的关联对象，如果inverse=false，那么先删除中间表的记录（解除关联关系），再删除对象
+					
+			<> 一对一
+				--> 方法一：基于外键：
+					[] 多对多是2个一对多实现的。而一对一是通过一个一对多限定外键只能出现一次unique="true"实现。也就是
+					外键约束+外键唯一性约束。用专门的外键可以不和任何表关联，独立存在。
+					无外键方：<one-to-one>标签，指定类型，指定外键引用property-ref="对方的属性"
+					有外键方：<many-to-one unique="true">,指定列名（作为外键）'
+					
+					[] hbm.xml中永远是一的那一方指定多的那一方的外键。
+					
+					[] 一对一中只有有外键方可以维护关联关系。所以无外键方解除关联关系和删除对象都会报错
+					
+					
+				--> 方法二：基于主键：
+					[] 主键也是外键（把主键当做外键，主键的唯一也提供了唯一性约束）。这样不需要添加外键列。
+					 主键作为外键(别的表的主键)，一定要和别的表有关联关系，不能独立存在。
+					 
+					[] hbm.xml中的配置
+					有外键方：主键的生成策略要改为foreign，还需要添加参数，参数名为property,参数值为引用另一方的属性名
+						也就是<one-to-one name="">的name。
+						<one-to-one>标签需要添加constrained="true"，表示主键也是外键。
+					无外键方：
+						one-to-one标签需要用property-ref属性，引用外键方属性
+						<one-to-one name="idCard" class="IdCard" property-ref="person">
+					
+					[] 解除关联关系时候，无论从哪一方解除关联关系都解除不了。	 
+						 
+				
+				
+			<> 单向关联
+				--> 其中一个bean中不写关联属性，也不在配置文件中配置。另外一个bean有关联属性和配置。这样就是单向关联。
+					有关联关系的那一方一定要维护关联关系。
+				--> 单向一对多，单向多对一。看哪部分不写关联属性和对应配置。对应表结构不会变化。
+				--> 单向多对多：
+				--> 一对一的单向关联:只能从有外键方到无外键方的单项关联。因为无外键方本身就不能维护关系，不能维护关系(关联不上
+					也解除不了)关联别人有什么用？
+			
+		> 继承结构
+			<> 方式一：整个继承结构使用一张表
+				--> type为空表示是回复贴，没有精华，定置等，floor为null表示主贴，没有楼层。一张表表示了2个实体。
+				不用的列设置为空，用的填上就可以。但是如果都为空那怎么区分是哪个类型呢？所以还需要一个字段，用于区别
+				记录是属于哪个类型。
+				
+				id  title  type	 floor	type
+ 				1	xxx		1	  null	topic
+				2	xx		null   5	reply
+				
+				--> 这种情况只用写一个映射文件，名字为父类名.hbm.xml
+				
+				--> 子类用subclass标签指定子类，不用指定表，里面用<property>属性指定子类特有属性
+				
+				--> 父类需要添加<discriminator type="string" column="class_">这个标签用来添加
+					一个字段，用来区分是对应哪个类的。每个类都有discriminator-value属性。用来设置discriminator
+					的值，不设置就默认为类全名。
+					
+				--> 父类类型获取子类类型的记录也可以。
+					Article article1 = session.get(Article.class, 2);//这条记录是Topic的
+					
+			<> 方式二：每个类一张表
+				--> 还是只需要一个映射文件。父类.hbm.xml
+					子类用joined-subclass标签标示，需要提供name和table。里面还有子标签<key>指定列名(这个列
+					既是父类的主键，也是父类外键，被子类表所引用，同时也作为子类的主键)
+					<joined-subclass name="Topic" table="demo16_topic">
+					joined-subclass还有property属性来指定子类特有属性。
+					
+					SQL语句中join表示连接查询（查询出来的记录既有表a的列，也有表b的列）。
+					
+				--> 抽象类也有表
+				
+				--> 每个表只有类中当前的属性，没有继承的属性
+				
+				--> 子类引用父类表的主键值作为外键。建立一对一的关联关系。
+					
+			<> 方式三：每个具体类对应一张表，抽象类不对应表。
+				--> 每个表中都有全部信息，包括继承过来的信息，而且没有兄弟类的数据(相比第一张表)
+				--> 抽象类添加abstract=true属性
+				--> 子类用<union-subclass>标签
+					SQL中union关键字表示让取两个集合的并集。
+					例如：select * from user where id<=3 
+						union all
+						select * from user where id>=8
+						查询结果为id<=3或者id>=8的user记录
+				--> 这时候使用了<union-subclass>，主键生成策略不能为identity，用hilo（报错T_T）
+			<> 建议:类有继承结构就行，数据库表不建议也有继承结构，查询会效率低。
+			
+8.HQL语句
+	* hibernate提供以下几种检索方式：
+		> 导航对象图检索方式(OGNL):根据已经加载的对象导航到其他对象。
+		> OID检索方式：根据对象的OID来检索对象(就是根据主键查询，session.get,session.load)。
+		> HQL检索方式：使用面向对象的HQL查询语言。
+		> QBC检索方式：使用QBC(Query By Criteria)API来检索对象，这种API封装了基于字符串形式的查询语句，
+					提供了更面向对象的查询接口。
+		> 本地SQL检索方式：使用数据库的SQL语言查询。
+		
+		推荐使用HQL
+	
+	* HQL(hibernate query language)
+		> 特点：
+			1.与语句SQL相似
+			2.SQL查询的是表或者表中的列，HQL查询的是对象
+			3.HQL的关键字不区分大小写，类名与属性名区分大小写
+			4.SELECT可以省略
+		> 查询：
+			1. 简单查询，可以带别名，可以省略掉AS
+			
+			2. 带条件查询，用WHERE和SQL一样
+			
+			3. ORDER BY 和SQL一样
+			
+			4. 查询指定列。
+				<> 查询一列。返回类型为列的类型。
+				<> 查询多列。返回的类型为数组。
+				<> 查询多列如果不想返回数组，可以使用new关键字，查询出来的列直接封装到对象，没有查询的列值为null
+					SELECT new Employee(emp.name, emp.id) FROM Employee emp 
+					其中实体类要有指定列的构造方法，参数顺序要和查询顺序一样。
+					
+			5. 查询结果
+				<> 多行查询记录。session.createQuery("hql").list();
+				<> 单行查询记录。session.createQuery("hql").uniqueResult();
+					结果有多条记录会抛异常，结果没有记录对象为null
+				<> 分页查询。session.createQuery("hql")
+							.setFirstResult("这页第一条记录在总记录的下标")
+							.setMaxResults("这页最大记录数")
+							.list();
+			6.聚合函数，和SQL一样
+			
+			7.分组查询，和SQL一样
+			
+			8.连接查询，比SQL简便
+				<> SELECT e.id,e.name,e.department.name FROM Employee e
+				
+			9.查询的时候使用参数
+				<> 使用"?"占位符
+					HQL:FROM Employee e WHERE e.name=?
+					session.createQuery(hql).setParameter(0,"张三").list();
+					注意：下标从0开始
+				<> 使用变量名
+					--> 变量名格式	:xxx
+					--> HQL:FROM Employee e WHERE e.name=:name
+					--> session.createQuery(hql).setParameter("name","张三").list(); 
+				<> 当参数是集合的时候
+					--> 只能使用变量名
+					--> HQL: FROM Employee e WHERE e.id IN(x:ids)
+					--> Object[] params = {1,2,3,6,100};
+						session.createQuery(hql).setParameterList("ids", params).list();
+						
+			10.命名查询。
+				<> 在要查询的实体的映射文件中添加<query name="">标签来给查询语句命名。query标签是
+					<hibernate-mapping>标签的直接子标签。<![CDATA[内容]]>是防止与XML的关键字冲突
+				    <query name="queryByIdRange">
+	     				<![CDATA[
+	     					FROM Employee e WHERE e.id BETWEEN :idMin AND :idMax
+	     				]]>
+     				</query>
+     			<> 在代码中Query query = session.getNamedQuery("queryByIdRange");来获得query
+     				对象，然后配置参数，得到结果集和之前的一样。
+     				
+     		11.使用UPDATE和DELETE的HQL语句
+     			<> 除了session.update(),session.delete()外还可以用session.createQuery("hql")来
+     				进行更新和删除。
+     			<> HQL语句格式：
+     				UPDATE Employee e SET e.name=:name
+     				DELETE FROM Employee WHERE e.id = :id
+     				其中DELETE FROM 的FROM 可以省略
+     			<> 方法调用
+     				执行更新和删除的方法都是同一个executeUpdate()
+     				session.createQuery(hql).setParameter("name","张三").executeUpdate();
+     			<> 特点，执行HQL语句中的UPDATE和DELETE不会通知session的缓存。
+     				session要获得更新后的数据可以通过session.refresh(obj)来更新缓存中的旧数据。
+     				
+     * QBC(Query By Criteria)
+     	> 得到Criteria对象
+     		Criteria criteria = session.createCriteria(实体类.class);
+     	> 给查询添加条件
+     		使用Restrictions的静态方法。例如：
+			criteria.add(Restrictions.ge("id",1));
+			criteria.add(Restrictions.le("id",5));
+			le表示小于等于，lt表示小于，方法名称类似于el表达式
+     	> 给查询排序
+			使用Order的静态方法。只有升序和降序。例如：
+			criteria.addOrder(Order.desc("id"));
+			criteria.addOrder(Order.asc("name"));
+			先调用addOrder方法的列作为最优先比较的列。按顺序到最后一个排序参考列只有在前面都相等的情况才会用这列的值来排序。
+			
+9.其他特性
+	* 懒加载
+		> 用的时候才使用SQL语句查询数据库。
+		
+		> 有关联关系使用懒加载，百度，或者http://ryxxlong.iteye.com/blog/640105
+		
+		> 懒加载返回的是代理对象。实体类为final不能使用懒加载(不会报错，只是不使用)
+		
+		> 类层面的懒加载：hbm.xml中class标签有lazy属性来设置是否需要懒加载。默认值是true。
+		
+		> 属性层面的懒加载：在<property>,<set>等有lazy属性,最好是在代表关联关系的属性的时候使用。
+			例如集合属性对应的是别的实体，还有list，map，bag，many-to-one,one-to-one。(many-to-many本身
+			就是在集合里面的)。但是数组不能懒加载，因为不能生成代理对象。
+			<> 元素的懒加载策略
+				--> lazy=true
+				查询sysout(department.getEmployeeSet().size())时，查询集合里面的所有元素。
+				然后再计算集合的大小。
+				--> lazy=extra
+				查询sysout(department.getEmployeeSet().size())时，没有查询集合里面的所有元素，
+				而是只是调用SELECT COUNT(*)语句。
+				
+		> 不使用懒加载的时候
+			例如，OA中用户登录后就要立刻加载用户权限，马上进行权限判断的，这时候可以把懒加载关掉。
+			
+		> 懒加载注意事项：
+			<> session.close()后就不能使用查询数据库的方法（抛出懒加载异常），
+				原因：真正获取数据时session已经关闭了。
+				例如department.getEmployeeSet().懒加载的话只有第一次使用才加载，不是调用get方法就立刻加载。
+				--> 解决懒加载异常的办法
+					1.延迟session.close()
+					2.关闭懒加载，lazy=false
+					3.使用Hibernate.initialize(department.getEmployeeSet())调用这个方法后
+						就马上加载EmployeeSet
+			<> 如果在session.close()之前，tx.commit()之后，使用查询数据库的方法，不会报错。因为查询是不用开启事务的。
+			
+	* 数据库连接池
+		> 导包：hibernate-release-5.0.5.Final\lib\optional\c3p0
+				下的3个jar包。不需要添加c3p0-config.xml配置文件
+		> 注意：name的参数和c3p0官方的参数名字不一样。
+			<> 	例如：官方：acquireIncrement
+				hibernate：acquire_increment
+		> 配置:
+			<!-- 使用c3p0连接池，配置连接池提供的供应商 -->
+			<property name="connection.provider_class">org.hibernate.connection.C3P0ConnectionProvider</property>
+			<!-- 配置数据库连接池最少数目 -->
+			<property name="c3p0.min_size">5</property>
+			<!-- 配置数据库连接池最大数目 -->
+			<property name="c3p0.max_size">20</property>
+			<!-- 设定数据库连接的过期时间，单位为秒，
+				如果连接池中的某个数据库处于空闲时间超过timeout时间，就会从连接池中清除
+			 -->
+			 <property name="c3p0.timeout">120</property>
+			 <!-- 每3000秒检查所有连接池中空间的连接，单位为秒 -->
+			<property name="c3p0.idle_test_period">3000</property>	
+			<!-- 每次创建的连接数 -->	
+			<property name="acquire_increment">2</property>
+			
+		> 查看数据库的连接数和状态：
+			SQL语句：SHOW processlist
+	* 二级缓存
+		> 一级缓存是session中的缓存，二级缓存是sessionFactory中的缓存。
+			查询时，如果session缓存中没有指定对象，在二级缓存中找，如果二级缓存中没有就在数据库找。
+		> 一级缓存是为了方便管理对象，二级缓存是为了提高性能。
+		
+		> 无论一级缓存还是二级缓存都是根据OID找到缓存中的对象。如果根据HQL语句查找对象，对象不会进入一级缓存和二级缓存。
+		
+		> （hb3.0的，后面不写了，我用的是hb5.0）二级缓存有类级别和集合级别。对应标签<class-cache><collection-cache>
+			<> 类级别<class-cache>
+				--> usage属性：选择实体是只读的还是读写的
+		>> 使用ehcache配置二级缓存
+			<> ehcache特点：
+				-> 把缓存放到内存里面，如果内存用完了，放到硬盘里面
+				-> 缓存文件放到硬盘下，程序执行完不会删除，下次再执行程序就覆盖之前的缓存文件。
+			<> 导包
+				hibernate-release-5.0.5.Final\lib\optional\ehcache
+				下的3个jar包。
+			<> 准备ehcache.xml在/src下
+				ehcache.xml在hibernate-release-5.0.5.Final\project\etc\下有
+				--> ehcache参数
+			<> 配置主配置文件
+				1.打开使用二级缓存
+				<property name="hibernate.cache.use_second_level_cache">true</property>
+				2.选择供应商，这里用ehcache
+				<property name="hibernate.cache.region.factory_class">org.hibernate.cache.ehcache.EhCacheRegionFactory</property>  
+				3.开启查询缓存
+				<property name="hibernate.cache.use_query_cache">true</property>
+				4.指定要放入缓存的实体类。
+				这个要放在很后面。鼠标放在sessionFactory上有顺序。有了这个就可以不用在映射文件配置。推荐使用这种，方便管理。
+				<class-cache usage="read-write" class="hibernate.demo21.domain.Employee"/>
+				5.指定要放入的缓存集合
+				<collection-cache uasge=".." collection="类全名.集合属性"/> 用点表示从属关系。类似EL表达式
+				使用集合缓存时，要求集合存放的实体类也要添加到二级缓存。真正的缓存数据要去<class-cache>找。
+				例如：collection="a.b.department.employeeSet".需要employee也进入二级缓存。
+			<> 配置映射文件（指定要缓存的类）
+				--> 光标放在class下面，里面有配置可选项和必选项。里面有cache。顺序不能错，所以cache要放在<id>之前。
+				--> <cache usage="read-write">
+					cache的属性：
+					1. usage
+						- read-only
+						- read-write
+						- nonstrict-read-write
+						- transactional
+					2. include，默认为all
+					3. region
+					
+		> 类缓存
+			<class-cache>
+			
+		> 集合缓存
+			<collection-cache>
+			
+		> 查询缓存
+			主配置文件中
+			<property name="hibernate.cache.use_query_cache">true</property>
+			查询语句中
+			session.createQuery(hql).setCacheable(true).list()
+			这样查询，会从二级缓存中获取查询数据。否则只会从数据库查询数据，放到二级缓存中，而不会从二级缓存获取数据。
+			
+		> 更新时间戳
+			使用UPDATE、DELETE格式的HQL语句时，会在二级缓存把要更新的对象废除，然后需要的时候再从数据库中查找。
+			
+10.在应用程序中使用session的管理方案
+
+	* 问题：这三个问题可以用过滤器解决分层带来的问题和代码只写一遍，ThreadLocal解决后去session的问题。Spring的管理更高端。
+	
+		> 开启事务和关闭事务写在业务层，一个请求对应一个业务逻辑对应一个事务。这样session写在业务层，那么数据访问层怎么
+		获取业务层的session呢？
+			解决：把session放到Threadlocal
+		> 而且session是数据访问层的类，不能写在业务层。怎么办？
+			解决：过滤器
+		> session开启和关闭的代码都是重复的，能否只写一遍？
+			解决：在过滤器打开事务，关闭事务。虽然这样提高耦合度，但是要换的是只用换过滤器就行，方便更换。
+			class MyFilter implments Filter{
+				public void doFilter(request,response,chain){
+					SessionFactory sf = new Configuration().congfigure().buildSessionFactory();
+					Session session = sf.getCurrentSession();//创建session,因为一开始是空的。 
+					Transaction tx  = null;
+					try{
+						session = HibernateUtils.openSession();
+						tx = session.beginTransaction();
+						chain.doFilter(转转后的HttpServletRequest，HttpServletResponse);
+						tx.commit();
+					} catch{
+						tx.rollback();
+						throw(e);
+					} finally{
+							/*
+							 * 用currentSession就不用finally的语句了，因为这样做的时候，事务提交的时候回自动关闭
+							 * session。
+							 * if(session != null){
+							 * 	session.close();
+							 * 	ThreadLocalUtils.getThreadLocal().remove();//移除
+							 * }
+							 */
+						}
+					}
+				
+				//Dao层
+				public void setUser(User user){
+					Session session = sessionFactory.getCurrentSession();
+					session.save(user);
+				}
+	* sessionFactory.getCurrentSession()
+		> 上面的问题可以通过这个方法解决。
+		> 直接调用这个方法会报错，因为没有告诉session绑定在哪个地方。
+		> 通过在主配置文件中配置以下配置就可以使用。
+			<property name="current_session_context_class">thread</property>
+		> 这样以后不用finally了，因为会事务提交后会自动关闭session。因为session会在事务提交或回滚后自动关闭，
+			并且与上下文解除绑定。（上下文通常用thread）
+			
+11.练习
+	* 部门，员工，账号，权限的关系。
+		> 部门与员工:一对多
+		> 部门与部门：一对多（自关联）
+		> 员工与账号：一对一
+		> 账号与权限：多对多
+		
+	* 映射模板
+		> 一对多(set)
+			<set name="">
+				<key column=""/>
+				<one-to-many class=""/>
+			</set>
+			
+		> 多对一
+			<many-to-one name="" class="" column=""/>
+			
+		> 多对多(set)
+			<set name="" table="">
+				<key column=""/>
+				<many-to-many class="" column=""/>
+			</set>
+			
+		> 一对一(基于外键，有外键方)
+			<many-to-one name="" class="" column="" unique="true"/>
+		
+		> 一对一(基于外键，无外键方)
+			<one-to-one name="" class="" property-ref="有外键方的name"/>
+	
+	* 填映射模板的空
+	<!--aa属性，表示与实体B的，cc关系--> 其中cc为一对多，多对一，多对多，一对一基于外键有外键方，一对一基于外键无外键方
+		> name属性：填aa
+		
+		> class属性：填B
+		
+		> column属性：
+			--> 在many-to-one中：写本条配置的name属性值后面加上id
+			--> 在一对多的key中：写对方类的表达次关系的外键列名
+			--> 在多对多的key中：写自己的类名称加id(首字母小写吧)
+				在多对多的many-to-many中，写对方的类名+id(首字母小写吧)
+				
+		> 多对多的table属性：
+			保证两边的table的值一样就可以
+			
+		> one-to-one的property-ref属性：引用有外键方的<many-to-one unique="true"/>的name属性的值

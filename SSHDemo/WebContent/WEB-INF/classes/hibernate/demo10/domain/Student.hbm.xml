@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+ <hibernate-mapping package="hibernate.demo10.domain">
+	<class name="Student" table="demo10_student">
+		<id name="id" type="long" column="id">
+			<generator class="native"></generator>
+		</id>
+    	<property name="name" type="string" column="name" length="20"/>
+    	<!--taecherSet属性，与Teacher多对多关系
+    		set中table属性是集合表(中间表)
+    	  -->
+    	<set name="teacherSet" table="demo10_teacher_student" inverse="true">
+    		<key column="studentId"></key><!-- 引用当前表的主键作为外键 -->
+    		<!-- 指定关联对象和关联对象的主键作为外键的外键列 -->
+    		<many-to-many class="Teacher" column="teacherId"></many-to-many>
+    	</set>
+     </class>
+ </hibernate-mapping>

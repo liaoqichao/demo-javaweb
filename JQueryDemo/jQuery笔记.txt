@@ -1,0 +1,339 @@
+jQuery
+
+1.jQuery是一个JavaScript框架
+
+2.作用是为了简化书写（封装常用方法，例如ajax）
+	* jQuery和JavaScript的单引号和双引号没区别，但是尽量使用单引号，嵌套的时候才使用双引号。
+	* 例如：document.getElmentById("id号");  ==  $('#id号')
+	
+3.当前流行的JavaScript库
+	* jQuery 用的比较多，最流行
+	* MooTools
+	* Prototype 最早出现的js库，用的比较多
+	* Dojo	用的比较多
+	* YUI
+	* EXTJS	用的比较多。EXT：扩展
+	* DWR 主要用在服务器，用的比较多
+	
+4.注意：jquery-2.0以上版本不再支持IE 6/7/8
+
+5.第一例
+	* $(document)是一个jQuery对象。document是一个dom对象。
+	      如果是jQuery对象，只能使用jQuery库提供的方法，如果是dom对象只能使用js本身的方法
+	      
+6.jQuery对象命名规则
+	* jQuery对象以$开头，但是不是必须的，只是约定俗成。例如:var $obj = $('#id1');
+	
+7.jQuery对象不能使用DOM对象的方法。
+	* 例如：
+		var obj1 = document.getElementById("id1");
+		alert(obj1.value);
+		
+		var $obj1 = $('#id1');	// 这里$obj1对象不能调用DOM的value。只能调用jQuery的方法.val()
+		alert($obj1.val());
+		
+8.jQuery对象与DOM对象的互相转换
+	* jQuery的对象是以集合的方式存储的。因为通过id获取是一个对象，但是通过class或者tagName获取是多个，所以用集合。
+	* DOM -> jQuery
+		var $text = $(text);
+	* jQuery -> DOM （获取集合第一个对象）
+		1) var text1 = $text[0];
+		2) var text2 = $text.get(0);
+
+9.jQuery遍历数组和元素的4种方式
+	* $.each(数组或jQuery对象,function(i,n){ ...});
+		> 其中i是当前元素的索引值，n是当前元素，如果是对象则是DOM对象。
+	* $.each(数组或jQuery对象,function(){ ...});
+		> function()也可以不带参数。在函数体里面用$('this')表示当前被遍历到的数组元素或对象。this是DOM对象，$('this')
+		      是jQuery对象。	
+	* $objs.each(function(i,n){...});
+	* $objs.each(function(){...});
+
+10.jQuery选择器
+	* $('#id') 等价于 document.getElementById("id");
+	* $('tagName') 等价于document.getElementsByTagName("tagName");
+	* 基本选择器(1)
+		> class选择器
+			<> 格式：$('.className');
+		> id选择器
+			<> 格式:$('#id');
+		> 标签名
+			<> 格式：$('tagName');
+		> 通配符
+			<> 格式：$('*'); // 全部都选中了。
+		> 组合选择器
+			<> 格式：$('span,.myClass,#id-1')
+			<> 注意：他们的关系是或，不是且。
+				-> 并且关系用点号，例如$('div.myClass')
+				-> id本身就是唯一，所以不会出现$('div#id');
+	* 层次选择器(2)
+		> 祖宗和子孙关系 
+			<> 格式：$('ancestor descendant')
+			<> 例如：$('table td')表示table下的所有td元素（中间隔着tbody和tr元素）
+		> 父子关系
+			<> 格式：$('parent > child')
+			<> 例如：$('form > input' )表示form下的input标签直接子元素
+		> 相邻关系(同一层级)
+			匹配所有紧接着prev后面的next元素,这里的next元素是和prev元素同层级的。
+			<> 格式：$('prev + next')
+		> 兄弟关系(同一层级)
+			匹配当前元素后面的所有兄弟元素
+			<> 格式：$('prev ~ siblings')
+			<> 例如：$('#id1 ~ *')匹配#id1元素后面的所有兄弟元素，*换成span就是#id1后所有标签为span的兄弟元素。
+		** 补充：找同一层级的所有元素
+			<> $('#id').siblings("*/.myClass/#id/tagName/其他选择器");
+	* 过滤选择器
+		> 基础过滤选择器(3)
+			<> $('div:first') 选择第一个div元素
+			<> $('div:last') 选择最后一个div元素.和层级没有关系。从上到下，从左至右找。
+			<> $('div:not(.myClass)') 选择class不为myClass的所有div元素
+			<> $('div:even') 选择索引值为偶数的div元素。索引值从0开始。
+			<> $('div:odd') 选择索引值为奇数的div元素。索引值从0开始。
+			<> $('div:eq(1)') 选择索引值为1的div元素
+			<> $(':header') 选择所有标题元素（h1~h6）
+			<> $(':animated') 选择所有当前正在执行动画的元素
+		> 内容过滤选择器(4)
+			<> $('div:contains("-1")') 选择文本包含“-1”的所有div区域（不包括子元素）
+			<> $('div:empty') 选择没有子元素（文本内容也是一个元素，所以是没有文本内容且没有子元素）的所有div元素
+			<> $('div:has(.myClass)') 选择一组元素，这些元素存在1~n个class为myClass的子元素。
+			<> $('div:parent') 选择一组元素，这些元素是父元素。文本内容也是一个元素。
+		> 可见度选择器(5)
+			<> $('div:hidden') 选择div元素，这些元素是input type="hidden"或者是css中的display:none
+			<> $('div:visible') 选择div元素，这些元素不是input type="hidden"且不是css中的display:none
+			<> $('*:hidden').show() 选择所有隐藏的元素，并显示出来。但是不能显示<input type="hidden"/>
+			<> $.each(数组或者jQuery对象，callback); 遍历和数组和jQuery对象
+				-> 遍历数组例子：
+					var arr1 = [0,1,2];
+					$.each(arr1,function(i,n){
+						alert("Item #"+i+":"+n);
+					});
+					
+					其中i，n不写也行。i代表当前遍历到的元素的索引值，n代表当前遍历到元素的值。
+				-> 遍历对象例子：
+					var arr2 = [{"name":"zhangSan","age":"15"},{"name":"liSi","age":"18"},{"name:":"wangWu","age":"18"}];
+					$.each(arr2,function(i,n){
+						alert(i+":"+n.name+" "+n.age);
+					});
+		> 属性过滤选择器(6)
+			<> $('div[title]') 选择div元素，这些div元素都有title属性。
+			<> $('div[title="t1"]') 选择div元素，这些div元素的title属性的值都为t1
+			<> $('div[title!="t1"]') 选择div元素，这些div元素的title属性的值不为t1（没有title属性也被选中）
+			<> $('div[title^="t"]') 选择div元素，这些元素的title属性值是以“t”开头。^相当于正则表达式的以...开头
+			<> $('div[title$="t"]') 选择div元素，这些元素的title属性值是以“t”结尾。$相当于正则表达式的以...结尾
+			<> $('div[title*="t"]') 选择div元素，这些元素的title属性值包含“t”。*相当于通配符
+			<> $('div[id][title*="t"]') 选择div元素，这些元素有id属性而且title属性的值要包含t。
+		> 子元素选择器(7)
+			<> $('div .layer-1:nth-child(1/even/odd/3n+1)') 在每个div元素中选择class=layer-1的子元素集合中的第1/偶数/奇数/第3n+1个元素
+			<> $('div .layer-1:first-child') 在每个div元素中选择class=layer-1的子元素集合中的第一个元素
+			<> $('div .layer-1:last-child') 在每个div元素中选择class=layer-1的子元素集合中的最后一个元素
+			<> $('div .layer-1:only-child') 在每个div元素中，如果class=layer-1的子元素只有一个，那么就选中这个子元素
+		> 表单过滤选择器(8)
+			<> 	$(':text') 选择<input type="text"/>的标签元素
+				:input	选择所有input标签元素
+				:text	
+				:password
+				:radio
+				:checkbox
+				:submit
+				:image
+				:reset
+				:button
+				:file
+		> 表单对象属性过滤选择器(9)
+			<> :enabled
+				$('input[type="text"]:enabled') 选择可用文本框
+			<> :disabled
+				$('input[type="text"]:disabled') 选择不可用文本框
+			<> :checked
+				$(':checkbox:checked')或者$('input[type="checkbox"]:checked') 选择被选中的复选框元素
+	* 选择器的使用
+		使用什么选择器根据需求定
+		> 如果针对内容，则使用内容选择器
+		> 如果是有层级关系（根据祖先选择后代(不同层级)；找兄弟，后一个元素，找后面几个元素(相同层级)），使用层级选择器
+		> 如果根据id、class\tagName，或者这3个组合，使用基本选择器
+		> 如果选择表单中的元素，则使用表单选择器或者表单对象属性选择器(根据表单项是否可用(enabled/disabled)，
+			单选框,复选框(checked)，下拉列表(selected)等表单的属性来选择元素)
+		> 根据可见性选择元素，则使用可见性选择器
+		> 如果根据某元素的属性（有什么属性，属性值是什么）来选择，则使用属性选择器
+		> 如果考虑对选中的元素要进行过滤（第1/n/last个元素，奇偶数），则使用基本过滤选择器（基本筛选器）
+			和使用过滤（not(),first(),last(),is(),eq()）
+			
+11. jQuery中的DOM操作
+	* 通过选择器选中的指定元素，是问了什么？是为了操作这些元素！！
+	* DOM根据操作对象不同的分类：
+		> XML DOM
+		> HTML DOM
+		> CSS DOM
+	* 获取属性和设置属性都可以用attr()方法来完成
+		var attr = $('#id').attr("id");获取属性值
+		$('#id').attr("key","value");设置属性值
+	* 追加样式addClass("className")
+		$('#first').addClass("one"); 其中one是css的一个样式不一定是.one，可能是#one等
+	* 删除样式removeClass("className")
+		$('#first').removeClass("one")
+	* 切换样式toggleClass("className")
+		$('#first').toggleClass("one");
+	* 是否含有样式hasClass("className")
+		$('#first').hasClass("one")
+	** 这里的追加和删除都是在内存里面修改了DOM树，浏览器的html代码不会改变。
+	   HTML文件一旦被浏览器运行起来了，就会形成DOM树。通过一些操作修改了内存中的DOM树页面内容就会发生变化，但是HTML文件并没有改变
+	* 创建元素
+		> 方法一(一步到位)：var $ele = $('整个标签')
+			<> 例如: var $ele = $('<a id="bd" href="http://www.baidu.com">百度</a>');则创建了一个
+				<a id="bd" href="http://www.baidu.com">百度</a>标签
+		> 方法二(分步完成)：var $ele = $('标签')
+			<> 例如：
+				var $myli = $('<li></li>');
+				$myli.attr("id","cd");
+				$myli.text("成都");
+	* 插入刚创建的元素
+		> 内部插入（父元素中添加子元素）
+			<> 父元素.append(子元素)  -- 队尾插入
+				$('#city').append($myli); 
+				表示在$('#city')对象内部的添加一个$myli元素到最后面。$myli是$('#city')最后一个子元素。
+				如果是$('.city')集合就是每个class=city的元素下都添加一个$myli子元素
+			<> 父元素.prepend(子元素) -- 队首插入
+				$('#city').prepend($myli);
+			<> 子元素.appendTo(父元素)  -- 队尾插入
+				效果和父元素.append(子元素)一样
+			<> 子元素.prependTo(父元素) -- 队首插入
+				效果和父元素.prepend(子元素)一样
+		> 外部插入（一个元素前后添加兄弟元素）
+			<> 某个元素.after(String/Element/JQuery) 表示在这个元素后面插入String/Element/JQuery
+				$('#bj').after($myli);
+			<> 新建元素.insertAfter(已存在元素)
+				$myli.insertAfter($('#bj'));
+				效果和某个元素.after(String/Element/JQuery)一样
+			<> 某元素.before(新建元素)
+				$('#jl').before($myli);
+			<> 新建元素.insertBefore(某元素)
+				$('<li id="tj">天津</li>').insertBefore($('#jl'));
+				效果和某元素.before(新建元素)一样
+	* 节点操作
+		> 移动节点
+			<> 上面的内部插入和外部插入方法，如果被插入的对象是新建的，则直接插入，如果被插入的是原有的对象，则移动这个原有的对象。
+				-> $('#tj').after($('#fk'));
+			         效果：原来的$('#fk')会移动到$('#tj')后面（原来的$('#fk')不见了），而不只是$('#tj').后面多了$('#fk')。
+			         如果再次出发事件，$('#fk')在$('#tj')后面，所以不会发生变化。
+			** 使用jQuery查找某个对象，如果这个对象（id,class,...,）不存在，不会报错，val()也是！而使用DOM会报错。
+		> 删除节点
+			<> empty() 删除匹配元素的所有子节点，清空该元素的子元素
+				$('li').empty();  li标签还是保留，所以页面还有很多li标签的点
+			<> remove(str)
+				$('li').remove(); 删除所有li标签
+				$('li').remove('#sh'); 删除指定标签，但是通常不这么写，而是写成$('#sh').remove()
+				如果不带参数表示全部都删除，str用于筛选，但是筛选一般在获取对象的时候筛选，所以一般是不带参数。
+		> 复制节点
+			<> clone() 复制元素，不复制元素的事件
+			<> clone(true) 不但复制元素，还复制元素中的事件
+		> 替换节点
+			<> replaceWith()
+				$a.replaceWith($b) == $b.replaceAll($a)
+				$a.replaceWith($b) 表示用$b替换掉$a节点
+			<> replaceAll()
+				$b.replaceAll($a) 表示$b替换掉所有的$a
+				
+12.jQuery对元素属性的操作
+	* jQuery中一个函数实现获取和设置的方法
+		> attr();
+			<> 传递一个参数，则获取该元素的某个属性值
+			<> 传递两个参数，则设置指定属性的值
+		> html() 相当于innerHTML
+			<> 不带参数，表示获取该元素的HTML内容。
+				例如<div><p>abc</p></div>的$('id').html(); 其获取的就是abc
+			<> 带参数，表示设置某个元素的HTML内容
+				例如<div><div>中$('div').html('<p>abc</p>');则div标签里面多了<p>abc</p>
+				jQuery会解析参数的内容。如果是text()方法就只当做纯文本不解析。
+		> text()
+			<> 不带参数表示获取文本内容
+			<> 带参数表示设置文本内容
+		> val()
+			<> 不带参数表示获取value属性的值
+			<> 带参数表示设置value的值
+		> height()
+		> width()
+		> css()
+	* 删除指定元素的指定属性removeAttr("attrName")
+	
+13. 常用遍历节点的方法	
+	* children() 获取子元素
+	* next() 获取下一个同层级的元素
+	* nextAll() 获取后面所有同层级的元素
+	* prev() 获取上一个同层级的元素
+	* prevAll() 获取前面所有同层级的元素
+	* siblings() 获取所有同层级的元素
+	
+	** 注意jquery1.6以上，设置checked的值为checked和为空字符串不能用 attr(), 要用prop()
+	例如：$('input[name="items"]').prop("checked","checked");
+	** attr()和prop()的区别：
+		> 某个元素的固有属性时用prop
+			像checkbox，radio，select,a这样的元素，checked，selected，href和id是固有属性，所以用prop。
+		> 自己定义的DOM属性时用attr
+	
+14. jQuery整合ajax
+	* 可用方法：jQuery对象.load（包含get和post）, $.get(), $.post()
+	* jQuery对象.load
+		> load(url,[data],[callback])  -- 有中括号表示可选项
+			<> 第一个参数表示为请求URL。例如<c:url value='/demo22/demo22Action_execute'/>
+			<> 第二个参数表示发送的数据，没有写null。如果要发送数据，则数据的格式应当是
+				{"username":"zhangSan","psw":"123"}
+			<> 第三个参数是回调函数。回调函数可以带三个参数.function(data,textStatus,xmlHttpRequest){}
+				-> 第一个参数是控制器返回的数据（string类型）
+				-> 第二个参数是文本的状态（一共有4中）
+					1) success
+					2) error
+					3) notmodify
+					4) timeout
+				-> 第三个参数是xmlHttpRequest对象
+		> 载入远程的html文件，并插入至DOM中。
+		> 默认使用get方法，如果传递时有参数自动变为post方法
+		> 返回的内容会自动显示（没有使用输出语句）
+		** 补： struts2的text,JSON,xml三个返回数据格式
+			1) 回调函数返回如果是JSON字符串，通过eval("("+data+")");方式变成JSON对象
+				>> struts2返回JSON的方法
+					a. 导struts2-json-plugin.jar
+					b. 在action里面需要返回的数据在getter上使用@JSON注解
+					c. 在struts.xml中,package的extends的值改为json-default
+					d. 在struts.xml中,reslt标签添加属性type="json"
+					e. result添加子元素<param name="root">{msg,obj}</param>，其中大括号里面的为需要返回到该视图的JSON串对应
+						对象在action中getter的名字。
+						例如 @JSON public String getMsg(){..},则<param>{msg}</param>。
+						由于result有<param>标签，所有返回的视图的路径需要用<param name="location">来表示。如：
+						<param name="location">/jsps/a.jsp</param>
+						
+			2) 回调函数如果返回的是文本，则直接使用
+			3) 回调函数如果返回的是XML数据。则var receiced_data = xmlHttpRequest.responseXML;
+				这样得到的reveived_data就是DOM对象
+				>> struts2，返回XML格式的方法
+					HttpServletResponse response = ServletActionContext.getResponse();  
+			        response.setContentType("text/xml ");  
+			        PrintWriter pw = response.getWriter();  
+			        pw.print(XMLFormat_outPut);
+			        return null;  
+		> 问题：
+			1) 使用这个方法必须需要一个jQuery对象来调用
+			2) 返回的文本会显示在这个调用的jQuery对象里。（文本内容赋值到jQuery对象里）
+	* $.ajax()
+		> 参数JSON传中只有url是必选的，其他都是可选。还有很多属性，上网找。
+		> 这个方法不依赖jquery对象。
+		> 这个方法通过不同的属性可以有以下作用：
+			<> 加载并执行一个JS文件
+			<> 保存数据到服务器，成功时显示信息。
+			<> 装入一个 HTML 网页最新版本。
+			<> 同步加载数据。发送请求时锁住浏览器。需要锁定用户交互操作时使用同步方式。
+			<> 发送 XML 数据至服务器。设置 processData 选项为 false，防止自动转换数据格式。
+		> 例子 -- 保存数据到服务器，成功时显示信息。
+		$.ajax({
+			type:"POST",url:"<c:url value='/demo22/demo22Action_execute'/>",
+			data:{"username":$('#username').val(),"psw":$('#psw').val()},
+			success:function(msg){
+				alert("Date Received:" + msg);
+			}
+		});
+		> dataType属性可以指定返回数据的格式。 除了单纯的XML，还可以指定 html、json、jsonp、script或者text。
+	* $.get()
+		> $.get()和$.post()是$.ajax()的简化
+	* $.post()
+		> $.post(url,[data],[callback]);
+		> 其中回调函数只有两个参数。function(data,[textStatus]),返回xmlHttpRequest对象。
+		> data以json串格式

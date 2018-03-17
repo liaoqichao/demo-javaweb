@@ -1,0 +1,2 @@
+购物车保存到session，没有保存到数据库，所以没有dao，没有dao所以service可以在bean里面。
+service的功能移到bean，所以没有service

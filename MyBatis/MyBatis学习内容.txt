@@ -1,0 +1,19 @@
+demo1 = 主配置文件，映射文件的配置，单表查询。
+demo2 = 增、删、该
+demo3 = mybatis开发dao的方法一：原始方法(dao接口和dao实现类)
+demo4 = mybatis开发dao的方法二：mapper代理方法
+demo5 = 输入映射。输出参数为pojo的包装类型，用户信息综合查询
+demo6 = 输出映射。resultType。输出参数为简单类型
+demo7 = 输出映射。resultMap。
+demo8 = 动态sql。where，if标签。定义和引用sql片段
+demo9 = 动态sql。foreach标签。
+demo10 = 多表查询：一对一查询。使用ResultType方式和使用ResultMap方式映射结果集
+demo11 = 多表查询：一对多查询。
+demo12 = 多表查询：多对多查询。
+demo13 = 延迟加载
+demo14 = 一级缓存
+demo15 = 二级缓存 
+demo16 = 二级缓存整合ehcache
+demo17 = Spring和mybatis整合(dao、mapper代理、mapper代理的批量扫描)，在SpringMybatis项目
+demo18 = 逆向工程
+

@@ -1,0 +1,86 @@
+1.struts2环境搭建
+	* 所需jar包：不同应用所需的jar包不一样（2.3.24.1版本一共有107个jar包），以下jar包是必须要有的。
+		视频太古老，只需要6个jar包，这里需要9个jar包
+		> struts2-core-2.3.24.1		struts2框架核心类库
+		> xwork-core-2.3.24.1		XWork类库，struts2在其上的构建
+		> ognl-3.0.6				对象图导航语言，struts2框架通过其读写对象的属性
+		> freemaker-2.3.22			struts2的UI标签的模板使用FreeMaker编写
+		> commons-logging-1.1.3		struts2框架使用这个日志包来支持Log4j和jdk1.4+的日志记录
+		> commons-fileupload-1.3.1	文件上传组件，struts2-2.1.6版本后必须加入此文件
+		> commons-io-2.2
+		> commons-lang3-3.2
+		> javassist-3.11.0.GA
+		----------------------------------------
+		添加Struts2库
+		Window->Preferences->Java->Build Path->User Library
+		new Library。写上库的名字，然后add jars（从已经有的项目中）或者add External Jars（从本地硬盘中）添加jar包到该类库。
+		使用Struts类库
+		右键项目名->Build Path->Config Build Path
+		点击Add Library，双击User Library，选择Struts2点Finish。
+		***但是这样读取不到类，会出现ClassNotFoundException，所以不要这样！
+		----------------------------------------
+		
+	* 配置文件：
+		> strut2的默认配置文件为struts.xml,该文件应该存放在WEB-INF/classes下。开发阶段可以放在src下
+		> 获取配置文件。在apps里面有几个例子，解压blank项目，在WEB-INF/classes下找到struts.xml复制到项目中
+		
+	* 在web.xml中加入struts2 MVC框架启动配置。
+		> struts2中，struts框架是通过Filter来启动的。在blank项目下的WEB-INF/web.xml复制<filter>
+		      和<filter-mapping>标签
+		      
+	* 注意：struts2读取到struts.xml文件内容后，以JavaBean的形式把struts.xml加载到内存中，以后struts2对用户的每次请求处理都
+		      将使用内存中的数据，而不是每次都读取struts.xml文件。
+		      
+2.Struts2的第一个程序Hello World
+	* struts.xml中的配置。
+		<package name="stucts2" namespace="/demo1" extends="struts-default">
+			<action name="hello" method="execute" class="struts2.demo1.HelloAction">
+				<result name="success">/WEB-INF/pages/hello.jsp</result>
+			</action>
+		</package>
+		> package：类似于java的包，为了便于管理和解决重名问题。在实际应用中应该把一组业务功能相关的action放在一个包下。
+				       如果把一个包定义为抽象（abstract属性值为true）就不能在里面定义action
+			<> name：即包的名称，必须是唯一的。包的名称不对应java中类包的名称。
+			<> namespace：命名空间。会作为访问该包下action路径的一部分。上面的例子访问路径为:/test/hello.action。
+				相当于bookstore项目中的后台的servlet，全部路径前面都加了一个/admin
+			<> extends:继承了struts-default这个包。可以这么说当包继承了struts-default包才可以使用struts2的核心功能。
+		> action：
+			name：action的名称，作为访问action路径的一部分。访问路径=package.namespace/action.name
+			class:访问类的名称(就是要访问哪个action？)
+			method:要访问action的哪个方法(相当于BaseServlet的JSP提供method参数)
+				
+		> result:定义视图
+			name：视图的名称
+			type:默认时dispatcher（请求转发）。它的值出了请求转发和重定向还有其他值。
+			内容：/WEB-INF/page/hello.jsp是视图的路径。
+			
+	* HelloAction
+		无入侵式设计：代码里面没有HttpServlet，没有request，response
+		> 里面的方法要对应action里面的method属性
+		> 返回类型要为String，返回值要为result标签的name属性的值
+	
+	* /WEB-INF/pages/hello.jsp
+		使用el表达式输出action中的message属性。这里默认的是request域.
+
+3.Action名称的搜索顺序。
+	在HelloWorld中，在地址栏输入http://localhost:8080/SSHDemo/demo1/abc/hello也能访问到action。
+	
+	* 如果action存在，包不存在。
+	     没有/demo1/abc这个包（package），就会找上一层，如果也没有再找上一层，然后找到/demo1，发现有这个包，再从这个包里面找action。
+	     
+	* 如果包存在，但是这个包不存在指定的action。
+	      有/demo1这个包，但是这个包下没有指定的action，会取默认命名空间下寻找action。
+	  	> 默认命名空间：不设置namespace或者设置为空字符串。
+	  	
+4.action的各项配置默认值
+	action的name不能省略。<result>的内容（返回的视图）不能省略
+	<action name="abc">
+		<result>/WEB-INF/pages/lalala.jsp</result>
+	</action>
+	* 如果action没有指定class，其默认值：ActionSupport
+	* 如果action没有指定method，其默认值：execute
+	* 如果result没有指定name，其默认值：success
+	
+5.result配置的各种视图转发类型
+	就是result中type属性的值
+	dispatch：默认，就是请求转发。request.getRequestDispatcher("/jsps/a.jsp").forward(request,response);

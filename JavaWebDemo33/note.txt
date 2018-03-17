@@ -1,0 +1,36 @@
+
+> 数据连接层的DAO用来连接业务逻辑层的UserService和数据库,数据的载体是User(把数据封装)。
+> 业务逻辑层的UserService通过DAO获取到数据(User对象),提供功能User find();把数据传到WEB层的UserServlet。
+      这时,业务逻辑层没有和数据库直接有联系。
+> WEB层使用Servlet获得业务逻辑层的功能完成后返回的数据,并转发、显示到JSP中。
+
+> WEB层负责获取业务逻辑层返回的数据,并显示。
+> 业务逻辑层负责通过获得数据连接层的数据,完成项目所需要的功能。
+> 数据连接层负责用JavaBean将数据封装起来,直接和数据库接触。
+
+> 实体：通常是JavaBean,用来存储数据,例如User
+
+黄：绿偷,如果不是绿偷肯定是红偷
+红：我们4个当中,我没偷
+蓝：黄假，黄偷
+绿：不是我们4个,蓝是假
+
+1.if yellow ture  ->绿偷或者红偷
+	->if green tou ->green false,blue true.->yellow false  --> error
+	->if red tou  -> red false,blue false,green flase  --> error
+from 1 --> yellow false;
+
+2.if red true && yellow false
+<1>	if blue true  -> green false  --> 第一个结果：黄色偷
+<2>	if blue false -> yellow true  green true -->error
+  if red false && yellow false
+  	blue true green true --> error
+from 2 -->  red true;
+
+3.if red true && yellow false && blue true
+	green false -> 同<1>		黄色偷 
+	
+4.if red true && yellow false && blue false
+	green ture -> 同<2>		error
+	
+综上,答案唯一,黄色偷,红和蓝全真,黄和绿全假

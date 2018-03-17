@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script type="text/javascript" src="js/jquery.js"></script>
+</head>
+<body>
+<script type="text/javascript">
+$(document).ready(function(){
+	$('#btn-1').click(function(){
+		$.ajax({
+			url:'http://localhost:8080/WebServiceDemo10/cxf/hello',
+			type:'POST',
+			dataType:'XML',
+			contentType:'text/xml;charset=utf-8',
+			data:'<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Body><ns2:sayHello xmlns:ns2="http://service.demo10/"><arg0>'+$('#name').val()+'</arg0></ns2:sayHello></soap:Body></soap:Envelope>',
+			success:function(data,status,xmlHttpRequest){
+				alert($(data).find('return').eq(0).text());
+			},
+			error:function(){
+				alert('error');
+			}
+		
+		});
+	});
+});
+
+</script>
+	姓名：<input id="name" type="text"/><br/>
+	<button id="btn-1">使用jQuery的ajax方法调用WebService服务</button>
+</body>
+</html>

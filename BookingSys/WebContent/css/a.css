@@ -1,0 +1,21 @@
+@CHARSET "UTF-8";
+/**
+a的hover，visited，link，active颜色相同
+*/
+/*未访问   用冒号a:link*/
+a:link{
+	color: blue;
+	text-decoration: none;/*去掉下划线*/
+}
+/*鼠标悬停*/
+a:HOVER {
+color: blue;
+}
+/*点击效果 瞬间的*/
+a:ACTIVE {
+color: blue;
+}
+/*访问后效果*/
+a:VISITED {
+color: blue;
+}

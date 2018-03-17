@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+ <hibernate-mapping package="hibernate.demo23.domain">
+	<class name="Privilege" table="demo23_privilege">
+		<id name="id">
+			<generator class="native"/>
+		</id>
+    	<property name="action"/>
+    	
+    	<!-- userAccountSet属性，表示与userAccount的多对多关系 -->
+    	<set name="userAccountSet" table="demo23_userAccount_privilege">
+    		<key column="privilegeId"></key>
+    		<many-to-many class="UserAccount" column="userAccountId"></many-to-many>
+    	</set>
+     </class>
+ </hibernate-mapping>

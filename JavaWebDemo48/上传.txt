@@ -1,0 +1,74 @@
+上传
+	点击表单的提交：上传的是字符串(键值对)，而上传时送文件。
+1.上传对表单的限制
+	* 必须是method="post"
+	* enctype="multipart/form-data";这个也是表单数据
+	* 表单中需要添加文件表单项<input type="file" name="xxx"/>
+2.上传对Servlet的限制
+	* request.getParameter("xxx");这个方法在在表单为enctype="multipart/form-data"作废，返回值为null。
+		不是file的也不能用。
+	* ServletInputStream request.getInputStream();包含整个请求的体
+
+3.多部件表单的体enctype="multipart/form-data"
+	1. 每隔出多个部件，即一个表单项一个部件。
+	2. 一个部件中自己包含请求头和空行，以及请求体。
+	3. 普通表单项：
+	  > 1个头：Content-Disposition：包含name="xxxx"，即表单项名称。
+	  > 体就是表单项的值
+	4. 文件表单项：
+	  > 2个头：
+	    * Content-Disposition：包含name="xxxx"，即表单项名称；还有一个filename="xxx"，表示上传文件的名称
+	    * Content-Type：它是上传文件的MIME类型，例如：image/pjpeg，表示上传的是图片，图上中jpg扩展名的图片。
+	  > 体就是上传文件的内容。
+4.commons-fileupload.jar
+	依赖commons-io.jar.
+	> commons-fileupload.jar 解析request中上传的数据，解析后的结果是一个表单项数据封装到一个FileItem对象中。
+5.上传三步
+	相关类：
+		> 工厂：DiskFileItemFactory
+		> 解析器：ServletFileUpload
+		> 表单项：FileItem
+	第一步：创建工厂
+		DiskFileItemFactory factory = new DiskFileItemFactory();
+	第二步：创建解析器
+		ServletFileUpload sfu = new ServletFileUpload(factory);
+	第三步：使用解析器来解析request，得到FileItem列表
+		List<FileItem> fileItemList = sfu.parseRequest(request);
+6.FileItem
+	> bool isFormField():是否为普通表单项
+	> String getFieldName(); 返回普通表单项的名称
+	> String getString(String charset); 返回表单项的值
+	> String getName();返回文件表单项(上传的文件)的名称
+	> long getSize();返回上传文件的字节数。
+	> InputStream getInputStream();返回上传文件对应的输入流。
+	> void write(File destFile);把上传的文件内容保存到指定的文件中。(如果文件存在，被替换，如果不存在，创建)
+	> String getContextType();获取MINE类型image/jpeg
+7.上传的细节。
+	> 文件必须保存到WEB-INF下，也可以保存到C盘，D盘...目的是为了不让浏览器直接访问到。
+	> 文件名相关问题：
+		* 有的浏览器上传文件的名称是绝对路径，需要切割。C:\files\白冰.jpg。360浏览器直接是"白冰.jpg"
+	 	* 文件名乱码或者普通表单项乱码：
+	 		a.	request.setCharacterEncoding("utf-8");这个方法还是有用。因为ServletFileUpload
+				内部会调用request.getCharacterEncoding();		//优先级低，因为request作为参数传过来的
+			b.	ServletFileUpload.setHanderEncoding("UTF-8");也能处理//这个优先级高，类的内部的方法修改
+			
+	 	* 文件同名问题：需要为每个名称添加文件前缀，让文件不重复，使用UUID
+	 > 目录打散:一个文件夹如果有几千个文件或者文件夹会很卡。
+	 	* 不能在一个目录下存放多个文件，通过分文件夹，分层存放。这些目录是自动生成。
+	 		a.	首字符打散：用首字母作为用户名称。例如：abc.txt,保存到a目录下，如果不存在a目录则创建。缺点：中文字太多
+	 		b.	时间打散：使用当前日期作为目录。一天一个文件夹。缺点：周6,7文件夹爆满，1,2,3,4,5文件夹空的
+	 		c.	哈希打散:任何都可以调用hashCode();
+	 			i.调用hashCode获取int
+	 			ii.把int转换为16进制0~9，A~F
+	 			iii.获取16进制的前2位用来生成目录，目录为2层。例如：1B2C3D4E5F,/1/B/保存文件。一共256个文件夹，每个文件将夹1,2千个文件。
+	 				如果2层不够，可以3层。hashCode返回的int类型4个字节32位，对应16进制的8位。一共可以有16^8目录(42亿)。
+	 				缺点：不知道文件存到哪个目录(存的时候把路径也保存了)。
+	 > 上传文件大小限制：
+	 	* 单个文件大小限制：sfu.setFileSizeMax(10 *1024 * 1024);//设置上传单个文件大小的限制为10M
+	 	* 整个请求所有数据大小限制：//		sfu.setSizeMax(50 * 1024 *1024);//设置整个表单数据的大小为50M
+	 	如果上传的文件超出限制，在parseRequest执行时会抛出异常。
+	 > 缓存大小与临时目录
+	 	上传的文件一开始是在内存保存的（jre默认使用64MB内存），如果上传一个100M的文件内存就溢出了，所以要上传一点就写一点到硬盘上。
+	 	* 缓存大小：默认是10KB。超出多大才向硬盘保存？
+	 	* 临时目录:向硬盘的什么目录保存？
+	 	创建DiskFileItemFactory时，除了无参构造器，还有DiskFileItemFactory(int 缓存大小,File 临时目录);

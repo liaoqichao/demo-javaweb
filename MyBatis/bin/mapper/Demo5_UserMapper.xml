@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+ <!-- 
+ namespace命名空间的作用是对sql的分类化管理。namespace作用都是限定！！英语的定语
+ 注意:如果使用mapper代理开发，namespace就有特殊重要的作用：namespace等于mapper接口的地址(全限定名)
+  -->
+<mapper namespace="mapper.Demo5_UserMapper">
+<!--  demo5 用户信息的综合查询 
+	#{userCustom.sex}:取出pojo包装对象中性别的值
+	${userCustom.username}:取出pojo包装对象中的名称
+	为什么resultType使用userCustom呢?
+	因为不一定是select *。可能是select user.*,商品价格,订单编号。这样就可以把商品价格和订单编号的属性放到userCustom中，
+	而使用user则不可以。
+-->
+<select id="findUserList" parameterType="mybatis.po.UserQueryVo" 
+		resultType="mybatis.po.UserCustom">
+	  SELECT * FROM `user` WHERE user.sex=#{userCustom.sex} AND user.username LIKE '%${userCustom.username}%';
+</select>
+</mapper>

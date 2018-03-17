@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script type="text/javascript" src="../js/jquery.js"></script>
+<link rel="stylesheet" href="../css/demo6.css" type="text/css"/>
+</head>
+<body>
+<h1 class="title">可见度过滤选择器</h1>
+
+	<div id="div-1" class="layer-0">我是div-1</div><br/>
+	<div id="div-2" class="layer-0">我是div-2
+		<div id="div-2-1" class="layer-1" style="display:none">我是div-2-1</div>
+		<div id="div-2-2" class="layer-1">我是div-2-2</div>
+	</div><br/>
+	<div id="div-3" class="layer-0" style="display:none">我是div-3
+		<div id="div-3-1" class="layer-1">我是div-3-1</div>
+		<span id="div-3-span-1" class="layer-1">我是div-3-span-1</span>
+	</div>
+	<div id="div-4" class="layer-0"></div>
+	<br/>
+	<span class="layer-0" id="span-1">这里是span-1</span>
+	<span class="layer-0" id="span-2" style="display:none">这里是span-2</span>
+	<br/>
+	<input type="hidden" id="hidden1" value="hidden1"/>
+	<input type="hidden" id="hidden2" value="hidden2"/>
+	<input type="hidden" id="hidden3" value="hidden3"/>
+	<input type="hidden" id="hidden4" value="hidden4"/>
+	<br/>
+	<button id="btn-1">改变所有可见div的元素的背景色</button>
+	<button id="btn-2">改变所有不可见的元素，利用jQuery的show()方法显示出来，并改变它们的背景色</button>
+	<button id="btn-3">选取所有文本隐藏域(input type="hidden")，并打印它们的值</button>
+<script type="text/javascript">
+$('#btn-1').click(function(){
+	$('div:visible').css("background","#00ffff");
+});
+
+$('#btn-2').click(function(){
+	// show 显示当前的元素
+	// 这个show可以对整个jQuery元素的集合来操作。
+	// show 方法不能把<<input type="hidden"/>显示出来
+	$('*:hidden').show().css("background","#00ffff");
+});
+
+$('#btn-3').click(function(){
+	var $objs = $('input:hidden'); // $objs.length == 4;
+	// 遍历$objs
+	/* 
+		传统方法
+		1.把jQuery对象转化为DOM对象
+	*/
+// 	for(var i=0; i<$objs.length ; i++){
+// 		var obj = $objs[i];
+// 		alert(obj.value);
+// 	}
+	/*
+		这个方法不能操作jQuery对象。
+		为什么不行？
+	*/
+// 	for(var i=0; i<$objs.length ; i++){
+// 		// 为什么不行？
+// 		alert($objs[i].val());//不能直接这么用
+// 	}
+	
+	/*
+		jQuery方法。
+		格式：$.each(数组或者jQuery对象，callback);
+	*/
+	// 遍历数组
+// 	var arr1 = ["a",100,233];
+// 	$.each(arr1,function(i,n){
+// 		alert("Item #"+i+":"+n);
+// 	});
+	
+	// 遍历对象,这里的n代表对象本身
+// 	var arr2 = [{"name":"张三","age":"15"},
+// 	            {"name":"李四","age":"18"},
+// 	            {"name":"王五","age":"12"},
+// 	            {"name":"赵六","age":"18"},
+// 	            ];	
+// 	$.each(arr2,function(i,n){
+// 		alert(i+":"+n.name+" "+n.age); 
+// 	});
+
+	// 本例子方法一
+	$.each($objs,function(i,n){	//这里的n是DOM对象。可以直接.value或者变成jQuery对象用.val()
+		// 1. n = $objs[i]; n是DOM对象 
+		// 2. 用n写自己的代码。alert(n.value);
+		// 3. i++;
+		alert($(n).val());
+	});
+	
+	// 本例子方法二
+	$.each($objs,function(){
+		// this = $objs[i]; 这里的this也是DOM对象。可以直接.value或者变成jQuery对象用.val()
+		alert("DOM:"+this.value);
+		alert("jQuery:"+$(this).val());
+	});
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+ <!-- 
+ namespace命名空间的作用是对sql的分类化管理。namespace作用都是限定！！英语的定语
+ 注意:如果使用mapper代理开发，namespace就有特殊重要的作用：namespace等于mapper接口的地址(全限定名)
+  -->
+<mapper namespace="mapper.Demo7_UserMapper">
+
+<!-- 定义resultMap 
+	将sql中的id_和username_和User的id，username作映射。
+	type:指的是resultMap最终映射的java类型，可以使用别名
+	id：resultMap的唯一标识
+-->
+	<resultMap type="user" id="userResultMap">
+		<!-- id表示查询结果集中记录的主键(唯一标识)映射的定义 
+			colume:查询结果的列名
+			property：type指定的pojo中的属性名
+		-->
+		<id column="id_" property="id"/>
+		
+		<!-- result表示对普通列的映射定义 
+			
+		-->
+		<result column="username_" property="username"/>
+	</resultMap>
+
+<!--  demo7
+	使用resultMap进行输出映射
+	resultMap:指定resultMap对应的id，如果这个resultMap在其他的mapper文件中，前面需要加namespace前缀
+ -->
+ <select id="findUserByIdResultMap" parameterType="int" resultMap="userResultMap">
+ 	SELECT id id_ , username username_ FROM USER WHERE id=#{id}
+ </select>
+</mapper>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+ <hibernate-mapping package="sh.domain">
+	<class name="Person" table="person">
+		<!-- 可以同时读，但是不能一个读一个写,region表示把缓存定义在哪个区域。通常是实体类的全称。
+			一个二级缓存可以分成很多个区域，每个区域专门放一个实体类。这个缓存域对应的是ehcache.xml中的cache标签的name属性的		
+		 -->
+		<cache usage="read-write" region="sh.domain.Person"/>
+		<id name="id">
+			<generator class="native"/><!-- 主键自增长 -->
+		</id>
+    	<property name="name"/>
+     </class>
+ </hibernate-mapping>

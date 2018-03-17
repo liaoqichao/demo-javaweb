@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-4.0.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
+        
+        <!-- 使用注解。注册解析注解的处理器 -->
+<!--         <context:annotation-config></context:annotation-config> -->
+        <!-- 让spring自动扫描和bean.base-package表示要扫描哪个包下的类（包括子包）
+        	这个的注解处理器有很多，包括了上面的，所以上面的可以去掉。
+         -->
+        <context:component-scan base-package="spring"></context:component-scan>
+        
+        <!-- 使用aop，支持aspect注解 -->
+        <aop:aspectj-autoproxy></aop:aspectj-autoproxy>
+        
+        
+        <!-- 整合jdbc -->
+        <!-- 使用属性占位符,告诉spring占位符代替的是哪些属性
+        	classpath:是明确指明文件是在类路径底下。
+        	使用方法：${属性文件中的key}
+         -->
+        <context:property-placeholder location="classpath:jdbc-c3p0.properties"/>
+        <!-- 配置数据源 -->
+        <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+    		<property name="jdbcUrl" value="${jdbcUrl}"></property>
+			<property name="driverClass" value="${driverClass}"></property>
+			<property name="user" value="${user}"></property>
+			<property name="password" value="${password}"></property>
+			<property name="acquireIncrement" value="${acquireIncrement}"></property>
+			<property name="initialPoolSize" value="${initialPoolSize}"></property>
+			<property name="minPoolSize" value="${minPoolSize}"></property>
+			<property name="maxPoolSize" value="${maxPoolSize}"></property>
+        </bean>
+        <!-- 配置事务管理，需要导入spring-jdbc包 -->
+        <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        	<property name="dataSource" ref="dataSource"></property>
+        </bean>
+        <!-- 注册@Transactional注解解析器，指定事务管理器 -->
+        <tx:annotation-driven transaction-manager="txManager"/>
+        
+<!--     <bean class="org.springframework.web.portlet.mvc.annotation.DefaultAnnotationHandlerMapping"/> -->
+
+<!--     <bean class="org.springframework.web.portlet.mvc.annotation.AnnotationMethodHandlerAdapter"/> -->
+
+<!--     // ... (controller bean definitions) ... -->
+	<!-- id和name属性都是用来标识当前的bean标签的。id是xml本身就有的属性，符合xml的约束(不能包含/斜杠)，但是
+		有时候就需要这个/斜杠，就用name属性。建议没有特殊字符用id，有特殊字符用name.
+		class指定要被管理的类，不是接口。这个时候这个类就会有spring来创建和维护。需要用到这个bean的时候只需要向spring
+		获取就可以。是获取不是创建。
+	 -->
+	<bean id="personService" class="spring.demo2.service.impl.PersonServiceBean"></bean>
+	
+	<!-- 通过静态工厂方法实例化,指定类为工厂类，再指定方法 -->
+	<bean id="demo3_personService" class="spring.demo3.service.PersonServiceFactory" factory-method="createPersonServiceBean"></bean>
+	
+	<!-- 通过实例化工厂，再实例化bean的方法 
+		factory-bean的值要等于工厂bean的id
+	-->
+	<bean id="demo3_personServiceFactory" class="spring.demo3.service.PersonServiceFactory"/>
+	<bean id="demo3_personService2" factory-bean="demo3_personServiceFactory" factory-method="createPersonServiceBean2"/>
+	
+	<!-- demo4 -->
+	<bean id="demo4_personService" class="spring.demo4.service.impl.PersonServiceBean" scope="prototype"></bean>
+	
+	<!-- demo5 -->
+	<bean id="demo5_personService" class="spring.demo5.service.impl.PersonServiceBean" init-method="init" destroy-method="destory"></bean>
+	
+	<!-- demo6 -->
+	<bean id="demo6_personDao" class="spring.demo6.dao.impl.PersonDaoBean"></bean>
+	<bean id="deom6_personService" class="spring.demo6.service.impl.PersonServiceBean">
+		<!-- 第一种方式：采用ref方式
+			这里指定的是bean类里面的属性值，不是bean标签的id。ref是给指定的要注入的bean的id
+		 -->
+		<property name="personDao" ref="demo6_personDao"></property>
+		<!-- 第二种方式,采用内部bean方式
+			但是spring.demo6.dao.impl.PersonDaoBean不能被别的bean所引用，它也不能自己实例化 
+		-->
+<!-- 		<property name="personDao"> -->
+<!-- 			<bean class="spring.demo6.dao.impl.PersonDaoBean"></bean> -->
+<!-- 		</property> -->
+		
+		<property name="set">
+			<set>
+				<value>第一个元素</value>
+				<value>第2个元素</value>
+				<value>第三个元素</value>
+			</set>
+		</property>
+		<property name="list">
+			<list>
+				<value>list第一个</value>
+				<value>list第2个</value>
+				<value>list第3个</value>
+			</list>
+		</property>
+		<property name="props">
+			<props>
+				<prop key="key1">value1</prop>
+				<prop key="key2">value2</prop>
+				<prop key="key3">value3</prop>
+			</props>
+		</property>
+		<property name="map">
+			<map>
+				<entry key="key-1" value="map-value-1"></entry>
+				<entry key="key-2" value="map-value-2"></entry>
+				<entry key="key-3" value="map-value-3"></entry>
+			</map>
+		</property>
+	</bean>
+	
+	<!-- demo7 -->
+	<bean id="demo7_personDao" class="spring.demo7.dao.impl.PersonDaoBean"></bean>
+	<bean id="demo7_personService" class="spring.demo7.service.impl.PersonServiceBean">
+		<!-- index表示第几个参数,type表示要注入的类型，ref表示引用，value表示值-->
+		<constructor-arg index="0" type="spring.demo7.dao.PersonDao" ref="demo7_personDao"></constructor-arg>
+		<constructor-arg index="1" type="java.lang.String" value="我是name属性"></constructor-arg>
+	</bean>
+	
+	<!-- demo8注解依赖注入 -->
+	<bean id="demo8_personDao" class="spring.demo8.dao.impl.PersonDaoBean"></bean>
+	<bean id="demo8_personService" class="spring.demo8.service.impl.PersonServiceBean">
+		<property name="name" value="233"></property>
+	</bean>
+	<!-- demo8，自动装配，不建议使用，容易发生不可预见的结果 -->
+<!-- 	<bean id="demo8_personService" class="spring.demo8.service.impl.PersonServiceBean" -->
+<!-- 	autowire="byType"> -->
+<!-- 		<property name="name" value="233"></property> -->
+<!-- 	</bean> -->
+
+	<!-- demo9.自动扫描和管理bean -->
+	
+	<!-- demo12,dataSource和txManger最前面有配置 -->
+<!-- 	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close"> -->
+<!--    		<property name="jdbcUrl" value="jdbc:mysql://localhost:3306/springjdbc"></property> -->
+<!-- 		<property name="driverClass" value="com.mysql.jdbc.Driver"></property> -->
+<!-- 		<property name="user" value="root"></property> -->
+<!-- 		<property name="password" value="123"></property> -->
+<!-- 		<property name="acquireIncrement" value="5"></property> -->
+<!-- 		<property name="initialPoolSize" value="10"></property> -->
+<!-- 		<property name="minPoolSize" value="2"></property> -->
+<!-- 		<property name="maxPoolSize" value="20"></property> -->
+<!-- 	</bean> -->
+<!-- 	<bean id="txManager" class=""> -->
+<!-- 		<property name="dataSource" ref="dataSource"></property> -->
+<!-- 	</bean> -->
+	 <bean id="jdbcTemplate"  
+        class="org.springframework.jdbc.core.JdbcTemplate">  
+         <property name="dataSource" ref="dataSource" />  
+    </bean>
+   	<bean id="demo12_personDao" class="spring.demo12.dao.impl.PersonDaoBean"/>
+</beans>

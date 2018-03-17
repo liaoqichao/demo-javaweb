@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<taglib xmlns="http://java.sun.com/xml/ns/j2ee"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-jsptaglibrary_2_0.xsd"
+  version="2.0">
+    <description>My EL function Lib</description>
+  <display-name>JSTL functions</display-name>
+  <tlib-version>1.0</tlib-version><!-- 版本随便吧,第一次就1.0 -->
+  <short-name>demo29</short-name><!-- 建议前缀 -->
+  <uri>http://www.huyouni.com/el/functions</uri><!-- 随便,只是定位,打成jar包才有用。 -->
+  
+  
+  <function>
+    <description>
+      my description.
+    </description>
+    <name>func</name>
+    <function-class>fn.Demo29_EL_MyFn</function-class>
+    <function-signature>java.lang.String func()</function-signature>
+    <example>
+      	不给你例子
+    </example>
+  </function>
+  
+ </taglib>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-4.0.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
+        
+        <!-- 使用注解。注册解析注解的处理器 -->
+        <context:annotation-config></context:annotation-config>
+        <!-- 让spring自动扫描和bean.base-package表示要扫描哪个包下的类（包括子包）
+        	这个的注解处理器有很多，包括了上面的，所以上面的可以去掉。
+         -->
+        <context:component-scan base-package="sh"></context:component-scan>
+        
+        <!-- 使用aop，支持aspect注解 -->
+        <aop:aspectj-autoproxy></aop:aspectj-autoproxy>
+        
+
+
+<!--     // ... (controller bean definitions) ... -->
+	<bean id="userAction" class="ss.web.action.UserAction"></bean>
+</beans>

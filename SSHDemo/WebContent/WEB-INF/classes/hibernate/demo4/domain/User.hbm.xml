@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+ <hibernate-mapping package="hibernate.demo4.domain">
+	<class name="User" table="t_user">
+<!-- 		<id name="id" type="int" column="id"> -->
+		<!-- 使用uuid主键生成策略 -->
+		<id name="id" type="string" column="id">
+			<generator class="uuid"/>
+				<!-- 高地位算法 -->
+				<!-- 主键通过另外一张表（hi_value），的一列（next_value）根据算法得到主键 
+					一直报空指针异常
+				-->
+<!-- 				<generator class="hilo"> -->
+<!-- 					<param name="table">hi_value</param> -->
+<!-- 					<param name="column">next_value</param> -->
+<!-- 					<param name="max_lo">100</param> -->
+<!-- 				</generator> -->
+		</id>
+    	<property name="name" type="string" column="name" length="20"/>
+     </class>
+ </hibernate-mapping>

@@ -1,0 +1,43 @@
+九、Tomcat配置JNDI资源
+ *  1.JNDI Java Naming and Directory Interface
+ *  2.JNDI作用：在服务器上配置资源，然后通过统一的方式获取资源。 简单的说就是对资源的存，取。
+ *  3.目标：把数据库连接池配置到Tomcat，通过JNDI获取资源
+ 局部:
+ MyEclipse:CATALINA_HOME\conf\Catalina\localhost下加上项目名.xml。里面代码在下面。
+ Eclipse:
+ 1.在META-INF创建context.xml，里面代码在下面。
+ 2.在WEB-INF下添加
+ 	  <resource-ref>
+    <description>DB Connection</description>
+    <res-ref-name>jdbc/dataSource</res-ref-name>
+    <res-type>com.mchange.v2.c3p0.ComboPooledDataSource</res-type>
+    <res-auth>Container</res-auth>
+  </resource-ref>	
+  
+ 项目名.xml和context.xml的代码：
+ <?xml version="1.0" encoding="UTF-8" ?>
+<context>
+	<!-- 
+		name:指定资源的名称，可以随便起。
+		factory：是固定的，资源由谁负责创建
+		type：资源的类型。
+		其他都是资源的参数 
+	-->
+	<Resource name="jdbc/dataSource"
+			factory="org.apache.naming.factory.BeanFactory"
+			type="com.mchange.v2.c3p0.ComboPooledDataSource"
+			
+			jdbcUrl="jdbc:mysql://localhost:3306/demo1" 
+			driverClass="com.mysql.jdbc.Driver"
+			user="root" 
+			password="123" 
+			acquireIncrement="3"
+			initialPoolSize="10"
+	/>
+</context>
+
+全局：
+http://wenku.baidu.com/link?url=WpKyyz3PwisUUZuCW3A_BjzuDw_toVJtykG_e6DnkFW8dUeDM_aaqELv4LZ2tj0Z264mviMvYOF8NZ6VQqYS_vDrf1cwclD7IsP-V4PZ_N7
+
+
+ThreadLocal

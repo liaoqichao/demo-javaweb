@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+
+    <constant name="struts.enable.DynamicMethodInvocation" value="false" />
+    <!-- 在页面打印更详细的错误信息，信息内容就是控制台打印的异常信息 -->
+    <constant name="struts.devMode" value="true" />
+    <!-- 指定WEB应用的默认编码集，相当于调用request.setCharacterEncoding("UTF-8") -->
+    <constant name="struts.i18n.encoding" value="UTF-8"></constant>
+    
+    <!-- 指定配置信息里面对应的action类有spring负责创建 -->
+    <constant name="struts.objectFactory" value="spring"></constant>
+   
+	<!-- 表单标签中的checkboxlist中会自动生成一些没用的html代码，例如主题，通过这个把和主题相关的html代码删除。 -->
+	<constant name="struts.ui.theme" value="simple"/>
+	
+    <package name="default" namespace="/" extends="struts-default">
+
+        <default-action-ref name="index" />
+
+        <global-results>
+            <result name="error">/WEB-INF/jsp/error.jsp</result>
+        </global-results>
+        
+
+        <global-exception-mappings>
+            <exception-mapping exception="java.lang.Exception" result="error"/>
+        </global-exception-mappings>
+
+    </package>
+
+    <include file="example.xml"/>
+
+    <!-- Add packages here -->
+    <!-- 
+    	xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    	xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    	xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+     -->
+
+	
+<!-- 	<package name="person" namespace="/person" extends="struts-default"> -->
+<!-- 		<action name="personAction_*" class="personAction" method="{1}"> -->
+<!-- 			<result name="msg">/jsps/msg.jsp</result> -->
+<!-- 		</action> -->
+<!-- 	</package> -->
+	<package name="user" namespace="/user" extends="struts-default">
+		<action name="action_*" class="userAction" method="{1}">
+			<result name="msg">/jsps/msg.jsp</result>
+		</action>
+	</package>
+	
+
+	
+
+</struts>
